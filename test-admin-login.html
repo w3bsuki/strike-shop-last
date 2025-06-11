@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Admin Login</title>
+</head>
+<body>
+    <h1>Medusa Admin Login Test</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <div id="result"></div>
+
+    <script>
+        async function testLogin() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                // Login request
+                const response = await fetch('http://172.30.205.219:9000/auth/user/emailpass', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'admin@medusa.com',
+                        password: 'admin123'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <p style="color: green;">Login successful!</p>
+                        <p>Token: ${data.token?.substring(0, 50)}...</p>
+                        <p><a href="http://172.30.205.219:9000/app">Go to Admin Panel</a></p>
+                    `;
+                    
+                    // Store the token
+                    localStorage.setItem('medusa_admin_token', data.token);
+                    
+                    // Try to access admin
+                    const meResponse = await fetch('http://172.30.205.219:9000/admin/users/me', {
+                        headers: {
+                            'Authorization': `Bearer ${data.token}`
+                        },
+                        credentials: 'include'
+                    });
+                    
+                    if (meResponse.ok) {
+                        const user = await meResponse.json();
+                        resultDiv.innerHTML += `<p>Logged in as: ${user.email}</p>`;
+                    }
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">Login failed: ${JSON.stringify(data)}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,599 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Typewriter";
+  src: url("/fonts/CourierPrime-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Typewriter";
+  src: url("/fonts/CourierPrime-Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+:root {
+  /* shadcn/ui design tokens */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+  --primary: 0 0% 9%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 0 0% 96.1%;
+  --secondary-foreground: 0 0% 9%;
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 45.1%;
+  --accent: 0 0% 96.1%;
+  --accent-foreground: 0 0% 9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+  --ring: 0 0% 3.9%;
+  --radius: 0.5rem;
+  
+  /* Chart colors */
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+  
+  /* Sidebar colors */
+  --sidebar-background: 0 0% 98%;
+  --sidebar-foreground: 0 0% 3.9%;
+  --sidebar-primary: 0 0% 9%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 0 0% 96.1%;
+  --sidebar-accent-foreground: 0 0% 9%;
+  --sidebar-border: 0 0% 89.8%;
+  --sidebar-ring: 0 0% 3.9%;
+}
+
+.dark {
+  --background: 0 0% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 0 0% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 0 0% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 0 0% 9%;
+  --secondary: 0 0% 14.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 0 0% 14.9%;
+  --muted-foreground: 0 0% 63.9%;
+  --accent: 0 0% 14.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 14.9%;
+  --input: 0 0% 14.9%;
+  --ring: 0 0% 83.1%;
+  
+  /* Chart colors for dark mode */
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+  
+  /* Sidebar colors for dark mode */
+  --sidebar-background: 0 0% 3.9%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 0 0% 98%;
+  --sidebar-primary-foreground: 0 0% 9%;
+  --sidebar-accent: 0 0% 14.9%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 0 0% 14.9%;
+  --sidebar-ring: 0 0% 83.1%;
+}
+
+body {
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  font-family: "Typewriter", "Courier Prime", ui-monospace, monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.horizontal-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Container */
+.strike-container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 640px) {
+  .strike-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .strike-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Card Styling - More Minimalistic */
+.product-card {
+  background-color: hsl(var(--card));
+  position: relative;
+}
+
+.product-card-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  background-color: hsl(var(--muted));
+}
+
+.product-card-image {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-card-image {
+  transform: scale(1.05);
+}
+
+.product-card-content {
+  padding-top: 0.75rem;
+  padding-bottom: 0.5rem;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.product-card-title {
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin-bottom: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-card-price {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.product-card-original-price {
+  font-size: 10px;
+  color: hsl(var(--muted-foreground));
+  text-decoration: line-through;
+  margin-left: 0.25rem;
+}
+
+.product-card-discount,
+.product-card-new {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  color: hsl(var(--primary-foreground));
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0.125rem 0.375rem;
+}
+
+.product-card-discount {
+  background-color: hsl(var(--destructive));
+}
+
+.product-card-new {
+  background-color: hsl(var(--primary));
+}
+
+.product-card-wishlist {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.375rem;
+  background-color: hsla(var(--background), 0.8);
+  backdrop-filter: blur(4px);
+  border-radius: 9999px;
+  color: hsl(var(--foreground));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.product-card:hover .product-card-wishlist {
+  opacity: 1;
+}
+
+.product-card-wishlist:hover {
+  background-color: hsl(var(--background));
+}
+
+/* Category Card Styling */
+.category-card {
+  background-color: hsl(var(--card));
+  position: relative;
+  overflow: hidden;
+}
+
+.category-card-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.category-card:hover .category-card-image {
+  transform: scale(1.05);
+}
+
+.category-card-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease;
+}
+
+.category-card:hover .category-card-overlay {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.category-card-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 1rem;
+  color: hsl(var(--primary-foreground));
+}
+
+.category-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.125rem;
+}
+
+.category-card-count {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Section Styling - Updated to use typography system */
+.section-title {
+  @apply text-section-title;
+}
+
+.section-padding {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .section-padding {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* Navigation & Buttons */
+.nav-link {
+  color: hsl(var(--foreground));
+  font-weight: 400;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: hsl(var(--muted-foreground));
+}
+
+.button-primary {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-weight: 700;
+  padding: 0.625rem 1.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 0;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button-primary:hover {
+  background-color: hsl(var(--primary) / 0.9);
+}
+
+.button-primary:disabled {
+  background-color: hsl(var(--muted));
+  cursor: not-allowed;
+}
+
+.button-secondary {
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  background-color: transparent;
+  font-weight: 700;
+  padding: 0.625rem 1.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button-secondary:hover {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.button-text {
+  color: hsl(var(--foreground));
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.button-text:hover {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Improved Input Field Styling */
+.input-field {
+  border: none;
+  border-bottom: 1px solid hsl(var(--border));
+  border-radius: 0;
+  font-size: 0.875rem;
+  padding: 0.5rem 0.25rem;
+  background-color: transparent;
+  transition: border-bottom-color 0.2s ease;
+  font-family: "Typewriter", monospace;
+}
+
+.input-field:focus {
+  outline: none;
+  border-bottom-color: hsl(var(--ring));
+  border-bottom-width: 2px;
+  box-shadow: none;
+}
+
+.input-field::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Search Input Styling - Fixed */
+.search-input {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0;
+  font-size: 0.875rem;
+  padding: 0.75rem;
+  background-color: hsl(var(--background));
+  transition: border-color 0.2s ease;
+  font-family: "Typewriter", monospace;
+  width: 100%;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: none;
+}
+
+.search-input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Footer specific input styling */
+.footer-input {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0;
+  font-size: 0.75rem;
+  padding: 0.75rem;
+  background-color: hsl(var(--background));
+  transition: border-color 0.2s ease;
+  font-family: "Typewriter", monospace;
+}
+
+.footer-input:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: none;
+}
+
+.footer-input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Brand Carousel Animation - Bigger and Better */
+@keyframes scroll-brands {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.brand-carousel {
+  animation: scroll-brands 20s linear infinite;
+}
+
+.brand-carousel:hover {
+  animation-play-state: paused;
+}
+
+/* Bottom Navigation Styling */
+.bottom-nav {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Mobile Menu Animation Enhancement */
+.mobile-menu-enter {
+  transform: translateX(-100%);
+}
+
+.mobile-menu-enter-active {
+  transform: translateX(0);
+  transition: transform 300ms ease-in-out;
+}
+
+.mobile-menu-exit {
+  transform: translateX(0);
+}
+
+.mobile-menu-exit-active {
+  transform: translateX(-100%);
+  transition: transform 300ms ease-in-out;
+}
+
+/* Ensure proper z-index layering */
+.hero-content {
+  position: relative;
+  z-index: 10;
+}
+
+.hero-carousel {
+  position: relative;
+  z-index: 5;
+}
+
+/* Helper for subtle borders */
+.border-subtle {
+  border-color: hsl(var(--border));
+}
+
+/* Mobile spacing for bottom nav */
+@media (max-width: 1023px) {
+  body {
+    padding-bottom: 70px;
+  }
+}
+
+/* Typography System - Production Ready */
+.text-display-xl {
+  @apply text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight font-display;
+}
+
+.text-display-lg {
+  @apply text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight font-display;
+}
+
+.text-display-md {
+  @apply text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight font-display;
+}
+
+.text-display-sm {
+  @apply text-xl md:text-2xl lg:text-3xl font-bold tracking-tight font-display;
+}
+
+.text-heading-xl {
+  @apply text-2xl md:text-3xl font-bold tracking-tight;
+}
+
+.text-heading-lg {
+  @apply text-xl md:text-2xl font-bold tracking-tight;
+}
+
+.text-heading-md {
+  @apply text-lg md:text-xl font-semibold tracking-tight;
+}
+
+.text-heading-sm {
+  @apply text-base md:text-lg font-semibold tracking-tight;
+}
+
+.text-body-lg {
+  @apply text-lg leading-relaxed;
+}
+
+.text-body-md {
+  @apply text-base leading-relaxed;
+}
+
+.text-body-sm {
+  @apply text-sm leading-relaxed;
+}
+
+.text-body-xs {
+  @apply text-xs leading-relaxed;
+}
+
+.text-label-lg {
+  @apply text-sm font-medium uppercase tracking-strike;
+}
+
+.text-label-md {
+  @apply text-xs font-bold uppercase tracking-strike;
+}
+
+.text-label-sm {
+  @apply text-xs font-bold uppercase tracking-strike-wide;
+}
+
+.text-caption {
+  @apply text-xs text-muted-foreground leading-tight;
+}
+
+.text-overline {
+  @apply text-xs font-bold uppercase tracking-strike-wide text-muted-foreground;
+}
+
+/* Strike-specific typography patterns */
+.text-price {
+  @apply text-sm font-bold tracking-tight;
+}
+
+.text-price-large {
+  @apply text-lg font-bold tracking-tight;
+}
+
+.text-button {
+  @apply text-xs font-bold uppercase tracking-strike;
+}
+
+.text-nav {
+  @apply text-xs font-medium uppercase tracking-strike;
+}
+
+.text-product-title {
+  @apply text-sm font-medium tracking-tight line-clamp-2;
+}
+
+.text-section-title {
+  @apply text-sm font-bold uppercase tracking-strike mb-4;
+}
