@@ -1,5 +1,7 @@
+# Medusa Backend Dockerfile
 FROM node:20-alpine
 
+# Install build dependencies
 RUN apk add --no-cache python3 g++ make
 
 WORKDIR /app
@@ -13,17 +15,16 @@ COPY package.json pnpm-lock.yaml ./
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy the rest of the application
+# Copy application files
 COPY . .
 
 # Build the application
 RUN pnpm run build
 
-# Expose port
+# Runtime configuration
 EXPOSE 8000
-
-# Use PORT environment variable from Railway
+ENV NODE_ENV=production
 ENV PORT=8000
 
-# Start the application
+# Start command
 CMD ["pnpm", "run", "start"]
