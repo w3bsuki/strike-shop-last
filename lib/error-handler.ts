@@ -209,8 +209,8 @@ export class ErrorHandler {
 
   // Log to external service (Sentry, LogRocket, etc.)
   private logToService(error: AppError): void {
-    if (typeof window !== "undefined" && window.Sentry) {
-      window.Sentry.captureException(error, {
+    if (typeof window !== "undefined" && (window as any).Sentry) {
+      (window as any).Sentry.captureException(error, {
         tags: {
           errorType: error.type,
           errorCode: error.code,

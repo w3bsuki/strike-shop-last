@@ -68,7 +68,7 @@ export default function AdminHeader() {
           <div className="flex items-center space-x-3">
             <div className="relative h-8 w-8 rounded-full overflow-hidden">
               <Image
-                src={user?.avatar || "/placeholder.svg?height=32&width=32"}
+                src="/placeholder.svg?height=32&width=32"
                 alt="Admin"
                 fill
                 className="object-cover"
@@ -76,7 +76,7 @@ export default function AdminHeader() {
             </div>
             <div className="hidden md:block">
               <p className="text-sm font-medium">
-                {user?.firstName} {user?.lastName}
+                {user?.first_name} {user?.last_name}
               </p>
               <p className="text-xs text-gray-500">Administrator</p>
             </div>

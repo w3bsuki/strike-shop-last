@@ -171,7 +171,13 @@ export default function CommunityCarousel() {
 
               {/* Post Image */}
               <div className="relative aspect-square">
-                <Image src={post.image || "/placeholder.svg"} alt={post.caption} fill className="object-cover" />
+                <Image 
+                  src={post.image || "/placeholder.svg"} 
+                  alt={post.caption} 
+                  fill 
+                  sizes="(max-width: 640px) 280px, 320px"
+                  className="object-cover" 
+                />
               </div>
 
               {/* Post Actions */}

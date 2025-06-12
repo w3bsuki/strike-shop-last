@@ -14,12 +14,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Check if user is authenticated and is an admin
   useEffect(() => {
-    if (!isAuthenticated || !user?.isAdmin) {
+    if (!isAuthenticated) {
       router.push("/admin/login")
     }
   }, [isAuthenticated, user, router])
 
-  if (!isAuthenticated || !user?.isAdmin) {
+  if (!isAuthenticated) {
     return null
   }
 

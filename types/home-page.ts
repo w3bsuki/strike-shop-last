@@ -21,6 +21,12 @@ export type HomePageProduct = {
   description?: string
   sizes?: string[]
   sku?: string
+  variants?: Array<{
+    id: string
+    title: string
+    sku?: string
+    prices?: any[]
+  }>
 }
 
 export type HomePageProps = {

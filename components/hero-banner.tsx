@@ -56,7 +56,14 @@ export default function HeroBanner({
   return (
     <section className="relative bg-gray-100">
       <div className="relative w-full h-[75vh] min-h-[450px] md:min-h-[600px]">
-        <Image src={image || "/placeholder.svg"} alt={title} fill priority className="object-cover" />
+        <Image 
+          src={image || "/placeholder.svg"} 
+          alt={title} 
+          fill 
+          sizes="100vw"
+          priority 
+          className="object-cover" 
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
       </div>
 

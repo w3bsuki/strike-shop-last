@@ -9,11 +9,11 @@ async function getHomePageData() {
     // Fetch categories from Medusa
     const medusaCategories = await MedusaProductService.getCategories()
     const categories: HomePageCategory[] = medusaCategories.length > 0 
-      ? medusaCategories.map(cat => ({
+      ? medusaCategories.map((cat: any) => ({
           id: cat.id,
           name: cat.name.toUpperCase(),
           count: 0, // Medusa doesn't provide count
-          image: "/placeholder.svg?height=400&width=400",
+          image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&crop=center",
           slug: cat.handle,
         }))
       : [] // Fallback to empty if no Medusa categories
@@ -38,8 +38,8 @@ async function getHomePageData() {
     
     // Get collections for categorizing products
     const collections = await MedusaProductService.getCollections()
-    const newArrivalsCollection = collections.find(c => c.handle === 'new-arrivals')
-    const bestSellersCollection = collections.find(c => c.handle === 'best-sellers')
+    const newArrivalsCollection = collections.find((c: any) => c.handle === 'new-arrivals')
+    const bestSellersCollection = collections.find((c: any) => c.handle === 'best-sellers')
 
     // Convert Medusa products to HomePageProduct format
     const convertMedusaProduct = (prod: any): HomePageProduct => {
@@ -48,7 +48,7 @@ async function getHomePageData() {
         id: prod.id,
         name: prod.title,
         price: lowestPrice ? MedusaProductService.formatPrice(lowestPrice.amount, lowestPrice.currency) : "£0.00",
-        image: prod.thumbnail || prod.images?.[0]?.url || "/placeholder.svg?height=400&width=300",
+        image: prod.thumbnail || prod.images?.[0]?.url || "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=400&fit=crop&crop=center",
         images: prod.images?.map((img: any) => img.url),
         slug: prod.handle,
         isNew: prod.collection?.id === newArrivalsCollection?.id,
@@ -56,6 +56,7 @@ async function getHomePageData() {
         description: prod.description,
         sizes: prod.variants?.map((v: any) => v.title.split(' / ')[0]).filter((v: string, i: number, a: string[]) => a.indexOf(v) === i),
         sku: prod.variants?.[0]?.sku,
+        variants: prod.variants, // Include actual variant data with IDs
       }
     }
 

@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, Heart, Eye } from "lucide-react"
-import ProductQuickView from "./product-quick-view"
+import { ProductQuickView } from "./product-quick-view"
 import { useWishlistStore, type WishlistItem } from "@/lib/wishlist-store"
 import { Button } from "@/components/ui/button"
 
@@ -25,6 +25,12 @@ type Product = {
   description?: string
   sizes?: string[]
   sku?: string
+  variants?: Array<{
+    id: string
+    title: string
+    sku?: string
+    prices?: any[]
+  }>
 }
 
 interface ProductScrollProps {
@@ -39,6 +45,7 @@ export default function ProductScroll({ title, products, viewAllLink }: ProductS
   const [canScrollRight, setCanScrollRight] = useState(false)
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false)
+
 
   // Fix: Use the correct function names from the wishlist store
   const { wishlist, addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore()
@@ -66,6 +73,10 @@ export default function ProductScroll({ title, products, viewAllLink }: ProductS
   }
 
   const openQuickView = (product: Product) => {
+    if (!product) {
+      console.error('No product data provided to openQuickView')
+      return
+    }
     const enhancedProduct = {
       ...product,
       images: product.images || [
@@ -73,9 +84,10 @@ export default function ProductScroll({ title, products, viewAllLink }: ProductS
         product.image.replace("300", "301"),
         product.image.replace("300", "302"),
       ],
-      description: `Premium ${product.name.toLowerCase()} crafted with attention to detail and modern design aesthetics. Features high-quality materials and contemporary styling.`,
-      sizes: ["XS", "S", "M", "L", "XL"],
-      sku: `STR${product.id.toUpperCase()}${Math.floor(Math.random() * 1000)}`,
+      description: product.description || `Premium ${product.name.toLowerCase()} crafted with attention to detail and modern design aesthetics. Features high-quality materials and contemporary styling.`,
+      sizes: product.sizes || ["XS", "S", "M", "L", "XL"],
+      sku: product.sku || `STR${product.id.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8)}${Math.floor(Math.random() * 1000)}`,
+      variants: product.variants, // Pass through the variants array with real IDs
     }
     setQuickViewProduct(enhancedProduct)
     setIsQuickViewOpen(true)
@@ -83,7 +95,10 @@ export default function ProductScroll({ title, products, viewAllLink }: ProductS
 
   const closeQuickView = () => {
     setIsQuickViewOpen(false)
-    setQuickViewProduct(null)
+    // Delay clearing the product to allow dialog animation to complete
+    setTimeout(() => {
+      setQuickViewProduct(null)
+    }, 300)
   }
 
   const handleWishlistToggle = (e: React.MouseEvent, product: Product) => {
@@ -175,11 +190,15 @@ export default function ProductScroll({ title, products, viewAllLink }: ProductS
                     )}
 
                     <button
-                      className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100"
-                      onClick={() => openQuickView(product)}
+                      className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 z-20"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        openQuickView(product)
+                      }}
                       aria-label="Quick view"
                     >
-                      <div className="bg-white/90 backdrop-blur-sm p-3 rounded-full transform scale-90 group-hover:scale-100 transition-transform">
+                      <div className="bg-white/90 backdrop-blur-sm p-3 rounded-full transform scale-90 group-hover:scale-100 transition-transform pointer-events-none">
                         <Eye className="h-4 w-4 text-black" />
                       </div>
                     </button>
@@ -196,18 +215,20 @@ export default function ProductScroll({ title, products, viewAllLink }: ProductS
                       />
                     </button>
                   </div>
-                  <Link href={`/product/${product.slug}`} className="product-card-content block">
-                    <h3 className="product-card-title">"{product.name}"</h3>
-                    <div className="flex items-baseline">
-                      <span className="product-card-price">{product.price}</span>
-                      {product.originalPrice && (
-                        <span className="product-card-original-price">{product.originalPrice}</span>
+                  <div className="product-card-content">
+                    <Link href={`/product/${product.slug}`} className="block">
+                      <h3 className="product-card-title">"{product.name}"</h3>
+                      <div className="flex items-baseline">
+                        <span className="product-card-price">{product.price}</span>
+                        {product.originalPrice && (
+                          <span className="product-card-original-price">{product.originalPrice}</span>
+                        )}
+                      </div>
+                      {product.colors && (
+                        <div className="text-[10px] text-[var(--subtle-text-color)] mt-0.5">{product.colors} Colors</div>
                       )}
-                    </div>
-                    {product.colors && (
-                      <div className="text-[10px] text-[var(--subtle-text-color)] mt-0.5">{product.colors} Colors</div>
-                    )}
-                  </Link>
+                    </Link>
+                  </div>
                 </div>
               )
             })}

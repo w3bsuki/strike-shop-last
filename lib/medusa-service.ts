@@ -47,7 +47,13 @@ export class MedusaProductService {
     offset?: number
   }): Promise<MedusaProduct[]> {
     try {
-      const { products } = await medusaClient.products.list(params)
+      // Add region_id to ensure prices are included
+      const searchParams = {
+        ...params,
+        region_id: process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || 'reg_01JXFMWZWX24XQD1BYNTS3N15Q'
+      }
+      
+      const { products } = await medusaClient.products.list(searchParams)
       return products as MedusaProduct[]
     } catch (error) {
       console.error('Error fetching products from Medusa:', error)
@@ -163,14 +169,26 @@ export class MedusaProductService {
   /**
    * Get the lowest price from variants
    */
-  static getLowestPrice(product: MedusaProduct): { amount: number; currency: string } | null {
+  static getLowestPrice(product: any): { amount: number; currency: string } | null {
     if (!product.variants || product.variants.length === 0) return null
     
-    // Find first variant with prices
+    // Handle Medusa v2 calculated_price structure
     let lowestPrice = null
     
     for (const variant of product.variants) {
-      if (variant.prices && variant.prices.length > 0) {
+      // Check for calculated_price (v2 format)
+      if (variant.calculated_price && variant.calculated_price.calculated_amount) {
+        const price = {
+          amount: variant.calculated_price.calculated_amount,
+          currency_code: variant.calculated_price.currency_code
+        }
+        
+        if (!lowestPrice || price.amount < lowestPrice.amount) {
+          lowestPrice = price
+        }
+      }
+      // Fallback to prices array (v1 format)
+      else if (variant.prices && variant.prices.length > 0) {
         if (!lowestPrice || variant.prices[0].amount < lowestPrice.amount) {
           lowestPrice = variant.prices[0]
         }
@@ -181,7 +199,7 @@ export class MedusaProductService {
       // Return default price if no prices found
       return {
         amount: 0,
-        currency: 'usd'
+        currency: 'eur'
       }
     }
     

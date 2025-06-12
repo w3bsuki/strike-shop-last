@@ -13,7 +13,7 @@ import CategoryScroll from "@/components/category-scroll"
 import ProductScroll from "@/components/product-scroll"
 import BottomNav from "@/components/bottom-nav"
 import CommunityCarousel from "@/components/community-carousel"
-import ProductQuickView from "@/components/product-quick-view"
+import { ProductQuickView } from "@/components/product-quick-view"
 
 import type { HomePageProps, HomePageProduct } from "@/types/home-page"
 
@@ -34,7 +34,7 @@ export default function HomePageClient({ categories, newArrivals, saleItems, sne
         product.description ||
         `Premium ${product.name.toLowerCase()} crafted with attention to detail and modern design aesthetics. Features high-quality materials and contemporary styling.`,
       sizes: product.sizes || ["XS", "S", "M", "L", "XL"],
-      sku: product.sku || `STR${product.id.toUpperCase()}${Math.floor(Math.random() * 1000)}`,
+      sku: product.sku || `STR${product.id.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8)}${Math.floor(Math.random() * 1000)}`,
     }
     setQuickViewProduct(enhancedProduct)
     setIsQuickViewOpen(true)
@@ -42,7 +42,10 @@ export default function HomePageClient({ categories, newArrivals, saleItems, sne
 
   const closeQuickView = () => {
     setIsQuickViewOpen(false)
-    setQuickViewProduct(null)
+    // Delay clearing the product to allow dialog animation to complete
+    setTimeout(() => {
+      setQuickViewProduct(null)
+    }, 300)
   }
 
   return (
@@ -50,7 +53,7 @@ export default function HomePageClient({ categories, newArrivals, saleItems, sne
       <Header />
 
       <HeroBanner
-        image="/placeholder.svg?height=1080&width=1920"
+        image="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop&crop=center"
         title='"STRIKE SS25"'
         subtitle="DEFINING THE GRAY AREA BETWEEN BLACK AND WHITE"
         buttonText="EXPLORE COLLECTION"
@@ -84,11 +87,15 @@ export default function HomePageClient({ categories, newArrivals, saleItems, sne
                   {item.discount && <div className="product-card-discount">{item.discount}</div>}
 
                   <button
-                    className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100"
-                    onClick={() => openQuickView(item)}
+                    className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 z-20"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      openQuickView(item)
+                    }}
                     aria-label="Quick view"
                   >
-                    <div className="bg-white/90 backdrop-blur-sm p-3 rounded-full transform scale-90 group-hover:scale-100 transition-transform">
+                    <div className="bg-white/90 backdrop-blur-sm p-3 rounded-full transform scale-90 group-hover:scale-100 transition-transform pointer-events-none">
                       <Eye className="h-4 w-4 text-black" />
                     </div>
                   </button>
@@ -104,13 +111,15 @@ export default function HomePageClient({ categories, newArrivals, saleItems, sne
                     <Heart className="h-3.5 w-3.5" />
                   </button>
                 </div>
-                <Link href={`/product/${item.slug}`} className="product-card-content block">
-                  <h3 className="product-card-title">"{item.name}"</h3>
-                  <div className="flex items-baseline">
-                    <span className="product-card-price">{item.price}</span>
-                    {item.originalPrice && <span className="product-card-original-price">{item.originalPrice}</span>}
-                  </div>
-                </Link>
+                <div className="product-card-content">
+                  <Link href={`/product/${item.slug}`} className="block">
+                    <h3 className="product-card-title">"{item.name}"</h3>
+                    <div className="flex items-baseline">
+                      <span className="product-card-price">{item.price}</span>
+                      {item.originalPrice && <span className="product-card-original-price">{item.originalPrice}</span>}
+                    </div>
+                  </Link>
+                </div>
               </div>
             ))}
           </div>

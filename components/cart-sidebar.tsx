@@ -7,9 +7,25 @@ import { X, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function CartSidebar() {
-  const { items, isOpen, closeCart, updateQuantity, removeItem, getTotalItems, getTotalPrice } = useCartStore()
+  const { items, isOpen, isLoading, error, closeCart, updateQuantity, removeItem, getTotalItems, getTotalPrice, clearError } = useCartStore()
 
   if (!isOpen) return null
+
+  const handleUpdateQuantity = async (id: string, size: string, quantity: number) => {
+    try {
+      await updateQuantity(id, size, quantity)
+    } catch (error) {
+      console.error('Failed to update quantity:', error)
+    }
+  }
+
+  const handleRemoveItem = async (id: string, size: string) => {
+    try {
+      await removeItem(id, size)
+    } catch (error) {
+      console.error('Failed to remove item:', error)
+    }
+  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-GB", {
@@ -40,6 +56,22 @@ export default function CartSidebar() {
           </button>
         </div>
 
+        {/* Error Display */}
+        {error && (
+          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+            <div className="flex justify-between items-center">
+              <span>{error}</span>
+              <button
+                onClick={clearError}
+                className="text-red-500 hover:text-red-700"
+                aria-label="Clear error"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Cart Items */}
         <div className="flex-1 overflow-y-auto">
           {items.length === 0 ? (
@@ -54,9 +86,9 @@ export default function CartSidebar() {
           ) : (
             <div className="p-6 space-y-6">
               {items.map((item) => (
-                <div key={`${item.id}-${item.size}`} className="flex space-x-4">
+                <div key={`${item.lineItemId}-${item.size}`} className="flex space-x-4">
                   <div className="relative w-20 h-24 bg-gray-100 flex-shrink-0">
-                    <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+                    <Image src={item.image || "/placeholder.svg"} alt={item.name} fill sizes="80px" className="object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <Link
@@ -71,34 +103,39 @@ export default function CartSidebar() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => updateQuantity(item.id, item.size, item.quantity - 1)}
-                          className="p-1 border border-subtle hover:border-black"
+                          onClick={() => handleUpdateQuantity(item.id, item.size, item.quantity - 1)}
+                          disabled={isLoading}
+                          className="p-1 border border-subtle hover:border-black disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Decrease quantity"
                         >
                           <Minus className="h-3 w-3" />
                         </button>
                         <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.id, item.size, item.quantity + 1)}
-                          className="p-1 border border-subtle hover:border-black"
+                          onClick={() => handleUpdateQuantity(item.id, item.size, item.quantity + 1)}
+                          disabled={isLoading}
+                          className="p-1 border border-subtle hover:border-black disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Increase quantity"
                         >
                           <Plus className="h-3 w-3" />
                         </button>
                       </div>
                       <button
-                        onClick={() => removeItem(item.id, item.size)}
-                        className="p-1 text-[var(--subtle-text-color)] hover:text-red-600"
+                        onClick={() => handleRemoveItem(item.id, item.size)}
+                        disabled={isLoading}
+                        className="p-1 text-[var(--subtle-text-color)] hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Remove item"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                     <div className="flex items-center justify-between mt-2">
-                      <span className="text-sm font-bold">{item.price}</span>
-                      {item.originalPrice && (
+                      <span className="text-sm font-bold">
+                        {item.pricing.displayUnitSalePrice || item.pricing.displayUnitPrice}
+                      </span>
+                      {item.pricing.displayUnitSalePrice && (
                         <span className="text-xs text-[var(--subtle-text-color)] line-through">
-                          {item.originalPrice}
+                          {item.pricing.displayUnitPrice}
                         </span>
                       )}
                     </div>

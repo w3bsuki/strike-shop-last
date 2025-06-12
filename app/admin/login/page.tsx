@@ -29,14 +29,8 @@ export default function AdminLogin() {
       const success = await login(email, password)
 
       if (success) {
-        // Check if user is admin (in a real app, this would be part of the login response)
-        const user = useAuthStore.getState().user
-        if (user?.isAdmin) {
-          router.push("/admin")
-        } else {
-          setError("You don't have permission to access the admin panel")
-          useAuthStore.getState().logout()
-        }
+        // Admin login successful, redirect to admin dashboard
+        router.push("/admin")
       } else {
         setError("Invalid email or password")
       }

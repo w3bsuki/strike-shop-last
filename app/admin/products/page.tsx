@@ -239,6 +239,7 @@ export default function ProductsPage() {
                         src={product.image || "/placeholder.svg"}
                         alt={product.name}
                         fill
+                        sizes="40px"
                         className="object-cover"
                       />
                     </div>

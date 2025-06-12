@@ -125,6 +125,7 @@ export default function ProductPageClient({ productData, slug }: ProductPageProp
                     src={product.images[currentImageIndex] || "/placeholder.svg"}
                     alt={`${product.name} - View ${currentImageIndex + 1}`}
                     fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     priority
                     className="object-cover"
                   />
@@ -140,6 +141,7 @@ export default function ProductPageClient({ productData, slug }: ProductPageProp
                         src={img || "/placeholder.svg"}
                         alt={`Thumbnail ${index + 1}`}
                         fill
+                        sizes="20vw"
                         className="object-cover"
                       />
                     </button>

@@ -5,19 +5,23 @@ import { User, ShoppingBag, Menu, X, Search } from "lucide-react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { useCartStore } from "@/lib/cart-store"
-import { useAuthStore } from "@/lib/auth-store"
-import AuthModal from "./auth-modal"
+import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isNewsletterVisible, setIsNewsletterVisible] = useState(true)
   const [isSearchVisible, setIsSearchVisible] = useState(false)
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-
+  const [isClient, setIsClient] = useState(false)
   const { openCart, getTotalItems } = useCartStore()
-  const { isAuthenticated, user } = useAuthStore()
-  const totalItems = getTotalItems()
+  const { isSignedIn, user } = useUser()
+  
+  // Prevent hydration mismatch by only calculating total on client
+  const totalItems = isClient ? getTotalItems() : 0
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -81,18 +85,28 @@ export default function Header() {
                 <Search className="h-5 w-5" />
               </button>
 
-              {isAuthenticated ? (
-                <Link href="/account" className="nav-link hidden lg:flex items-center p-3" aria-label="Account">
-                  <User className="h-5 w-5" />
-                </Link>
+              {isSignedIn ? (
+                <div className="hidden lg:flex items-center p-3">
+                  <UserButton 
+                    appearance={{
+                      elements: {
+                        avatarBox: "h-8 w-8",
+                        userButtonPopoverCard: "bg-white shadow-lg border",
+                        userButtonPopoverActionButton: "hover:bg-gray-50",
+                      }
+                    }}
+                    afterSignOutUrl="/"
+                  />
+                </div>
               ) : (
-                <button
-                  onClick={() => setIsAuthModalOpen(true)}
-                  className="nav-link hidden lg:flex items-center p-3"
-                  aria-label="Sign in"
-                >
-                  <User className="h-5 w-5" />
-                </button>
+                <SignInButton mode="modal">
+                  <button
+                    className="nav-link hidden lg:flex items-center p-3"
+                    aria-label="Sign in"
+                  >
+                    <User className="h-5 w-5" />
+                  </button>
+                </SignInButton>
               )}
 
               <button onClick={openCart} className="nav-link flex items-center p-3 -mr-3 relative" aria-label="Shopping bag">
@@ -184,7 +198,7 @@ export default function Header() {
             </nav>
 
             <div className="p-6 border-t border-subtle space-y-4">
-              {isAuthenticated ? (
+              {isSignedIn ? (
                 <Link
                   href="/account"
                   className="flex items-center space-x-3 nav-link text-sm"
@@ -194,16 +208,15 @@ export default function Header() {
                   <span>My Account</span>
                 </Link>
               ) : (
-                <button
-                  onClick={() => {
-                    setIsMenuOpen(false)
-                    setIsAuthModalOpen(true)
-                  }}
-                  className="flex items-center space-x-3 nav-link text-sm w-full text-left"
-                >
-                  <User className="h-4 w-4" />
-                  <span>Sign In</span>
-                </button>
+                <SignInButton mode="modal">
+                  <button
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center space-x-3 nav-link text-sm w-full text-left"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Sign In</span>
+                  </button>
+                </SignInButton>
               )}
               <Link href="/help" className="block nav-link text-sm" onClick={() => setIsMenuOpen(false)}>
                 Help & Support
@@ -216,8 +229,6 @@ export default function Header() {
         </div>
       )}
 
-      {/* Auth Modal */}
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </>
   )
 }
