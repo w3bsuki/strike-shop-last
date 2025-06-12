@@ -1,33 +1,29 @@
-# THIS DOCKERFILE IS FOR RAILWAY DEPLOYMENT ONLY
-# It builds the Medusa backend from the my-medusa-store subdirectory
-
 FROM node:20-alpine
 
 RUN apk add --no-cache python3 g++ make
 
-WORKDIR /app/my-medusa-store
+WORKDIR /app
 
-# Install pnpm globally
+# Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# First, copy everything to have access to my-medusa-store
-COPY . /app/
+# Copy entire project
+COPY . .
 
-# Navigate to the medusa directory
+# Change to medusa directory
 WORKDIR /app/my-medusa-store
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build the application
-RUN pnpm run build
-
-# Expose port
-EXPOSE 8000
-
-# Use PORT environment variable from Railway
-ENV PORT=8000
+# Set production environment
 ENV NODE_ENV=production
 
-# Start the application
+# Build the application
+RUN NODE_ENV=production pnpm run build
+
+# Expose port (Railway will override this with PORT env var)
+EXPOSE 8000
+
+# Start command
 CMD ["pnpm", "run", "start"]

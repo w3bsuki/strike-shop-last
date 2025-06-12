@@ -1,42 +1,30 @@
-import { loadEnv, defineConfig, Modules } from '@medusajs/framework/utils'
+import { loadEnv, defineConfig } from '@medusajs/framework/utils'
 
-loadEnv(process.env.NODE_ENV || 'development', process.cwd())
+loadEnv(process.env.NODE_ENV || 'production', process.cwd())
+
+// Generate secure secrets if not provided
+const generateSecret = (name: string) => {
+  if (!process.env[name]) {
+    console.warn(`${name} not set, using generated value`)
+    return Buffer.from(Math.random().toString(36).substring(2) + Date.now().toString(36)).toString('base64')
+  }
+  return process.env[name]
+}
 
 export default defineConfig({
   projectConfig: {
-    databaseUrl: process.env.DATABASE_URL,
+    databaseUrl: process.env.DATABASE_URL || process.env.DATABASE_PUBLIC_URL || "postgresql://postgres:postgres@localhost:5432/medusa",
     http: {
-      storeCors: process.env.STORE_CORS!,
-      adminCors: process.env.ADMIN_CORS!,
-      authCors: process.env.AUTH_CORS!,
-      jwtSecret: process.env.JWT_SECRET || "supersecret",
-      cookieSecret: process.env.COOKIE_SECRET || "supersecret",
-    }
+      port: parseInt(process.env.PORT || "8000"),
+      storeCors: "*",
+      adminCors: "*", 
+      authCors: "*",
+      jwtSecret: generateSecret('JWT_SECRET'),
+      cookieSecret: generateSecret('COOKIE_SECRET'),
+    },
   },
   admin: {
     disable: false,
-    backendUrl: process.env.MEDUSA_BACKEND_URL || "http://localhost:9000",
-    // Force the admin to use the correct backend URL
-    path: "/app"
-  },
-  modules: {
-    [Modules.PAYMENT]: {
-      resolve: "@medusajs/payment",
-      options: {
-        providers: [
-          {
-            resolve: "@medusajs/payment-stripe",
-            id: "stripe",
-            options: {
-              apiKey: process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY,
-              webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
-              // This will work for local development without webhooks
-              automatic_payment_methods: true,
-              payment_description: "Strike™ Order",
-            },
-          },
-        ],
-      },
-    },
+    backendUrl: process.env.MEDUSA_BACKEND_URL || process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "http://localhost:8000",
   },
 })
