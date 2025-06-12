@@ -1,29 +1,21 @@
 FROM node:20-alpine
 
-RUN apk add --no-cache python3 g++ make
-
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Copy medusa files
+COPY my-medusa-store/package*.json ./
+COPY my-medusa-store/pnpm-lock.yaml ./
+COPY my-medusa-store/yarn.lock ./
 
-# Copy entire project
-COPY . .
+# Install dependencies using npm (more reliable for Railway)
+RUN npm install
 
-# Change to medusa directory
-WORKDIR /app/my-medusa-store
+# Copy rest of medusa
+COPY my-medusa-store/ .
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Build
+RUN npm run build
 
-# Set production environment
-ENV NODE_ENV=production
-
-# Build the application
-RUN NODE_ENV=production pnpm run build
-
-# Expose port (Railway will override this with PORT env var)
 EXPOSE 8000
 
-# Start command
-CMD ["pnpm", "run", "start"]
+CMD ["npm", "run", "start"]
