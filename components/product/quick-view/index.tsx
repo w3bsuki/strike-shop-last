@@ -140,14 +140,22 @@ function QuickViewContent({ product, onClose }: { product: Product; onClose: () 
 
       addItem({
         variantId: variantId,
+        productId: product.id,
         name: product.name,
         image: product.image,
         slug: product.slug,
         size: selectedSize,
         quantity: quantity,
         sku: product.sku,
-        unitPrice,
-        originalUnitPrice,
+        pricing: {
+          currency: "USD",
+          unitPrice: unitPrice,
+          unitSalePrice: originalUnitPrice,
+          displayUnitPrice: product.price,
+          displayUnitSalePrice: product.originalPrice,
+          totalPrice: unitPrice * quantity,
+          displayTotalPrice: `$${(unitPrice * quantity).toFixed(2)}`
+        }
       })
 
       setIsAdded(true)
