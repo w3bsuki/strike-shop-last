@@ -93,7 +93,7 @@ export class DataService {
         ),
       ])
       
-      if (!medusaData.products.length || !sanityData) {
+      if (!medusaData.products.length) {
         return null
       }
       
@@ -206,8 +206,33 @@ export class DataService {
     }
   }
   
+  // Get all products directly from Medusa (bypassing Sanity for production)
+  static async getAllProducts(limit: number = 20): Promise<IntegratedProduct[]> {
+    try {
+      const { products } = await medusaClient.products.list({ limit })
+      
+      return products.map((product: any) => this.mergeProductData(product, null))
+    } catch (error) {
+      console.error("Error fetching all products:", error)
+      return []
+    }
+  }
+
   // Get featured products for homepage sections
   static async getFeaturedProducts(type: "sale" | "new" | "featured"): Promise<IntegratedProduct[]> {
+    try {
+      // Fallback to all products if Sanity is empty
+      const { products } = await medusaClient.products.list({ limit: 10 })
+      
+      return products.map((product: any) => this.mergeProductData(product, null))
+    } catch (error) {
+      console.error("Error fetching featured products:", error)
+      return []
+    }
+  }
+
+  // Legacy Sanity-based method (kept for reference)
+  static async getFeaturedProductsFromSanity(type: "sale" | "new" | "featured"): Promise<IntegratedProduct[]> {
     try {
       let sanityQuery = ""
       
@@ -429,16 +454,16 @@ export class DataService {
   // Helper: Merge single product data
   private static mergeProductData(
     medusaProduct: any,
-    sanityProduct: LibSanityProduct
+    sanityProduct?: LibSanityProduct | null
   ): IntegratedProduct {
     // Get price info from first variant
     const defaultVariant = medusaProduct.variants[0]
     const defaultPrice = defaultVariant?.prices?.[0]
     const amount = defaultPrice?.amount || 0
-    const currency = defaultPrice?.currency_code || "GBP"
+    const currency = defaultPrice?.currency_code || "EUR"
     
     // Calculate discount if originalPrice exists
-    const originalAmount = sanityProduct.originalPrice ? sanityProduct.originalPrice * 100 : amount
+    const originalAmount = sanityProduct?.originalPrice ? sanityProduct.originalPrice * 100 : amount
     const discountPercentage = originalAmount > amount ? Math.round(((originalAmount - amount) / originalAmount) * 100) : 0
     const discountAmount = originalAmount > amount ? originalAmount - amount : 0
     const discount = discountPercentage > 0 ? { amount: discountAmount / 100, percentage: discountPercentage } : undefined
@@ -450,10 +475,10 @@ export class DataService {
     }, 0)
     
     // Get available options
-    const availableSizes = sanityProduct.sizes || 
+    const availableSizes = sanityProduct?.sizes || 
       medusaProduct.options?.find((o: any) => o.title.toLowerCase() === "size")?.values.map((v: any) => v.value) || []
     
-    const availableColors = sanityProduct.colors ||
+    const availableColors = sanityProduct?.colors ||
       medusaProduct.options?.find((o: any) => o.title.toLowerCase() === "color")?.values.map((v: any) => v.value) || []
     
     // Map variants to integrated format
@@ -483,9 +508,9 @@ export class DataService {
       pricing: {
         currency: v.prices?.[0]?.currency_code || currency,
         price: v.prices?.[0]?.amount || amount,
-        salePrice: sanityProduct.isOnSale ? v.prices?.[0]?.amount : undefined,
+        salePrice: sanityProduct?.isOnSale ? v.prices?.[0]?.amount : undefined,
         displayPrice: DataService.formatPrice(v.prices?.[0]?.amount || amount, v.prices?.[0]?.currency_code || currency),
-        displaySalePrice: sanityProduct.isOnSale ? DataService.formatPrice(v.prices?.[0]?.amount || amount, v.prices?.[0]?.currency_code || currency) : undefined,
+        displaySalePrice: sanityProduct?.isOnSale ? DataService.formatPrice(v.prices?.[0]?.amount || amount, v.prices?.[0]?.currency_code || currency) : undefined,
       },
       
       // Inventory
@@ -501,17 +526,17 @@ export class DataService {
     return {
       // Core identifiers
       id: medusaProduct.id,
-      sanityId: sanityProduct._id,
-      slug: medusaProduct.handle || sanityProduct.slug.current,
+      sanityId: sanityProduct?._id,
+      slug: medusaProduct.handle || sanityProduct?.slug?.current || medusaProduct.id,
       sku: defaultVariant?.sku,
       
-      // Content from Sanity
+      // Content from Sanity (with Medusa fallbacks)
       content: {
-        name: sanityProduct.name,
-        description: sanityProduct.description,
+        name: sanityProduct?.name || medusaProduct.title,
+        description: sanityProduct?.description || medusaProduct.description,
         details: undefined, // SanityBlock[] type expected, but we have SanityProductDetailItem[]
-        images: sanityProduct.images || [],
-        categories: sanityProduct.category ? [sanityProduct.category as any as SanityCategory] : [],
+        images: sanityProduct?.images || medusaProduct.images?.map((img: any) => img.url) || [],
+        categories: sanityProduct?.category ? [sanityProduct.category as any as SanityCategory] : [],
         tags: [],
         brand: undefined,
         material: undefined,
@@ -541,24 +566,24 @@ export class DataService {
       pricing: {
         currency,
         basePrice: amount / 100,
-        salePrice: sanityProduct.isOnSale && sanityProduct.originalPrice ? amount / 100 : undefined,
+        salePrice: sanityProduct?.isOnSale && sanityProduct?.originalPrice ? amount / 100 : undefined,
         displayPrice: DataService.formatPrice(amount, currency),
-        displaySalePrice: sanityProduct.isOnSale && sanityProduct.originalPrice ? DataService.formatPrice(amount, currency) : undefined,
+        displaySalePrice: sanityProduct?.isOnSale && sanityProduct?.originalPrice ? DataService.formatPrice(amount, currency) : undefined,
         discount
       },
       
       // Badges
       badges: {
-        isNew: sanityProduct.isNewArrival || false,
-        isSale: sanityProduct.isOnSale || false,
+        isNew: sanityProduct?.isNewArrival || false,
+        isSale: sanityProduct?.isOnSale || false,
         isSoldOut: totalInventory === 0,
         isLimited: false
       },
       
       // Metadata
       metadata: {
-        title: sanityProduct.name,
-        description: sanityProduct.shortDescription || sanityProduct.description,
+        title: sanityProduct?.name || medusaProduct.title,
+        description: sanityProduct?.shortDescription || sanityProduct?.description || medusaProduct.description,
         keywords: []
       }
     }
