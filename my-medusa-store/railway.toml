@@ -1,0 +1,10 @@
+[build]
+  builder = "nixpacks"
+
+[build.nixpacksConfig]
+  installCmd = "npm install"
+  buildCmd = "npm run build"
+  startCmd = "npm run start"
+
+[variables]
+  NODE_ENV = "production"
