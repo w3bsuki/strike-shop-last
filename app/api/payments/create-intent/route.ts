@@ -3,12 +3,20 @@ import Stripe from 'stripe'
 import { medusaClient } from '@/lib/medusa'
 
 // Initialize Stripe with secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripeKey = process.env.STRIPE_SECRET_KEY || ''
+const stripe = stripeKey ? new Stripe(stripeKey, {
   apiVersion: '2025-05-28.basil' as any,
-})
+}) : null
 
 export async function POST(req: NextRequest) {
   try {
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Payment service not configured' },
+        { status: 503 }
+      )
+    }
+
     const { cartId } = await req.json()
 
     if (!cartId) {
