@@ -27,3 +27,23 @@ yarn-error.log*
 next-env.d.ts
 # clerk configuration (can include secrets)
 /.clerk/
+
+# Windows WSL artifacts
+*:Zone.Identifier
+*.Zone.Identifier
+
+# Test files in root
+/test-*.js
+
+# Editor directories
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
