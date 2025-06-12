@@ -38,7 +38,13 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }: Au
         const success = await login(formData.email, formData.password)
         if (success) onClose()
       } else {
-        const success = await register(formData)
+        const success = await register({
+          email: formData.email,
+          password: formData.password,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone
+        })
         if (success) onClose()
       }
     } catch (error) {
