@@ -15,6 +15,7 @@ export default defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL || process.env.DATABASE_PUBLIC_URL,
     http: {
+      port: parseInt(process.env.PORT || "8000"),
       storeCors: "*",
       adminCors: "*", 
       authCors: "*",

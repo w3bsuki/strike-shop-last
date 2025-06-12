@@ -22,5 +22,8 @@ RUN pnpm run build
 # Expose port
 EXPOSE 8000
 
+# Use PORT environment variable from Railway
+ENV PORT=8000
+
 # Start the application
 CMD ["pnpm", "run", "start"]
