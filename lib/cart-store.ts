@@ -62,7 +62,7 @@ type CartStore = {
   syncCart: () => Promise<void>
 }
 
-export const useOptimizedCartStore = create<CartStore>()(
+export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
