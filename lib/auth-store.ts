@@ -104,6 +104,9 @@ type AuthActions = {
   updateActivity: () => void
   checkSession: () => boolean
   clearError: () => void
+  
+  // Social login
+  socialLogin: (provider: "google" | "apple" | "facebook") => Promise<boolean>
 }
 
 type AuthStore = AuthState & AuthActions
@@ -813,6 +816,33 @@ export const useAuthStore = create<AuthStore>()(
       // Clear error state
       clearError: () => {
         set({ error: null })
+      },
+
+      // Social login - placeholder implementation
+      socialLogin: async (provider: "google" | "apple" | "facebook") => {
+        set({ isLoading: true, error: null })
+        
+        try {
+          // TODO: Implement social login with Clerk or other provider
+          toast({
+            title: "Social login",
+            description: `${provider} login is not yet implemented`,
+            variant: "default",
+          })
+          
+          return false
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Social login failed"
+          set({ error: message })
+          toast({
+            title: "Social login failed",
+            description: message,
+            variant: "destructive",
+          })
+          return false
+        } finally {
+          set({ isLoading: false })
+        }
       },
 
     }),
