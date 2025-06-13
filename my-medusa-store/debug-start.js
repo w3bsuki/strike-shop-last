@@ -37,19 +37,37 @@ try {
   console.error('Build check error:', err.message);
 }
 
-// Try to start medusa
-console.log('Starting medusa...');
+// Try to run migrations first
+console.log('Running migrations...');
 const { spawn } = require('child_process');
 
-const medusa = spawn('npx', ['medusa', 'start'], {
+const migrate = spawn('npx', ['medusa', 'db:migrate'], {
   stdio: 'inherit',
   env: process.env
 });
 
-medusa.on('error', (err) => {
-  console.error('Spawn error:', err);
-});
+migrate.on('exit', (code) => {
+  console.log(`Migration exit code: ${code}`);
+  
+  // Now try to start medusa without admin
+  console.log('Starting medusa with admin disabled...');
+  
+  // Set admin disabled in environment
+  const env = {
+    ...process.env,
+    DISABLE_MEDUSA_ADMIN: 'true'
+  };
+  
+  const medusa = spawn('npx', ['medusa', 'start'], {
+    stdio: 'inherit',
+    env: env
+  });
 
-medusa.on('exit', (code) => {
-  console.log(`Process exited with code: ${code}`);
+  medusa.on('error', (err) => {
+    console.error('Medusa spawn error:', err);
+  });
+
+  medusa.on('exit', (code) => {
+    console.log(`Medusa exit code: ${code}`);
+  });
 });
