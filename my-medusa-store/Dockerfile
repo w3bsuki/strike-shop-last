@@ -1,40 +1,24 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies in one layer
-RUN apk add --no-cache python3 g++ make && \
-    corepack enable && \
-    corepack prepare pnpm@latest --activate
+# Install deps
+RUN apk add --no-cache python3 g++ make
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
-
-# Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy source
+# Copy everything
 COPY . .
 
 # Build
 RUN pnpm run build
 
-# Production stage
-FROM node:20-alpine
-
-WORKDIR /app
-
-RUN apk add --no-cache python3 && \
-    corepack enable && \
-    corepack prepare pnpm@latest --activate
-
-# Copy from builder
-COPY --from=builder /app/package.json /app/pnpm-lock.yaml ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.medusa ./.medusa
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/medusa-config.js ./medusa-config.js
-
 EXPOSE 9000
+ENV PORT=9000
+ENV HOST=0.0.0.0
 
+# Just start without complex setup
 CMD ["pnpm", "run", "start"]
