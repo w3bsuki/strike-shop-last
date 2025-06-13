@@ -13,12 +13,19 @@ RUN pnpm install --frozen-lockfile
 # Copy everything
 COPY . .
 
-# Build
+# Build backend AND admin
 RUN pnpm run build
+
+# Create start script that runs migrations first
+RUN echo '#!/bin/sh' > /app/start-medusa.sh && \
+    echo 'echo "Running migrations..."' >> /app/start-medusa.sh && \
+    echo 'npx medusa db:migrate' >> /app/start-medusa.sh && \
+    echo 'echo "Starting Medusa..."' >> /app/start-medusa.sh && \
+    echo 'exec npx medusa start' >> /app/start-medusa.sh && \
+    chmod +x /app/start-medusa.sh
 
 EXPOSE 9000
 ENV PORT=9000
 ENV HOST=0.0.0.0
 
-# Just run the simple server to prove it works
 CMD ["node", "simple-server.js"]

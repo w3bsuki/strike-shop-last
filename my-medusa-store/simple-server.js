@@ -64,7 +64,7 @@ server.listen(PORT, HOST, () => {
   setTimeout(() => {
     console.log('🚀 Starting Medusa backend...');
     
-    const medusa = spawn('npx', ['medusa', 'start'], {
+    const medusa = spawn('./start-medusa.sh', [], {
       env: {
         ...process.env,
         PORT: String(Number(PORT) + 1000), // Run Medusa on different port
