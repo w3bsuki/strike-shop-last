@@ -1,42 +1,16 @@
-import { loadEnv, defineConfig, Modules } from '@medusajs/framework/utils'
+import { loadEnv, defineConfig } from '@medusajs/framework/utils'
 
-loadEnv(process.env.NODE_ENV || 'production', process.cwd())
-
-// Generate secure secrets if not provided
-const generateSecret = (name: string) => {
-  if (!process.env[name]) {
-    console.warn(`${name} not set, using generated value`)
-    return Buffer.from(Math.random().toString(36).substring(2) + Date.now().toString(36)).toString('base64')
-  }
-  return process.env[name]
-}
+loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
 export default defineConfig({
   projectConfig: {
-    databaseUrl: process.env.DATABASE_URL || process.env.DATABASE_PUBLIC_URL || "postgresql://postgres:postgres@localhost:5432/medusa",
+    databaseUrl: process.env.DATABASE_URL,
     http: {
-      storeCors: process.env.STORE_CORS || "*",
-      adminCors: process.env.ADMIN_CORS || "*", 
-      authCors: process.env.AUTH_CORS || "*",
-      jwtSecret: generateSecret('JWT_SECRET'),
-      cookieSecret: generateSecret('COOKIE_SECRET'),
-    },
-  },
-  admin: {
-    disable: false,
-    backendUrl: process.env.MEDUSA_BACKEND_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "http://localhost:8000"),
-  },
-  modules: {
-    // Disable problematic modules
-    [Modules.STOCK_LOCATION]: false,
-    [Modules.INVENTORY]: false,
-    [Modules.TAX]: false,
-    // Use in-memory services
-    cacheService: {
-      resolve: "@medusajs/cache-inmemory",
-    },
-    eventBusService: {
-      resolve: "@medusajs/event-bus-local",
+      storeCors: "*",
+      adminCors: "*", 
+      authCors: "*",
+      jwtSecret: process.env.JWT_SECRET || "temporary_jwt_secret",
+      cookieSecret: process.env.COOKIE_SECRET || "temporary_cookie_secret",
     },
   },
 })
