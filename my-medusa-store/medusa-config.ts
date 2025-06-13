@@ -26,4 +26,8 @@ export default defineConfig({
     disable: false,
     backendUrl: process.env.MEDUSA_BACKEND_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "http://localhost:8000"),
   },
+  modules: {
+    // Disable tax module to avoid initialization errors
+    tax: false,
+  },
 })
