@@ -22,7 +22,7 @@ module.exports = defineConfig({
     },
   },
   admin: {
-    disable: false,
+    disable: true, // Disable admin panel for production
     autoRebuild: false,
   },
   modules: {
