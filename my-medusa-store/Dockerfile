@@ -13,25 +13,13 @@ RUN pnpm install --frozen-lockfile
 # Copy everything
 COPY . .
 
-# Build backend first, then admin explicitly
+# Build everything including admin
 RUN pnpm run build
-RUN echo "Checking admin build..." && ls -la .medusa/ || echo "No .medusa directory"
-
-# Create start script that handles admin build
-RUN echo '#!/bin/sh' > /app/start-medusa.sh && \
-    echo 'echo "Running migrations..."' >> /app/start-medusa.sh && \
-    echo 'npx medusa db:migrate' >> /app/start-medusa.sh && \
-    echo 'echo "Checking admin build..."' >> /app/start-medusa.sh && \
-    echo 'if [ ! -f ".medusa/admin/index.html" ]; then' >> /app/start-medusa.sh && \
-    echo '  echo "Admin not built, building now..."' >> /app/start-medusa.sh && \
-    echo '  npx medusa build --admin-only' >> /app/start-medusa.sh && \
-    echo 'fi' >> /app/start-medusa.sh && \
-    echo 'echo "Starting Medusa..."' >> /app/start-medusa.sh && \
-    echo 'exec npx medusa start' >> /app/start-medusa.sh && \
-    chmod +x /app/start-medusa.sh
+RUN npx medusa build --admin-only
+RUN echo "Admin build check:" && ls -la .medusa/admin/ || echo "Admin build failed"
 
 EXPOSE 9000
 ENV PORT=9000
 ENV HOST=0.0.0.0
 
-CMD ["./start-medusa.sh"]
+CMD ["sh", "-c", "npx medusa db:migrate && npx medusa start"]
