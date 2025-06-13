@@ -2,24 +2,30 @@ const { loadEnv, defineConfig } = require("@medusajs/framework/utils")
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd())
 
+// Log configuration for debugging
+console.log("Medusa Configuration Loading...")
+console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Not set")
+console.log("PORT:", process.env.PORT || 9000)
+console.log("HOST:", process.env.HOST || "0.0.0.0")
+
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     http: {
-      port: process.env.PORT || 9000,
+      port: parseInt(process.env.PORT || "9000"),
       host: process.env.HOST || "0.0.0.0",
       storeCors: "*",
       adminCors: "*",
       authCors: "*",
-      jwtSecret: process.env.JWT_SECRET || "temporary_jwt_secret",
-      cookieSecret: process.env.COOKIE_SECRET || "temporary_cookie_secret",
+      jwtSecret: process.env.JWT_SECRET || "temporary_jwt_secret_replace_in_production",
+      cookieSecret: process.env.COOKIE_SECRET || "temporary_cookie_secret_replace_in_production",
     },
   },
   admin: {
     disable: false,
+    autoRebuild: false, // Disable auto rebuild in production
   },
   modules: {
-    // Core modules with resolve paths
     cacheService: {
       resolve: "@medusajs/cache-inmemory",
     },
@@ -29,14 +35,5 @@ module.exports = defineConfig({
     workflowEngineService: {
       resolve: "@medusajs/workflow-engine-inmemory",
     },
-    // Payment provider
-    paymentProviders: [
-      {
-        resolve: "@medusajs/payment-stripe",
-        options: {
-          apiKey: process.env.STRIPE_API_KEY || "sk_test_placeholder",
-        },
-      },
-    ],
   },
 })
