@@ -52,10 +52,10 @@ migrate.on('exit', (code) => {
   // Now try to start medusa without admin
   console.log('Starting medusa with admin disabled...');
   
-  // Set admin disabled in environment
+  // Set admin ENABLED and force rebuild
   const env = {
     ...process.env,
-    DISABLE_MEDUSA_ADMIN: 'true'
+    DISABLE_MEDUSA_ADMIN: 'false'
   };
   
   const medusa = spawn('npx', ['medusa', 'start'], {

@@ -28,4 +28,4 @@ EXPOSE 9000
 ENV PORT=9000
 ENV HOST=0.0.0.0
 
-CMD ["node", "simple-server.js"]
+CMD ["./start-medusa.sh"]
