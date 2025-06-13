@@ -1,0 +1,8 @@
+[build]
+buildCommand = "pnpm install && pnpm run build"
+
+[deploy]
+startCommand = "pnpm run start:railway"
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "always"

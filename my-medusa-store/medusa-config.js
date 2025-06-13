@@ -13,4 +13,28 @@ module.exports = defineConfig({
       cookieSecret: process.env.COOKIE_SECRET || "temporary_cookie_secret",
     },
   },
+  admin: {
+    disable: false,
+  },
+  modules: {
+    // Core modules with resolve paths
+    cacheService: {
+      resolve: "@medusajs/cache-inmemory",
+    },
+    eventBusService: {
+      resolve: "@medusajs/event-bus-local",
+    },
+    workflowEngineService: {
+      resolve: "@medusajs/workflow-engine-inmemory",
+    },
+    // Payment provider
+    paymentProviders: [
+      {
+        resolve: "@medusajs/payment-stripe",
+        options: {
+          apiKey: process.env.STRIPE_API_KEY || "sk_test_placeholder",
+        },
+      },
+    ],
+  },
 })
