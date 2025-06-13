@@ -2,17 +2,26 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install build dependencies
 RUN apk add --no-cache python3 g++ make
+
+# Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY my-medusa-store/package.json my-medusa-store/pnpm-lock.yaml ./
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies
 RUN pnpm install --frozen-lockfile
 
-COPY my-medusa-store/ .
+# Copy all files
+COPY . .
+
+# Build
 RUN pnpm run build
 
+# Expose port
 EXPOSE 9000
-ENV PORT=9000
-ENV HOST=0.0.0.0
 
+# Start command
 CMD ["pnpm", "run", "start"]
