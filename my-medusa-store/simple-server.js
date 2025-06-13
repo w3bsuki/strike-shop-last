@@ -13,6 +13,32 @@ let medusaError = null;
 const server = http.createServer((req, res) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
   
+  // If Medusa is ready and this is an admin or API request, proxy to Medusa
+  if (medusaReady && (req.url.startsWith('/app') || req.url.startsWith('/admin') || req.url.startsWith('/store'))) {
+    // Proxy to Medusa on port 10000
+    const http = require('http');
+    const proxyReq = http.request({
+      hostname: 'localhost',
+      port: 10000,
+      path: req.url,
+      method: req.method,
+      headers: req.headers
+    }, (proxyRes) => {
+      res.writeHead(proxyRes.statusCode, proxyRes.headers);
+      proxyRes.pipe(res);
+    });
+    
+    proxyReq.on('error', (err) => {
+      console.error('Proxy error:', err);
+      res.writeHead(502);
+      res.end('Bad Gateway');
+    });
+    
+    req.pipe(proxyReq);
+    return;
+  }
+  
+  // Default health response
   res.writeHead(200, { 
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*'
@@ -23,6 +49,8 @@ const server = http.createServer((req, res) => {
     message: medusaReady ? 'Medusa backend ready' : 'Starting Medusa backend...',
     medusaReady,
     medusaError,
+    adminUrl: medusaReady ? '/app' : null,
+    storeUrl: medusaReady ? '/store' : null,
     timestamp: new Date().toISOString(),
     url: req.url,
     port: PORT
