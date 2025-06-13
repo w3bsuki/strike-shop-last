@@ -26,4 +26,57 @@ export default defineConfig({
     disable: false,
     backendUrl: process.env.MEDUSA_BACKEND_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "http://localhost:8000"),
   },
+  modules: [
+    {
+      resolve: "@medusajs/medusa/payment",
+    },
+    {
+      resolve: "@medusajs/medusa/product", 
+    },
+    {
+      resolve: "@medusajs/medusa/pricing",
+    },
+    {
+      resolve: "@medusajs/medusa/promotion",
+    },
+    {
+      resolve: "@medusajs/medusa/fulfillment",
+    },
+    {
+      resolve: "@medusajs/medusa/sales-channel",
+    },
+    {
+      resolve: "@medusajs/medusa/cart",
+    },
+    {
+      resolve: "@medusajs/medusa/customer",
+    },
+    {
+      resolve: "@medusajs/medusa/order",
+    },
+    {
+      resolve: "@medusajs/medusa/user",
+    },
+    {
+      resolve: "@medusajs/medusa/region",
+    },
+    {
+      resolve: "@medusajs/medusa/store",
+    },
+    {
+      resolve: "@medusajs/medusa/currency",
+    },
+    {
+      resolve: "@medusajs/medusa/api-key",
+    },
+    {
+      resolve: "@medusajs/medusa/workflow-engine-inmemory",
+    },
+    {
+      resolve: "@medusajs/payment-stripe",
+      options: {
+        apiKey: process.env.STRIPE_API_KEY,
+      },
+    },
+  ],
 })

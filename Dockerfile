@@ -25,5 +25,5 @@ RUN pnpm run build
 EXPOSE 8000
 ENV NODE_ENV=production
 
-# Start command with migrations and explicit port
-CMD ["sh", "-c", "npx medusa db:migrate && PORT=${PORT:-8000} pnpm run start"]
+# Start command with database setup and explicit port
+CMD ["sh", "-c", "npx medusa db:create && npx medusa db:migrate && PORT=${PORT:-8000} pnpm run start"]
