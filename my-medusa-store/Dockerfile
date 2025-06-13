@@ -20,5 +20,5 @@ EXPOSE 9000
 ENV PORT=9000
 ENV HOST=0.0.0.0
 
-# Run migrations then start
-CMD ["sh", "-c", "npx medusa db:migrate && pnpm run start"]
+# Run migrations then start with debug
+CMD ["sh", "-c", "npx medusa db:migrate && node start.js"]
