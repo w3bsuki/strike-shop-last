@@ -6,6 +6,8 @@ module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     http: {
+      port: process.env.PORT || 9000,
+      host: process.env.HOST || "0.0.0.0",
       storeCors: "*",
       adminCors: "*",
       authCors: "*",
