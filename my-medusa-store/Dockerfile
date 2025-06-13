@@ -20,5 +20,5 @@ EXPOSE 9000
 ENV PORT=9000
 ENV HOST=0.0.0.0
 
-# Just start without complex setup
-CMD ["pnpm", "run", "start"]
+# Run migrations then start
+CMD ["sh", "-c", "npx medusa db:migrate && pnpm run start"]
