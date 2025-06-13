@@ -25,13 +25,15 @@ RUN echo '#!/bin/sh' > /app/start.sh && \
     echo 'echo "Starting Medusa..."' >> /app/start.sh && \
     echo 'echo "DATABASE_URL: ${DATABASE_URL:0:30}..."' >> /app/start.sh && \
     echo 'echo "PORT: ${PORT}"' >> /app/start.sh && \
+    echo 'echo "HOST: ${HOST}"' >> /app/start.sh && \
     echo '' >> /app/start.sh && \
-    echo '# Run migrations' >> /app/start.sh && \
-    echo 'echo "Running migrations..."' >> /app/start.sh && \
-    echo 'npx medusa db:migrate || echo "Migration failed, continuing..."' >> /app/start.sh && \
+    echo '# Initialize database' >> /app/start.sh && \
+    echo 'echo "Initializing database..."' >> /app/start.sh && \
+    echo 'node scripts/init-database.js || echo "Database init failed, continuing..."' >> /app/start.sh && \
     echo '' >> /app/start.sh && \
     echo '# Start Medusa with explicit host binding' >> /app/start.sh && \
-    echo 'HOST=0.0.0.0 exec npx medusa start' >> /app/start.sh && \
+    echo 'echo "Starting Medusa server..."' >> /app/start.sh && \
+    echo 'exec npx medusa start' >> /app/start.sh && \
     chmod +x /app/start.sh
 
 # Expose the port
@@ -39,5 +41,5 @@ EXPOSE 9000
 ENV PORT=9000
 ENV HOST=0.0.0.0
 
-# Use the startup script
-CMD ["/app/start.sh"]
+# Use the Express server for health checks
+CMD ["node", "server.js"]

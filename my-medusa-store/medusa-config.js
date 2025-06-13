@@ -1,4 +1,4 @@
-const { loadEnv, defineConfig } = require("@medusajs/framework/utils")
+const { loadEnv, defineConfig, Modules } = require("@medusajs/framework/utils")
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd())
 
@@ -23,16 +23,20 @@ module.exports = defineConfig({
   },
   admin: {
     disable: false,
-    autoRebuild: false, // Disable auto rebuild in production
+    autoRebuild: false,
   },
   modules: {
-    cacheService: {
+    // EXPLICITLY DISABLE TAX MODULE
+    [Modules.TAX]: false,
+    
+    // Core modules
+    [Modules.CACHE]: {
       resolve: "@medusajs/cache-inmemory",
     },
-    eventBusService: {
+    [Modules.EVENT_BUS]: {
       resolve: "@medusajs/event-bus-local",
     },
-    workflowEngineService: {
+    [Modules.WORKFLOW_ENGINE]: {
       resolve: "@medusajs/workflow-engine-inmemory",
     },
   },
