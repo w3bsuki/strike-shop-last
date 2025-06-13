@@ -17,7 +17,7 @@
     "seed": "medusa exec ./src/scripts/seed.ts",
     "start": "medusa start",
     "start:prod": "NODE_ENV=production medusa start",
-    "start:railway": "./start-railway.sh",
+    "start:railway": "node server.js",
     "start:medusa": "medusa start",
     "dev": "medusa develop",
     "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
