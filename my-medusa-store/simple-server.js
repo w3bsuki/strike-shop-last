@@ -64,7 +64,7 @@ server.listen(PORT, HOST, () => {
   setTimeout(() => {
     console.log('🚀 Starting Medusa backend...');
     
-    const medusa = spawn('./start-medusa.sh', [], {
+    const medusa = spawn('node', ['debug-start.js'], {
       env: {
         ...process.env,
         PORT: String(Number(PORT) + 1000), // Run Medusa on different port
@@ -81,15 +81,21 @@ server.listen(PORT, HOST, () => {
     });
     
     medusa.stderr.on('data', (data) => {
-      console.error(`Medusa Error: ${data}`);
-      medusaError = data.toString();
+      const errorMsg = data.toString();
+      console.error(`Medusa Error: ${errorMsg}`);
+      medusaError = (medusaError || '') + errorMsg;
     });
     
     medusa.on('close', (code) => {
       console.log(`Medusa exited with code ${code}`);
       if (code !== 0) {
-        medusaError = `Exited with code ${code}`;
+        medusaError = (medusaError || '') + `\nExited with code ${code}`;
       }
+    });
+    
+    medusa.on('error', (err) => {
+      console.error('Medusa spawn error:', err);
+      medusaError = `Spawn error: ${err.message}`;
     });
   }, 2000);
 });
