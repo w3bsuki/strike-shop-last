@@ -1,380 +1,240 @@
-# ACTIVE TASKS - Current Sprint (10 Priority Items)
+# ACTIVE TASKS - Current Sprint (Updated)
 
-> **AUTO-GENERATED**: Tasks generated from CODEBASE_MONITOR alerts + KNOWLEDGE_BASE insights
-> **UPDATED**: $(date)
-> **SPRINT DURATION**: 2 weeks (rotating task selection)
-> **FOCUS**: Production readiness blocking issues
-
----
-
-## 🚨 CRITICAL PATH (Must Complete First)
-
-### **TASK #1: SECURITY - Remove Hardcoded API Keys** 
-**Priority**: 🔴 CRITICAL  
-**Effort**: 1 hour  
-**Risk**: PRODUCTION BLOCKER
-
-**Problem**: API key `pk_29b82d9f59f0a63f3af01b371bbb4213c0f335610e50c3b9db479d3cea8247ae` hardcoded in `lib/cart-store.ts` line 69, 90, 102
-
-**Solution**:
-```typescript
-// Move to environment variable
-const MEDUSA_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
-if (!MEDUSA_PUBLISHABLE_KEY) {
-  throw new Error('Missing NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY')
-}
-```
-
-**Acceptance Criteria**:
-- [ ] API key moved to `.env.local`
-- [ ] All 3 hardcoded instances replaced
-- [ ] Environment validation added
-- [ ] Verified cart functionality still works
-- [ ] Added to `.env.example`
-
-**Dependencies**: None  
-**Blocks**: Production deployment
+> **UPDATED**: December 6, 2024
+> **SPRINT DURATION**: 2 weeks
+> **FOCUS**: Production deployment & launch readiness
+> **CURRENT STATE**: Backend ready for Railway, Frontend ready for Vercel
 
 ---
 
-### **TASK #2: SECURITY - Fix npm audit vulnerabilities**
+## 🚀 DEPLOYMENT PATH (Immediate Priority)
+
+### **TASK #1: BACKEND - Deploy Medusa on Railway** 
 **Priority**: 🔴 CRITICAL  
 **Effort**: 30 minutes  
-**Risk**: Security vulnerabilities in production
+**Status**: ✅ READY TO DEPLOY
 
-**Problem**: 3 high-severity vulnerabilities (axios SSRF, esbuild exposure)
+**Current State**: 
+- ✅ Dockerfile configured correctly
+- ✅ railway.json in place
+- ✅ Database connection ready
+- ⏳ Awaiting deployment
 
-**Solution**:
+**Next Steps**:
 ```bash
-cd my-medusa-store
-pnpm audit fix --force
-npm audit fix --force  # For frontend
+# From repository root
+railway up
+# Then set environment variables in Railway dashboard
 ```
 
 **Acceptance Criteria**:
-- [ ] `npm audit` returns 0 vulnerabilities
-- [ ] All packages updated to secure versions
-- [ ] Application functionality verified post-update
-- [ ] Lock files updated
+- [x] Dockerfile builds successfully
+- [ ] Railway deployment succeeds
+- [ ] Admin panel accessible at https://[domain]/app
+- [ ] API endpoints responding
+- [ ] Database migrations run
 
-**Dependencies**: None  
-**Blocks**: Security compliance
-
----
-
-## ⚡ HIGH IMPACT IMPROVEMENTS
-
-### **TASK #3: PERFORMANCE - Split ProductQuickView Component**
-**Priority**: 🟠 HIGH  
-**Effort**: 3 hours  
-**Impact**: Maintainability + Performance
-
-**Problem**: 400+ line component causing maintenance issues and bundle bloat
-
-**Solution**:
-```typescript
-// Split into focused components
-├── ProductQuickView.tsx (orchestrator)
-├── ProductImageGallery.tsx
-├── ProductDetails.tsx  
-├── ProductActions.tsx
-└── ProductSizeGuide.tsx
-```
-
-**Acceptance Criteria**:
-- [ ] Component split into 4-5 focused files
-- [ ] Each component < 100 lines
-- [ ] All functionality preserved
-- [ ] TypeScript types properly shared
-- [ ] Performance tested (no regression)
-
-**Dependencies**: None  
-**Benefits**: Easier testing, better performance, team collaboration
+**Dependencies**: PostgreSQL on Railway  
+**Blocks**: Everything else
 
 ---
 
-### **TASK #4: TYPE SAFETY - Replace Critical 'any' Types**
-**Priority**: 🟠 HIGH  
-**Effort**: 4 hours  
-**Impact**: Runtime safety + Developer experience
+### **TASK #2: FRONTEND - Deploy to Vercel**
+**Priority**: 🔴 CRITICAL  
+**Effort**: 30 minutes  
+**Status**: 🟡 NEEDS ENV VARS
 
-**Problem**: 68+ `any` types causing potential runtime errors
+**Current State**:
+- ✅ Build passes
+- ✅ TypeScript errors fixed
+- ⚠️ Needs environment variables
 
-**Solution**:
-```typescript
-// Create proper interfaces
-interface MedusaProduct {
-  id: string
-  title: string
-  variants: MedusaVariant[]
-  // ... proper typing
-}
-
-interface CartResponse {
-  cart: MedusaCart
-  // ... replace cart API any types
-}
-```
-
-**Acceptance Criteria**:
-- [ ] 20+ critical `any` types replaced with proper interfaces
-- [ ] Focus on cart-store.ts, data-service.ts, product-quick-view.tsx
-- [ ] No TypeScript compilation errors
-- [ ] Runtime safety improved in cart operations
-
-**Dependencies**: None  
-**Benefits**: Prevents runtime crashes, better IDE support
-
----
-
-### **TASK #5: UX - Add Loading States to All Async Operations**
-**Priority**: 🟡 MEDIUM  
-**Effort**: 2 hours  
-**Impact**: User experience improvement
-
-**Problem**: No loading feedback during cart operations, causing user confusion
-
-**Solution**:
-```typescript
-// Add loading states to cart store
-const addItem = async (item: CartItem) => {
-  set({ isLoading: true })
-  try {
-    // API call
-  } finally {
-    set({ isLoading: false })
-  }
-}
-
-// Loading UI components
-<Button disabled={isLoading}>
-  {isLoading ? <Spinner /> : 'Add to Cart'}
-</Button>
-```
-
-**Acceptance Criteria**:
-- [ ] Loading states added to cart operations
-- [ ] Loading UI for product fetching
-- [ ] Checkout flow loading indicators
-- [ ] Skeleton components for product cards
-- [ ] No operation appears "frozen"
-
-**Dependencies**: None  
-**Benefits**: Better perceived performance, clearer user feedback
-
----
-
-## 🔧 TECHNICAL IMPROVEMENTS
-
-### **TASK #6: REFACTOR - Optimize Cart API Calls**
-**Priority**: 🟡 MEDIUM  
-**Effort**: 2 hours  
-**Impact**: Performance improvement
-
-**Problem**: Sequential API calls causing 600ms+ cart operations
-
-**Solution**:
-```typescript
-// Before: Sequential calls (slow)
-await addItemToCart(item)      // 300ms
-await fetchUpdatedCart()       // 300ms = 600ms total
-
-// After: Optimistic updates (fast)
-updateCartOptimistically(item) // 0ms perceived
-addItemToCart(item)            // 300ms background
-```
-
-**Acceptance Criteria**:
-- [ ] Optimistic updates implemented
-- [ ] Cart operations feel instant
-- [ ] Error rollback working
-- [ ] API calls reduced by 50%
-
-**Dependencies**: None  
-**Benefits**: 50% faster cart operations
-
----
-
-### **TASK #7: ACCESSIBILITY - Fix WCAG Compliance Issues**
-**Priority**: 🟡 MEDIUM  
-**Effort**: 3 hours  
-**Impact**: Legal compliance + UX
-
-**Problem**: 40% WCAG compliance, missing ARIA labels, poor keyboard navigation
-
-**Solution**:
-```typescript
-// Add proper ARIA labels
-<button 
-  aria-label={`Add ${product.name} to cart`}
-  aria-describedby={`product-${product.id}-description`}
->
-
-// Improve keyboard navigation  
-<div 
-  role="button"
-  tabIndex={0}
-  onKeyDown={(e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      handleClick()
-    }
-  }}
->
-```
-
-**Acceptance Criteria**:
-- [ ] All interactive elements have ARIA labels
-- [ ] Keyboard navigation works throughout app
-- [ ] Screen reader testing passed
-- [ ] Color contrast meets WCAG AA standards
-- [ ] Focus management in modals
-
-**Dependencies**: None  
-**Benefits**: Legal compliance, broader accessibility
-
----
-
-## 🚀 INFRASTRUCTURE SETUP
-
-### **TASK #8: TESTING - Set Up Basic Testing Infrastructure**
-**Priority**: 🟡 MEDIUM  
-**Effort**: 4 hours  
-**Impact**: Code quality foundation
-
-**Problem**: 0% test coverage, no safety net for changes
-
-**Solution**:
+**Next Steps**:
 ```bash
-# Install testing dependencies
-npm install -D @testing-library/react @testing-library/jest-dom jest
-
-# Create basic test structure
-├── __tests__/
-│   ├── components/
-│   ├── stores/
-│   └── utils/
+npx vercel
+# Set environment variables in Vercel dashboard:
+# NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://[railway-domain]
+# NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=[from Railway]
+# STRIPE_SECRET_KEY=[your stripe key]
 ```
 
 **Acceptance Criteria**:
-- [ ] Jest + React Testing Library configured
-- [ ] 5 basic component tests written
-- [ ] Cart store tests implemented
-- [ ] Test command in package.json
-- [ ] CI integration planned
+- [ ] Vercel deployment succeeds
+- [ ] Homepage loads
+- [ ] Products display from Medusa
+- [ ] Cart functionality works
+- [ ] Checkout flow operational
 
-**Dependencies**: None  
-**Benefits**: Confidence in changes, regression prevention
+**Dependencies**: Medusa backend deployed  
+**Blocks**: Going live
 
 ---
 
-### **TASK #9: MONITORING - Add Basic Error Tracking**
-**Priority**: 🟡 MEDIUM  
-**Effort**: 1 hour  
-**Impact**: Production debugging capability
+## 🔧 CRITICAL FIXES (Before Launch)
 
-**Problem**: No error tracking, issues only found through user reports
+### **TASK #3: SECURITY - Remove Hardcoded API Keys** 
+**Priority**: 🔴 CRITICAL  
+**Effort**: 15 minutes  
+**Status**: ❌ BLOCKING PRODUCTION
+
+**Problem**: API key hardcoded in `lib/cart-store.backup.ts` lines 69, 90, 102
 
 **Solution**:
 ```typescript
-// Add basic error boundary with logging
-class ErrorBoundary extends Component {
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log to external service (Sentry, LogRocket)
-    console.error('Error caught:', error, errorInfo)
-  }
-}
+// Replace hardcoded key
+const MEDUSA_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!
 ```
 
 **Acceptance Criteria**:
-- [ ] Error boundary implemented
-- [ ] Console error tracking added
-- [ ] Basic error reporting setup
-- [ ] Development vs production error handling
-
-**Dependencies**: None  
-**Benefits**: Faster issue resolution, better debugging
+- [ ] Remove hardcoded keys from all files
+- [ ] Use environment variable
+- [ ] Test cart functionality
+- [ ] Commit and push changes
 
 ---
 
-## 🎨 USER EXPERIENCE POLISH
+### **TASK #4: ENVIRONMENT - Create Production Config**
+**Priority**: 🔴 CRITICAL  
+**Effort**: 30 minutes  
+**Status**: ❌ NOT STARTED
 
-### **TASK #10: MOBILE - Improve Mobile Touch Targets**
-**Priority**: 🟢 LOW  
-**Effort**: 1 hour  
-**Impact**: Mobile user experience
+**Required Environment Variables**:
 
-**Problem**: Touch targets too small on mobile (< 44px), causing missed taps
-
-**Solution**:
-```css
-/* Ensure minimum touch target size */
-.button, .touch-target {
-  min-height: 44px;
-  min-width: 44px;
-}
-
-/* Improve mobile spacing */
-.mobile-nav-item {
-  padding: 12px 16px; /* Larger touch area */
-}
+**Backend (Railway)**:
+```bash
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+NODE_ENV=production
+JWT_SECRET=[generate secure key]
+COOKIE_SECRET=[generate secure key]
+STRIPE_API_KEY=sk_live_...
 ```
 
-**Acceptance Criteria**:
-- [ ] All buttons minimum 44px height/width
-- [ ] Mobile navigation improved
-- [ ] Touch target spacing increased
+**Frontend (Vercel)**:
+```bash
+NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://[railway-url]
+NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=[from Medusa]
+NEXT_PUBLIC_MEDUSA_REGION_ID=[from Medusa]
+STRIPE_SECRET_KEY=sk_live_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+```
+
+---
+
+## 📋 POST-DEPLOYMENT TASKS
+
+### **TASK #5: TESTING - Verify Production Functionality**
+**Priority**: 🟠 HIGH  
+**Effort**: 1 hour  
+**Status**: ⏳ WAITING
+
+**Test Checklist**:
+- [ ] Homepage loads with products
+- [ ] Product detail pages work
+- [ ] Add to cart functionality
+- [ ] Cart persistence
+- [ ] Checkout flow (test mode)
+- [ ] Admin panel access
+- [ ] Mobile responsiveness
+
+---
+
+### **TASK #6: DOCUMENTATION - Create README.md**
+**Priority**: 🟠 HIGH  
+**Effort**: 1 hour  
+**Status**: ❌ MISSING
+
+**Content Needed**:
+```markdown
+# Strike Shop
+
+## Overview
+[Project description]
+
+## Tech Stack
+- Frontend: Next.js 14, TypeScript, Tailwind
+- Backend: Medusa.js
+- Database: PostgreSQL
+- Deployment: Railway (backend), Vercel (frontend)
+
+## Setup Instructions
+[Local development steps]
+
+## Deployment
+[Production deployment guide]
+
+## Environment Variables
+[List of required vars]
+```
+
+---
+
+## 🎯 LAUNCH READINESS CHECKLIST
+
+### **Pre-Launch Requirements**:
+- [ ] Backend deployed and accessible
+- [ ] Frontend deployed and connected
+- [ ] Payment processing configured (Stripe)
+- [ ] SSL certificates active
+- [ ] Environment variables set
+- [ ] Basic security audit passed
 - [ ] Mobile testing completed
+- [ ] Admin user created
+- [ ] Test order placed successfully
 
-**Dependencies**: None  
-**Benefits**: Better mobile conversion rates
+### **Nice-to-Have Before Launch**:
+- [ ] Error monitoring (Sentry)
+- [ ] Analytics (Google Analytics)
+- [ ] SEO metadata configured
+- [ ] Social media preview images
+- [ ] Terms of Service / Privacy Policy pages
 
 ---
 
-## 📊 TASK COMPLETION TRACKING
+## 📊 CURRENT PROGRESS
 
-### **CURRENT SPRINT PROGRESS**
+### **Deployment Status**
 ```
-🔴 Critical Tasks:    0/2 complete  (0%)
-🟠 High Priority:     0/2 complete  (0%)  
-🟡 Medium Priority:   0/4 complete  (0%)
-🟢 Low Priority:      0/2 complete  (0%)
+Backend Deployment:    🟡 Ready to deploy
+Frontend Deployment:   🟡 Ready to deploy
+Security Fixes:        ❌ Critical issue pending
+Environment Config:    ❌ Not configured
+Production Testing:    ⏳ Waiting
+Documentation:         ❌ Missing
 
-Overall Progress:     0/10 complete (0%)
+Overall Readiness:     60% complete
 ```
 
-### **VELOCITY TRACKING**
-- **Target**: 10 tasks per 2-week sprint
-- **Previous Sprint**: N/A (first sprint)
-- **Estimated Effort**: 21 hours total
-- **Resource Allocation**: 1 developer, ~10 hours/week
-
-### **RISK ASSESSMENT**
-- **HIGH RISK**: Security vulnerabilities (blocking production)
-- **MEDIUM RISK**: Large component complexity (maintenance burden)
-- **LOW RISK**: Mobile UX improvements (incremental)
+### **Time to Launch Estimate**
+- **Optimistic**: 2-3 hours (if deployments go smoothly)
+- **Realistic**: 4-6 hours (including testing)
+- **Pessimistic**: 1-2 days (if issues arise)
 
 ---
 
-## 🔄 TASK REGENERATION LOGIC
+## 🔄 NEXT SPRINT PRIORITIES (After Launch)
 
-### **AUTOMATIC TASK SELECTION CRITERIA**
-1. **Security Issues**: Always highest priority
-2. **Production Blockers**: Critical path items
-3. **High Impact/Low Effort**: Quick wins prioritized
-4. **Technical Debt**: Balanced with feature work
-5. **User Experience**: Continuous improvement
-
-### **NEXT SPRINT PREVIEW** (Auto-generated)
-Based on current codebase monitor, next sprint will likely include:
-- Bundle size optimization
-- Additional component refactoring  
-- Enhanced error handling
-- Performance monitoring setup
-- Dependency updates
+Based on refactoring roadmap:
+1. **Type Safety**: Replace remaining `any` types
+2. **Performance**: Implement caching strategy
+3. **Testing**: Set up Jest + React Testing Library
+4. **Monitoring**: Add Sentry error tracking
+5. **Features**: Complete wishlist functionality
 
 ---
 
-**TASK GENERATION**: Automated from CODEBASE_MONITOR + KNOWLEDGE_BASE  
-**LAST UPDATED**: $(date)  
-**NEXT REFRESH**: When current tasks 50% complete or 1 week elapsed  
-**FEEDBACK LOOP**: Task completion updates KNOWLEDGE_BASE patterns
+## 🚨 CRITICAL PATH TO LAUNCH
+
+1. **Fix hardcoded API key** (15 min)
+2. **Deploy Medusa backend to Railway** (30 min)
+3. **Get Railway URL and credentials** (5 min)
+4. **Deploy frontend to Vercel with env vars** (30 min)
+5. **Test all functionality** (60 min)
+6. **Fix any issues found** (30-120 min)
+
+**TOTAL TIME**: 3-5 hours
+
+---
+
+**IMPORTANT**: Focus only on deployment tasks. All refactoring and improvements can wait until after launch.
+
+**NEXT ACTION**: Remove hardcoded API key, then deploy backend to Railway.

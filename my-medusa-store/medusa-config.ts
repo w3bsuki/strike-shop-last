@@ -14,8 +14,8 @@ const generateSecret = (name: string) => {
 export default defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL || process.env.DATABASE_PUBLIC_URL || "postgresql://postgres:postgres@localhost:5432/medusa",
+    port: parseInt(process.env.PORT || "8000"),
     http: {
-      port: parseInt(process.env.PORT || "8000"),
       storeCors: "*",
       adminCors: "*", 
       authCors: "*",
@@ -25,6 +25,6 @@ export default defineConfig({
   },
   admin: {
     disable: false,
-    backendUrl: process.env.MEDUSA_BACKEND_URL || process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "http://localhost:8000",
+    backendUrl: process.env.MEDUSA_BACKEND_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "http://localhost:8000"),
   },
 })
