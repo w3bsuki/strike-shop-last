@@ -1,4 +1,4 @@
-import { loadEnv, defineConfig } from '@medusajs/framework/utils'
+import { loadEnv, defineConfig, Modules } from '@medusajs/framework/utils'
 
 loadEnv(process.env.NODE_ENV || 'production', process.cwd())
 
@@ -27,7 +27,11 @@ export default defineConfig({
     backendUrl: process.env.MEDUSA_BACKEND_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "http://localhost:8000"),
   },
   modules: {
-    // Minimal modules configuration
+    // Disable problematic modules
+    [Modules.STOCK_LOCATION]: false,
+    [Modules.INVENTORY]: false,
+    [Modules.TAX]: false,
+    // Use in-memory services
     cacheService: {
       resolve: "@medusajs/cache-inmemory",
     },
