@@ -1,0 +1,10 @@
+[build]
+builder = "nixpacks"
+buildCommand = "cd my-medusa-store && pnpm install && pnpm run build"
+
+[deploy]
+startCommand = "cd my-medusa-store && pnpm run start:railway"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
