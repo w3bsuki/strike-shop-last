@@ -1,8 +1,11 @@
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
+import type {
+  MedusaRequest,
+  MedusaResponse,
+} from "@medusajs/framework/http"
 
-export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
-  res.json({
-    status: "ok",
-    timestamp: new Date().toISOString(),
-  })
+export const GET = (
+  req: MedusaRequest,
+  res: MedusaResponse
+) => {
+  res.status(200).json({ status: "healthy", timestamp: new Date().toISOString() })
 }
