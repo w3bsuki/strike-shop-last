@@ -22,8 +22,15 @@ COPY my-medusa-store/ .
 RUN pnpm run build
 
 # Runtime configuration
-EXPOSE 8000
 ENV NODE_ENV=production
+ENV PORT=8000
 
-# Start command with database setup and explicit port
-CMD ["sh", "-c", "npx medusa db:create && npx medusa db:migrate && PORT=${PORT:-8000} pnpm run start"]
+# Expose the port Railway expects
+EXPOSE ${PORT}
+
+# Copy start script
+COPY my-medusa-store/scripts/railway-start.sh ./scripts/railway-start.sh
+RUN chmod +x ./scripts/railway-start.sh
+
+# Start command
+CMD ["./scripts/railway-start.sh"]

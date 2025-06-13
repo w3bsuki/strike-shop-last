@@ -15,9 +15,9 @@ export default defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL || process.env.DATABASE_PUBLIC_URL || "postgresql://postgres:postgres@localhost:5432/medusa",
     http: {
-      storeCors: "*",
-      adminCors: "*", 
-      authCors: "*",
+      storeCors: process.env.STORE_CORS || "*",
+      adminCors: process.env.ADMIN_CORS || "*", 
+      authCors: process.env.AUTH_CORS || "*",
       jwtSecret: generateSecret('JWT_SECRET'),
       cookieSecret: generateSecret('COOKIE_SECRET'),
     },
@@ -25,5 +25,14 @@ export default defineConfig({
   admin: {
     disable: false,
     backendUrl: process.env.MEDUSA_BACKEND_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "http://localhost:8000"),
+  },
+  modules: {
+    // Minimal modules configuration
+    cacheService: {
+      resolve: "@medusajs/cache-inmemory",
+    },
+    eventBusService: {
+      resolve: "@medusajs/event-bus-local",
+    },
   },
 })
