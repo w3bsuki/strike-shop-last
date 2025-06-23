@@ -1,12 +1,11 @@
-import { loadEnv } from "@medusajs/framework/utils";
-import { MedusaApp, Modules } from "@medusajs/framework/utils";
+import { loadEnv, Modules } from "@medusajs/framework/utils";
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd());
 
 const seedAdminUser = async () => {
   try {
-    const { medusaAppLoader } = await import("@medusajs/framework");
-    const app = await medusaAppLoader({ directory: process.cwd() });
+    const medusaFramework = await import("@medusajs/framework");
+    const app = await (medusaFramework as any).default({ directory: process.cwd() });
     
     const userModuleService = app.modules[Modules.USER];
     const authModuleService = app.modules[Modules.AUTH];

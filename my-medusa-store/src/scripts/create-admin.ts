@@ -1,8 +1,8 @@
 import { MedusaContainer } from "@medusajs/framework/types"
 
 export default async function createAdmin(container: MedusaContainer) {
-  const inviteService = container.resolve("inviteService")
-  const userService = container.resolve("userService")
+  const inviteService = container.resolve("inviteService") as any
+  const userService = container.resolve("userService") as any
   
   try {
     // Create an invite
