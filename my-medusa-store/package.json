@@ -18,6 +18,7 @@
     "start": "medusa start",
     "start:prod": "NODE_ENV=production medusa start",
     "start:railway": "medusa migrations run && medusa start",
+    "start:render": "medusa start",
     "start:medusa": "medusa start",
     "dev": "medusa develop",
     "predeploy": "medusa db:migrate",
