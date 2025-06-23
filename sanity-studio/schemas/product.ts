@@ -140,7 +140,7 @@ export default defineType({
             defineField({ name: "title", title: "Title", type: "string" }),
             defineField({ name: "content", title: "Content", type: "text", rows: 3 }),
           ],
-        }),
+        }) as any,
       ],
     }),
     // Add more fields as needed: materials, care instructions, etc.

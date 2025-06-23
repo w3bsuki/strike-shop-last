@@ -1,4 +1,4 @@
-import React from "react"
+import React from 'react';
 
 /**
  * Skip Link for keyboard navigation
@@ -12,5 +12,5 @@ export function SkipLink() {
     >
       Skip to main content
     </a>
-  )
+  );
 }

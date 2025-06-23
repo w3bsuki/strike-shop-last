@@ -1,15 +1,15 @@
-import React from "react"
-import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
+import React from 'react';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 interface AccessibleFormFieldProps {
-  id: string
-  label: string
-  error?: string
-  description?: string
-  required?: boolean
-  children: React.ReactElement
-  className?: string
+  id: string;
+  label: string;
+  error?: string;
+  description?: string;
+  required?: boolean;
+  children: React.ReactElement;
+  className?: string;
 }
 
 /**
@@ -23,15 +23,17 @@ export function AccessibleFormField({
   description,
   required = false,
   children,
-  className = ""
+  className = '',
 }: AccessibleFormFieldProps) {
   const describedBy = [
     description && `${id}-description`,
-    error && `${id}-error`
-  ].filter(Boolean).join(' ')
+    error && `${id}-error`,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn('space-y-2', className)}>
       <Label htmlFor={id} className="text-sm font-medium">
         {label}
         {required && (
@@ -40,7 +42,7 @@ export function AccessibleFormField({
           </span>
         )}
       </Label>
-      
+
       {description && (
         <p id={`${id}-description`} className="text-xs text-muted-foreground">
           {description}
@@ -60,19 +62,19 @@ export function AccessibleFormField({
         </p>
       )}
     </div>
-  )
+  );
 }
 
 /**
  * Accessible Checkbox/Radio Group
  */
 interface AccessibleGroupProps {
-  legend: string
-  error?: string
-  description?: string
-  required?: boolean
-  children: React.ReactNode
-  className?: string
+  legend: string;
+  error?: string;
+  description?: string;
+  required?: boolean;
+  children: React.ReactNode;
+  className?: string;
 }
 
 export function AccessibleFieldGroup({
@@ -81,17 +83,19 @@ export function AccessibleFieldGroup({
   description,
   required = false,
   children,
-  className = ""
+  className = '',
 }: AccessibleGroupProps) {
-  const groupId = React.useId()
+  const groupId = React.useId();
   const describedBy = [
     description && `${groupId}-description`,
-    error && `${groupId}-error`
-  ].filter(Boolean).join(' ')
+    error && `${groupId}-error`,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <fieldset
-      className={cn("space-y-3", className)}
+      className={cn('space-y-3', className)}
       aria-describedby={describedBy || undefined}
       aria-required={required}
       aria-invalid={error ? 'true' : 'false'}
@@ -106,37 +110,38 @@ export function AccessibleFieldGroup({
       </legend>
 
       {description && (
-        <p id={`${groupId}-description`} className="text-xs text-muted-foreground">
+        <p
+          id={`${groupId}-description`}
+          className="text-xs text-muted-foreground"
+        >
           {description}
         </p>
       )}
 
-      <div className="space-y-2">
-        {children}
-      </div>
+      <div className="space-y-2">{children}</div>
 
       {error && (
-        <p id={`${groupId}-error`} className="text-xs text-destructive" role="alert">
+        <p
+          id={`${groupId}-error`}
+          className="text-xs text-destructive"
+          role="alert"
+        >
           {error}
         </p>
       )}
     </fieldset>
-  )
+  );
 }
 
 /**
  * Screen Reader Only Text
  */
-export function VisuallyHidden({ 
+export function VisuallyHidden({
   children,
-  as: Component = 'span' 
-}: { 
-  children: React.ReactNode
-  as?: React.ElementType
+  as: Component = 'span',
+}: {
+  children: React.ReactNode;
+  as?: React.ElementType;
 }) {
-  return (
-    <Component className="sr-only">
-      {children}
-    </Component>
-  )
+  return <Component className="sr-only">{children}</Component>;
 }

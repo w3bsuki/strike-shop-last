@@ -1,667 +1,519 @@
-import { medusaClient } from "./medusa"
-import { client, urlFor } from "./sanity"
-// Note: Using any types for Medusa objects until we have proper type definitions
-import type { SanityProduct as LibSanityProduct, SanityCategory as LibSanityCategory } from "./sanity"
-import type { IntegratedProduct as IntegratedProductType, IntegratedVariant } from "@/types/integrated"
-import type { SanityProduct, SanityCategory } from "@/types/sanity"
-
 /**
- * Data Integration Service
- * 
- * This service coordinates data between:
- * - Sanity CMS: Product content, images, descriptions, categories
- * - Medusa: Inventory, pricing, variants, cart, checkout
+ * Data Service - Core integration layer between Sanity CMS and Medusa e-commerce
+ * Now uses Factory Pattern for consistent product creation
  */
 
-// Use the IntegratedProduct type from types/integrated.ts
-export type IntegratedProduct = IntegratedProductType
+import { sanityClient as client, urlForImage } from '@/lib/sanity';
+import { medusaClient } from '@/lib/medusa';
+import { MedusaProductService } from '@/lib/medusa-service';
+import { ProductFactory } from '@/lib/factories/ProductFactory';
+import { ProductQueryBuilder, type ProductQuery } from '@/lib/builders';
+import type { SanityProduct, SanityCategory } from '@/types/sanity';
+import type { IntegratedProduct } from '@/types/integrated';
+
+// Keep legacy interface for backward compatibility
+export interface LegacyIntegratedProduct {
+  // Core identifiers
+  id: string;
+  medusaId?: string;
+  sanityId?: string;
+
+  // Product information
+  title: string;
+  handle: string;
+  description: string;
+
+  // Pricing
+  price: {
+    amount: number;
+    currency: string;
+    formatted: string;
+  };
+  compareAtPrice?: {
+    amount: number;
+    currency: string;
+    formatted: string;
+  };
+
+  // Media
+  images: Array<{
+    url: string;
+    alt?: string;
+  }>;
+  thumbnail?: string;
+
+  // Inventory
+  inStock: boolean;
+  variants: Array<{
+    id: string;
+    title: string;
+    sku?: string;
+    price: number;
+    inventory_quantity: number;
+  }>;
+
+  // Categorization
+  categories: Array<{
+    id: string;
+    name: string;
+    handle: string;
+  }>;
+  tags: string[];
+
+  // SEO
+  seo?: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+  };
+
+  // Metadata
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export class DataService {
-  // Sync product data between Sanity and Medusa
-  static async syncProduct(sanityProduct: LibSanityProduct): Promise<void> {
+  private static instance: DataService;
+  private cache: Map<string, { data: any; timestamp: number }> = new Map();
+  private cacheTimeout = 5 * 60 * 1000; // 5 minutes
+  private pendingRequests: Map<string, Promise<any>> = new Map(); // Prevent duplicate requests
+
+  private constructor() {}
+
+  static getInstance(): DataService {
+    if (!DataService.instance) {
+      DataService.instance = new DataService();
+    }
+    return DataService.instance;
+  }
+
+  /**
+   * Get a single product by handle, merging data from both sources
+   * Now uses ProductFactory for consistent product creation
+   */
+  async getProduct(handle: string): Promise<IntegratedProduct | null> {
+    const cacheKey = `product:${handle}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    // Check if request is already pending
+    if (this.pendingRequests.has(cacheKey)) {
+      return this.pendingRequests.get(cacheKey);
+    }
+
+    // Create and store the promise
+    const promise = this._fetchProduct(handle, cacheKey);
+    this.pendingRequests.set(cacheKey, promise);
+
     try {
-      // Check if product exists in Medusa
-      const { products } = await medusaClient.products.list({
-        handle: sanityProduct.slug.current,
-      })
-      
-      if (products.length === 0) {
-        // Create new product in Medusa
-        await medusaClient.admin.products.create({
-          title: sanityProduct.name,
-          handle: sanityProduct.slug.current,
-          description: sanityProduct.description,
-          is_giftcard: false,
-          discountable: true,
-          // Map Sanity data to Medusa format
-          metadata: {
-            sanity_id: sanityProduct._id,
-            short_description: sanityProduct.shortDescription,
-            is_new_arrival: sanityProduct.isNewArrival,
-            is_featured: sanityProduct.isFeatured,
-            is_on_sale: sanityProduct.isOnSale,
-          },
-        })
-      } else {
-        // Update existing product
-        const medusaProduct = products[0]
-        await medusaClient.admin.products.update(medusaProduct.id, {
-          title: sanityProduct.name,
-          description: sanityProduct.description,
-          metadata: {
-            ...medusaProduct.metadata,
-            sanity_id: sanityProduct._id,
-            short_description: sanityProduct.shortDescription,
-            is_new_arrival: sanityProduct.isNewArrival,
-            is_featured: sanityProduct.isFeatured,
-            is_on_sale: sanityProduct.isOnSale,
-          },
-        })
-      }
-    } catch (error) {
-      console.error("Error syncing product:", error)
-      throw error
+      const result = await promise;
+      return result;
+    } finally {
+      this.pendingRequests.delete(cacheKey);
     }
   }
-  
-  // Get integrated product data
-  static async getProduct(handle: string): Promise<IntegratedProduct | null> {
+
+  private async _fetchProduct(handle: string, cacheKey: string): Promise<IntegratedProduct | null> {
     try {
-      // Fetch from both sources in parallel
-      const [medusaData, sanityData] = await Promise.all([
-        medusaClient.products.list({ handle }),
-        client.fetch<LibSanityProduct>(
-          `*[_type == "product" && slug.current == $handle][0]{
-            _id,
-            name,
-            description,
-            shortDescription,
-            images,
-            "category": category->{
-              _id,
-              name,
-              "slug": slug.current
-            },
-            details,
-            sizes,
-            colors,
-            isNewArrival,
-            isFeatured,
-            isOnSale
-          }`,
+      // Try to get from Medusa first
+      const medusaProduct = await MedusaProductService.getProduct(handle);
+      if (medusaProduct) {
+        // Try to enhance with Sanity data
+        const sanityQuery = `*[_type == "product" && slug.current == $handle][0]`;
+        const sanityProduct: SanityProduct | null = await client.fetch(
+          sanityQuery,
           { handle }
-        ),
-      ])
-      
-      if (!medusaData.products.length) {
-        return null
+        );
+
+        // Use ProductFactory to create integrated product
+        const integrated = ProductFactory.createIntegratedProduct(
+          medusaProduct,
+          sanityProduct || undefined,
+          {
+            currency: 'GBP',
+            region: 'uk',
+            includeVariants: true,
+            includePricing: true,
+            includeInventory: true,
+          }
+        );
+
+        this.setCache(cacheKey, integrated);
+        return integrated;
       }
-      
-      const medusaProduct = medusaData.products[0]
-      
-      // Merge data from both sources
-      return this.mergeProductData(medusaProduct, sanityData)
+
+      // Fallback to Sanity only
+      const sanityQuery = `*[_type == "product" && slug.current == $handle][0]`;
+      const sanityProduct: SanityProduct | null = await client.fetch(
+        sanityQuery,
+        { handle }
+      );
+
+      if (sanityProduct) {
+        // Use ProductFactory for Sanity-only products
+        const integrated = ProductFactory.createIntegratedProductFromSanity(
+          sanityProduct,
+          {
+            currency: 'GBP',
+            includeVariants: true,
+          }
+        );
+        this.setCache(cacheKey, integrated);
+        return integrated;
+      }
+
+      return null;
     } catch (error) {
-      console.error("Error fetching integrated product:", error)
-      return null
-    }
-  }
-  
-  // Get products by category
-  static async getProductsByCategory(
-    categorySlug: string,
-    options?: {
-      limit?: number
-      offset?: number
-      sortBy?: "price" | "name" | "created_at"
-      order?: "asc" | "desc"
-    }
-  ): Promise<IntegratedProduct[]> {
-    try {
-      // First get category from Sanity
-      const category = await client.fetch<LibSanityCategory>(
-        `*[_type == "category" && slug.current == $slug][0]`,
-        { slug: categorySlug }
-      )
-      
-      if (!category) return []
-      
-      // Get products in this category from Sanity
-      const sanityProducts = await client.fetch<LibSanityProduct[]>(
-        `*[_type == "product" && references($categoryId)]{
-          _id,
-          name,
-          "slug": slug.current,
-          description,
-          shortDescription,
-          images,
-          sizes,
-          colors,
-          isNewArrival,
-          isFeatured,
-          isOnSale
-        }`,
-        { categoryId: category._id }
-      )
-      
-      // Get corresponding products from Medusa
-      const handles = sanityProducts.map((p: any) => p.slug.current)
-      const { products: medusaProducts } = await medusaClient.products.list({
-        handle: handles,
-        limit: options?.limit || 100,
-        offset: options?.offset || 0,
-        order: options?.order || "desc",
-      })
-      
-      // Merge and return integrated products
-      return this.mergeProductLists(medusaProducts, sanityProducts, category)
-    } catch (error) {
-      console.error("Error fetching products by category:", error)
-      return []
-    }
-  }
-  
-  // Search products
-  static async searchProducts(query: string): Promise<IntegratedProduct[]> {
-    try {
-      // Search in Sanity
-      const sanityResults = await client.fetch<LibSanityProduct[]>(
-        `*[_type == "product" && (
-          name match $searchQuery ||
-          description match $searchQuery ||
-          shortDescription match $searchQuery
-        )]{
-          _id,
-          name,
-          "slug": slug.current,
-          description,
-          shortDescription,
-          images,
-          "category": category->{
-            _id,
-            name,
-            "slug": slug.current
-          },
-          sizes,
-          colors,
-          isNewArrival,
-          isFeatured,
-          isOnSale
-        }`,
-        { searchQuery: `*${query}*` }
-      )
-      
-      if (sanityResults.length === 0) return []
-      
-      // Get corresponding Medusa products
-      const handles = sanityResults.map((p: any) => p.slug.current)
-      const { products: medusaProducts } = await medusaClient.products.list({
-        handle: handles,
-      })
-      
-      return this.mergeProductLists(medusaProducts, sanityResults)
-    } catch (error) {
-      console.error("Error searching products:", error)
-      return []
-    }
-  }
-  
-  // Get all products directly from Medusa (bypassing Sanity for production)
-  static async getAllProducts(limit: number = 20): Promise<IntegratedProduct[]> {
-    try {
-      const { products } = await medusaClient.products.list({ limit })
-      
-      return products.map((product: any) => this.mergeProductData(product, null))
-    } catch (error) {
-      console.error("Error fetching all products:", error)
-      return []
+
+      return null;
     }
   }
 
-  // Get featured products for homepage sections
-  static async getFeaturedProducts(type: "sale" | "new" | "featured"): Promise<IntegratedProduct[]> {
-    try {
-      // Fallback to all products if Sanity is empty
-      const { products } = await medusaClient.products.list({ limit: 10 })
-      
-      return products.map((product: any) => this.mergeProductData(product, null))
-    } catch (error) {
-      console.error("Error fetching featured products:", error)
-      return []
-    }
-  }
+  /**
+   * Get products with filtering and pagination
+   */
+  async getProducts(
+    params: {
+      limit?: number;
+      offset?: number;
+      categoryId?: string;
+      categoryHandle?: string;
+      tags?: string[];
+      sort?: string;
+    } = {}
+  ): Promise<{ products: IntegratedProduct[]; count: number }> {
+    const cacheKey = `products:${JSON.stringify(params)}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
 
-  // Legacy Sanity-based method (kept for reference)
-  static async getFeaturedProductsFromSanity(type: "sale" | "new" | "featured"): Promise<IntegratedProduct[]> {
     try {
-      let sanityQuery = ""
-      
-      switch (type) {
-        case "sale":
-          sanityQuery = `*[_type == "product" && isOnSale == true]`
-          break
-        case "new":
-          sanityQuery = `*[_type == "product" && isNewArrival == true]`
-          break
-        case "featured":
-          sanityQuery = `*[_type == "product" && isFeatured == true]`
-          break
+      // Get products from Medusa
+      const medusaParams: any = {
+        limit: params.limit || 20,
+        offset: params.offset || 0,
+      };
+
+      if (params.categoryId) {
+        medusaParams.category_id = [params.categoryId];
       }
-      
-      sanityQuery += `{
-        _id,
-        name,
-        "slug": slug.current,
-        description,
-        shortDescription,
-        images,
-        "category": category->{
-          _id,
-          name,
-          "slug": slug.current
-        },
-        sizes,
-        colors,
-        isNewArrival,
-        isFeatured,
-        isOnSale,
-        price,
-        originalPrice
-      }`
-      
-      const sanityProducts = await client.fetch<LibSanityProduct[]>(sanityQuery)
-      
-      if (sanityProducts.length === 0) return []
-      
-      // Get Medusa products
-      const handles = sanityProducts.map((p: any) => p.slug.current)
-      const { products: medusaProducts } = await medusaClient.products.list({
-        handle: handles,
-      })
-      
-      return this.mergeProductLists(medusaProducts, sanityProducts)
+
+      if (params.tags) {
+        medusaParams.tags = params.tags;
+      }
+
+      const { products: medusaProducts, count } =
+        await MedusaProductService.getProducts(medusaParams);
+
+      // Enhance with Sanity data if available
+      const handles = medusaProducts.map((p: any) => p.handle).filter(Boolean);
+      const sanityQuery = `*[_type == "product" && slug.current in $handles]`;
+      const sanityProducts: SanityProduct[] =
+        handles.length > 0 ? await client.fetch(sanityQuery, { handles }) : [];
+
+      const sanityMap = new Map(
+        sanityProducts.map((p: any) => [p.slug.current, p])
+      );
+
+      const integratedProducts = medusaProducts.map((mp: any) => {
+        const sanityProduct = mp.handle
+          ? sanityMap.get(mp.handle) || null
+          : null;
+        return ProductFactory.createIntegratedProduct(mp, sanityProduct, {
+          currency: 'GBP',
+          region: 'uk',
+          includeVariants: true,
+          includePricing: true,
+          includeInventory: true,
+        });
+      });
+
+      const result = { products: integratedProducts, count };
+      this.setCache(cacheKey, result);
+      return result;
     } catch (error) {
-      console.error("Error fetching featured products:", error)
-      return []
-    }
-  }
-  
-  // Get products with filtering, sorting and pagination
-  static async getProducts(options: {
-    category?: string
-    filters?: any
-    sort?: 'relevance' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'newest' | 'best-selling'
-    limit?: number
-    offset?: number
-  } = {}): Promise<{
-    products: IntegratedProduct[]
-    pagination: {
-      total: number
-      limit: number
-      offset: number
-      hasMore: boolean
-    }
-    filters: any
-    applied: any
-  }> {
-    try {
-      const { category, filters = {}, sort = 'newest', limit = 20, offset = 0 } = options
-      
-      // Build Sanity query
-      let sanityQuery = '*[_type == "product"'
-      const queryParams: any = {}
-      
-      if (category) {
-        const categoryData = await client.fetch<LibSanityCategory>(
-          `*[_type == "category" && slug.current == $slug][0]`,
-          { slug: category }
-        )
-        if (categoryData) {
-          sanityQuery += ' && references($categoryId)'
-          queryParams.categoryId = categoryData._id
+
+      // Fallback to Sanity only
+      try {
+        let sanityQuery = `*[_type == "product"]`;
+        const queryParams: any = {};
+
+        if (params.categoryHandle) {
+          sanityQuery += `[category->slug.current == $categoryHandle]`;
+          queryParams.categoryHandle = params.categoryHandle;
         }
-      }
-      
-      // Apply filters
-      if (filters.sizes?.length > 0) {
-        sanityQuery += ' && count((sizes[])[@ in $sizes]) > 0'
-        queryParams.sizes = filters.sizes
-      }
-      
-      if (filters.colors?.length > 0) {
-        sanityQuery += ' && count((colors[])[@ in $colors]) > 0'
-        queryParams.colors = filters.colors
-      }
-      
-      if (filters.priceRange) {
-        if (filters.priceRange.min !== undefined) {
-          sanityQuery += ' && price >= $minPrice'
-          queryParams.minPrice = filters.priceRange.min
-        }
-        if (filters.priceRange.max !== undefined) {
-          sanityQuery += ' && price <= $maxPrice'
-          queryParams.maxPrice = filters.priceRange.max
-        }
-      }
-      
-      if (filters.inStock) {
-        // This would need to be checked against Medusa data
-      }
-      
-      sanityQuery += ']'
-      
-      // Add sorting
-      const sortMap = {
-        'relevance': '', // Default Sanity ordering when searching
-        'newest': ' | order(_createdAt desc)',
-        'price-asc': ' | order(price asc)',
-        'price-desc': ' | order(price desc)',
-        'name-asc': ' | order(name asc)',
-        'name-desc': ' | order(name desc)',
-        'best-selling': ' | order(_updatedAt desc)', // Using _updatedAt as proxy for popularity
-      }
-      
-      const fullQuery = sanityQuery + (sortMap[sort] || sortMap['newest']) + `{
-        _id,
-        name,
-        "slug": slug.current,
-        description,
-        shortDescription,
-        images,
-        "category": category->{
-          _id,
-          name,
-          "slug": slug.current
-        },
-        sizes,
-        colors,
-        isNewArrival,
-        isFeatured,
-        isOnSale,
-        price,
-        originalPrice
-      }[${offset}...${offset + limit}]`
-      
-      // Get total count
-      const countQuery = sanityQuery
-      const [sanityProducts, totalCount] = await Promise.all([
-        client.fetch<LibSanityProduct[]>(fullQuery, queryParams),
-        client.fetch<number>(`count(${countQuery})`, queryParams)
-      ])
-      
-      if (sanityProducts.length === 0) {
+
+        const start = params.offset || 0;
+        const end = start + (params.limit || 20);
+        sanityQuery += `[${start}...${end}]`;
+
+        const sanityProducts: SanityProduct[] = await client.fetch(
+          sanityQuery,
+          queryParams
+        );
+        const integratedProducts = sanityProducts.map((sp) =>
+          ProductFactory.createIntegratedProductFromSanity(sp, {
+            currency: 'GBP',
+            includeVariants: true,
+          })
+        );
+
         return {
-          products: [],
-          pagination: { total: 0, limit, offset, hasMore: false },
-          filters: {},
-          applied: filters
-        }
-      }
-      
-      // Get Medusa products
-      const handles = sanityProducts.map((p: any) => p.slug.current)
-      const { products: medusaProducts } = await medusaClient.products.list({
-        handle: handles,
-      })
-      
-      // Merge products
-      const integratedProducts = this.mergeProductLists(medusaProducts, sanityProducts)
-      
-      // Apply stock filter if needed
-      let finalProducts = integratedProducts
-      if (filters.inStock) {
-        finalProducts = integratedProducts.filter(p => p.commerce.inventory.available)
-      }
-      
-      // Get available filters from all products (for filter UI)
-      const allProductsQuery = '*[_type == "product"]{ sizes, colors, price }'
-      const allProducts = await client.fetch<any[]>(allProductsQuery)
-      
-      const availableSizes = [...new Set(allProducts.flatMap(p => p.sizes || []))]
-      const availableColors = [...new Set(allProducts.flatMap(p => p.colors || []))]
-      const prices = allProducts.map(p => p.price).filter(Boolean)
-      const priceRange = prices.length > 0 ? {
-        min: Math.min(...prices),
-        max: Math.max(...prices)
-      } : { min: 0, max: 1000 }
-      
-      return {
-        products: finalProducts,
-        pagination: {
-          total: totalCount,
-          limit,
-          offset,
-          hasMore: offset + limit < totalCount
-        },
-        filters: {
-          sizes: availableSizes,
-          colors: availableColors,
-          priceRange,
-        },
-        applied: filters
-      }
-    } catch (error) {
-      console.error("Error fetching products:", error)
-      return {
-        products: [],
-        pagination: { total: 0, limit: 20, offset: 0, hasMore: false },
-        filters: {},
-        applied: {}
+          products: integratedProducts,
+          count: integratedProducts.length,
+        };
+      } catch (sanityError) {
+
+        return { products: [], count: 0 };
       }
     }
   }
-  
-  // Helper: Merge single product data
-  private static mergeProductData(
-    medusaProduct: any,
-    sanityProduct?: LibSanityProduct | null
-  ): IntegratedProduct {
-    // Get price info from first variant
-    const defaultVariant = medusaProduct.variants[0]
-    const defaultPrice = defaultVariant?.prices?.[0]
-    const amount = defaultPrice?.amount || 0
-    const currency = defaultPrice?.currency_code || "EUR"
-    
-    // Calculate discount if originalPrice exists
-    const originalAmount = sanityProduct?.originalPrice ? sanityProduct.originalPrice * 100 : amount
-    const discountPercentage = originalAmount > amount ? Math.round(((originalAmount - amount) / originalAmount) * 100) : 0
-    const discountAmount = originalAmount > amount ? originalAmount - amount : 0
-    const discount = discountPercentage > 0 ? { amount: discountAmount / 100, percentage: discountPercentage } : undefined
-    
-    // Calculate if in stock
-    const totalInventory = medusaProduct.variants.reduce((sum: number, v: any) => {
-      if (!v.manage_inventory) return sum + 100 // If not managing inventory, assume available
-      return sum + (v.inventory_quantity || 0)
-    }, 0)
-    
-    // Get available options
-    const availableSizes = sanityProduct?.sizes || 
-      medusaProduct.options?.find((o: any) => o.title.toLowerCase() === "size")?.values.map((v: any) => v.value) || []
-    
-    const availableColors = sanityProduct?.colors ||
-      medusaProduct.options?.find((o: any) => o.title.toLowerCase() === "color")?.values.map((v: any) => v.value) || []
-    
-    // Map variants to integrated format
-    const variants: IntegratedVariant[] = medusaProduct.variants.map((v: any) => ({
-      id: v.id,
-      productId: medusaProduct.id,
-      title: v.title || "",
-      sku: v.sku,
-      
-      // Options
-      options: {
-        size: v.options?.find((o: any) => o.option?.title?.toLowerCase() === "size")?.value,
-        color: availableColors.length > 0 ? {
-          name: availableColors[0],
-          hex: undefined
-        } : undefined
-      },
-      
-      // Pricing
-      prices: v.prices?.map((p: any) => ({
-        id: p.id,
-        currencyCode: p.currency_code,
-        amount: p.amount,
-        regionId: p.region_id,
-        includesTax: p.includes_tax
-      })) || [],
-      pricing: {
-        currency: v.prices?.[0]?.currency_code || currency,
-        price: v.prices?.[0]?.amount || amount,
-        salePrice: sanityProduct?.isOnSale ? v.prices?.[0]?.amount : undefined,
-        displayPrice: DataService.formatPrice(v.prices?.[0]?.amount || amount, v.prices?.[0]?.currency_code || currency),
-        displaySalePrice: sanityProduct?.isOnSale ? DataService.formatPrice(v.prices?.[0]?.amount || amount, v.prices?.[0]?.currency_code || currency) : undefined,
-      },
-      
-      // Inventory
-      inventory: {
-        available: !v.manage_inventory || (v.inventory_quantity ?? 0) > 0 || v.allow_backorder,
-        quantity: v.inventory_quantity,
-        allowBackorder: v.allow_backorder
-      },
-      
-      medusaVariant: v
-    }))
-    
-    return {
-      // Core identifiers
-      id: medusaProduct.id,
-      sanityId: sanityProduct?._id,
-      slug: medusaProduct.handle || sanityProduct?.slug?.current || medusaProduct.id,
-      sku: defaultVariant?.sku,
-      
-      // Content from Sanity (with Medusa fallbacks)
-      content: {
-        name: sanityProduct?.name || medusaProduct.title,
-        description: sanityProduct?.description || medusaProduct.description,
-        details: undefined, // SanityBlock[] type expected, but we have SanityProductDetailItem[]
-        images: sanityProduct?.images || medusaProduct.images?.map((img: any) => img.url) || [],
-        categories: sanityProduct?.category ? [sanityProduct.category as any as SanityCategory] : [],
-        tags: [],
-        brand: undefined,
-        material: undefined,
-        care: [],
-        features: [],
-        story: undefined,
-        sizeGuide: undefined,
-        sustainability: undefined
-      },
-      
-      // Commerce data from Medusa
-      commerce: {
-        medusaProduct,
-        variants,
-        prices: variants.flatMap(v => v.prices),
-        inventory: {
-          available: totalInventory > 0,
-          quantity: totalInventory
-        },
-        tax: {
-          rate: 0.2, // 20% VAT
-          included: false
-        }
-      },
-      
-      // Pricing summary
-      pricing: {
-        currency,
-        basePrice: amount / 100,
-        salePrice: sanityProduct?.isOnSale && sanityProduct?.originalPrice ? amount / 100 : undefined,
-        displayPrice: DataService.formatPrice(amount, currency),
-        displaySalePrice: sanityProduct?.isOnSale && sanityProduct?.originalPrice ? DataService.formatPrice(amount, currency) : undefined,
-        discount
-      },
-      
-      // Badges
-      badges: {
-        isNew: sanityProduct?.isNewArrival || false,
-        isSale: sanityProduct?.isOnSale || false,
-        isSoldOut: totalInventory === 0,
-        isLimited: false
-      },
-      
-      // Metadata
-      metadata: {
-        title: sanityProduct?.name || medusaProduct.title,
-        description: sanityProduct?.shortDescription || sanityProduct?.description || medusaProduct.description,
-        keywords: []
-      }
-    }
-  }
-  
-  // Helper function to format price
-  private static formatPrice(amount: number, currency: string): string {
-    return new Intl.NumberFormat("en-GB", {
-      style: "currency",
-      currency: currency.toUpperCase(),
-    }).format(amount / 100)
-  }
-  
-  // Helper: Merge product lists
-  private static mergeProductLists(
-    medusaProducts: any[],
-    sanityProducts: LibSanityProduct[],
-    category?: LibSanityCategory
-  ): IntegratedProduct[] {
-    const productMap = new Map<string, IntegratedProduct>()
-    
-    // Create a map of Sanity products by handle
-    const sanityMap = new Map(
-      sanityProducts.map((p: any) => [p.slug.current, p])
-    )
-    
-    // Merge each Medusa product with its Sanity data
-    medusaProducts.forEach(medusaProduct => {
-      const handle = medusaProduct.handle
-      if (!handle) return
-      
-      const sanityProduct = sanityMap.get(handle)
-      if (!sanityProduct) return
-      
-      const integrated = this.mergeProductData(medusaProduct, {
-        ...sanityProduct,
-        category: sanityProduct.category || category,
-      })
-      
-      productMap.set(handle, integrated)
-    })
-    
-    return Array.from(productMap.values())
-  }
-  
-  // Initialize data sync (run on app start or via cron)
-  static async initializeSync(): Promise<void> {
+
+  /**
+   * Get all categories
+   */
+  async getCategories(): Promise<
+    Array<{ id: string; name: string; handle: string; parent?: string }>
+  > {
+    const cacheKey = 'categories:all';
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
     try {
-      console.log("Starting data sync between Sanity and Medusa...")
-      
-      // Get all products from Sanity
-      const sanityProducts = await client.fetch<LibSanityProduct[]>(
-        `*[_type == "product"]{
-          _id,
-          name,
-          "slug": slug.current,
-          description,
-          price,
-          originalPrice
-        }`
-      )
-      
-      // Sync each product
-      for (const product of sanityProducts) {
-        await this.syncProduct(product)
+      // Get from Medusa
+      const medusaCategories = await MedusaProductService.getCategories();
+
+      if (medusaCategories.length > 0) {
+        const categories = medusaCategories.map((cat: any) => ({
+          id: cat.id,
+          name: cat.name,
+          handle: cat.handle,
+          parent: cat.parent_category_id || undefined,
+        }));
+        this.setCache(cacheKey, categories);
+        return categories;
       }
-      
-      console.log(`Synced ${sanityProducts.length} products`)
+
+      // Fallback to Sanity
+      const sanityQuery = `*[_type == "category"]{ _id, title, slug }`;
+      const sanityCategories: SanityCategory[] =
+        await client.fetch(sanityQuery);
+
+      const categories = sanityCategories.map((cat) => ({
+        id: cat._id,
+        name: cat.name,
+        handle: cat.slug.current,
+      }));
+
+      this.setCache(cacheKey, categories);
+      return categories;
     } catch (error) {
-      console.error("Error initializing data sync:", error)
+
+      return [];
     }
+  }
+
+  /**
+   * Search products
+   */
+  async searchProducts(
+    query: string,
+    limit = 20
+  ): Promise<IntegratedProduct[]> {
+    const cacheKey = `search:${query}:${limit}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      // Search in Medusa
+      const medusaProducts = await MedusaProductService.searchProducts(
+        query,
+        limit
+      );
+
+      if (medusaProducts.length > 0) {
+        const handles = medusaProducts
+          .map((p: any) => p.handle)
+          .filter(Boolean);
+        const sanityQuery = `*[_type == "product" && slug.current in $handles]`;
+        const sanityProducts: SanityProduct[] =
+          handles.length > 0
+            ? await client.fetch(sanityQuery, { handles })
+            : [];
+
+        const sanityMap = new Map(
+          sanityProducts.map((p: any) => [p.slug.current, p])
+        );
+
+        const integratedProducts = medusaProducts.map((mp: any) => {
+          const sanityProduct = mp.handle
+            ? sanityMap.get(mp.handle) || null
+            : null;
+          return ProductFactory.createIntegratedProduct(mp, sanityProduct, {
+            currency: 'GBP',
+            region: 'uk',
+            includeVariants: true,
+            includePricing: true,
+            includeInventory: true,
+          });
+        });
+
+        this.setCache(cacheKey, integratedProducts);
+        return integratedProducts;
+      }
+
+      // Fallback to Sanity search
+      const sanityQuery = `*[_type == "product" && (title match $searchQuery || description match $searchQuery)][0...${limit}]`;
+      const sanityProducts: SanityProduct[] = await client.fetch(sanityQuery, {
+        searchQuery: `*${query}*`,
+      });
+
+      const products = sanityProducts.map((sp) =>
+        ProductFactory.createIntegratedProductFromSanity(sp, {
+          currency: 'GBP',
+          includeVariants: true,
+        })
+      );
+      this.setCache(cacheKey, products);
+      return products;
+    } catch (error) {
+
+      return [];
+    }
+  }
+
+  /**
+   * Get products using query builder pattern
+   */
+  async getProductsWithQuery(
+    queryOrBuilder: ProductQuery | ProductQueryBuilder
+  ): Promise<{ products: IntegratedProduct[]; count: number }> {
+    // Extract query from builder if needed
+    const query =
+      queryOrBuilder instanceof ProductQueryBuilder
+        ? queryOrBuilder.build()
+        : queryOrBuilder;
+
+    const cacheKey = `products-query:${JSON.stringify(query)}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    try {
+      // Build Medusa query
+      const medusaParams =
+        ProductQueryBuilder.fromQuery(query).buildForMedusa();
+
+      // Get products from Medusa
+      const { products: medusaProducts, count } =
+        await MedusaProductService.getProducts(medusaParams);
+
+      // Enhance with Sanity data if available
+      const handles = medusaProducts.map((p: any) => p.handle).filter(Boolean);
+      const sanityQuery = ProductQueryBuilder.fromQuery(query).buildForSanity();
+
+      let sanityProducts: SanityProduct[] = [];
+      if (handles.length > 0) {
+        // Use handles to get matching Sanity products
+        const sanityHandleQuery = `*[_type == "product" && slug.current in $handles]`;
+        sanityProducts = await client.fetch(sanityHandleQuery, { handles });
+      } else if (query.searchTerm || query.categories || query.tags) {
+        // Use the built Sanity query for search/filter scenarios
+        try {
+          sanityProducts = await client.fetch(sanityQuery);
+        } catch (error) {
+          // Sanity query failed, continuing with Medusa data only
+        }
+      }
+
+      const sanityMap = new Map(
+        sanityProducts.map((p: any) => [p.slug.current, p])
+      );
+
+      const integratedProducts = medusaProducts.map((mp: any) => {
+        const sanityProduct = mp.handle
+          ? sanityMap.get(mp.handle) || null
+          : null;
+        return ProductFactory.createIntegratedProduct(mp, sanityProduct, {
+          currency: query.currency || 'GBP',
+          region: query.region || 'uk',
+          includeVariants: query.includeVariants ?? true,
+          includePricing: query.includePricing ?? true,
+          includeInventory: query.includeInventory ?? true,
+        });
+      });
+
+      const result = { products: integratedProducts, count };
+      this.setCache(cacheKey, result);
+      return result;
+    } catch (error) {
+
+      // Fallback to Sanity only if it's a search/filter query
+      if (query.searchTerm || query.categories || query.tags) {
+        try {
+          const sanityQuery =
+            ProductQueryBuilder.fromQuery(query).buildForSanity();
+          const sanityProducts: SanityProduct[] =
+            await client.fetch(sanityQuery);
+          const integratedProducts = sanityProducts.map((sp) =>
+            ProductFactory.createIntegratedProductFromSanity(sp, {
+              currency: query.currency || 'GBP',
+              includeVariants: query.includeVariants ?? true,
+            })
+          );
+
+          return {
+            products: integratedProducts,
+            count: integratedProducts.length,
+          };
+        } catch (sanityError) {
+
+        }
+      }
+
+      return { products: [], count: 0 };
+    }
+  }
+
+  // Old mergeProductData and convertSanityProduct methods removed
+  // Now using ProductFactory for consistent product creation
+
+  /**
+   * Cache helpers with request deduplication
+   */
+  private getFromCache(key: string): any {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+      return cached.data;
+    }
+    return null;
+  }
+
+  private setCache(key: string, data: any): void {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  clearCache(): void {
+    this.cache.clear();
+    this.pendingRequests.clear();
   }
 }
 
-// Export convenience functions
-export const getProduct = DataService.getProduct.bind(DataService)
-export const getProducts = DataService.getProducts.bind(DataService)
-export const getProductsByCategory = DataService.getProductsByCategory.bind(DataService)
-export const searchProducts = DataService.searchProducts.bind(DataService)
-export const getFeaturedProducts = DataService.getFeaturedProducts.bind(DataService)
-export const initializeDataSync = DataService.initializeSync.bind(DataService)
+// Export singleton instance
+export const dataService = DataService.getInstance();
+
+// Export convenience functions - now using ProductFactory internally
+export const getProduct = (handle: string) => dataService.getProduct(handle);
+export const getProducts = (params?: any) => dataService.getProducts(params);
+export const getProductsWithQuery = (
+  query: ProductQuery | ProductQueryBuilder
+) => dataService.getProductsWithQuery(query);
+export const getCategories = () => dataService.getCategories();
+export const searchProducts = (query: string, limit?: number) =>
+  dataService.searchProducts(query, limit);
+
+// Re-export patterns for direct access
+export { ProductFactory } from '@/lib/factories/ProductFactory';
+export {
+  ProductQueryBuilder,
+  createProductQuery,
+  createSearchQuery,
+} from '@/lib/builders';

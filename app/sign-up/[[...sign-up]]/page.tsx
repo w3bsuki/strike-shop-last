@@ -1,5 +1,5 @@
-import { SignUp } from '@clerk/nextjs'
-import Link from 'next/link'
+import { SignUp } from '@clerk/nextjs';
+import Link from 'next/link';
 
 export default function SignUpPage() {
   return (
@@ -7,27 +7,29 @@ export default function SignUpPage() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <Link href="/" className="block">
-            <h1 className="text-3xl font-bold tracking-wider text-black">STRIKE™</h1>
+            <h1 className="text-3xl font-bold tracking-wider text-black">
+              STRIKE™
+            </h1>
           </Link>
           <p className="mt-2 text-sm text-gray-600">Create your account</p>
         </div>
-        
+
         <div className="bg-white p-8 shadow rounded-lg">
-          <SignUp 
+          <SignUp
             appearance={{
               elements: {
                 formButtonPrimary: 'bg-black hover:bg-gray-800 text-sm',
                 card: 'shadow-none',
                 headerTitle: 'sr-only',
                 headerSubtitle: 'sr-only',
-              }
+              },
             }}
           />
         </div>
-        
+
         <div className="text-center">
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="text-sm text-gray-600 hover:text-black transition-colors"
           >
             ← Back to store
@@ -35,5 +37,5 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

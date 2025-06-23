@@ -1,45 +1,39 @@
-"use client"
+'use client';
 
-import { Button } from '@/components/ui/button'
-import { Search, Home, ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
+import { Button } from '@/components/ui/button';
+import { Search, Home, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function NotFound() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="text-center max-w-md mx-auto">
         <div className="mb-8">
-          <div className="text-6xl font-bold text-muted-foreground mb-4">404</div>
+          <div className="text-6xl font-bold text-muted-foreground mb-4">
+            404
+          </div>
           <h1 className="text-heading-lg mb-2">Page not found</h1>
           <p className="text-body-sm text-muted-foreground">
-            The page you're looking for doesn't exist or has been moved.
+            The page you&rsquo;re looking for doesn&rsquo;t exist or has been moved.
           </p>
         </div>
 
         <div className="space-y-3">
           <Link href="/" className="block">
-            <Button 
-              variant="strike"
-              size="strike"
-              className="w-full"
-            >
+            <Button variant="strike" size="strike" className="w-full">
               <Home className="h-4 w-4 mr-2" />
               Go home
             </Button>
           </Link>
-          
+
           <Link href="/search" className="block">
-            <Button 
-              variant="strike-outline"
-              size="strike"
-              className="w-full"
-            >
+            <Button variant="strike-outline" size="strike" className="w-full">
               <Search className="h-4 w-4 mr-2" />
               Search products
             </Button>
           </Link>
 
-          <Button 
+          <Button
             onClick={() => window.history.back()}
             variant="strike-text"
             className="w-full"
@@ -59,5 +53,5 @@ export default function NotFound() {
         </div>
       </div>
     </div>
-  )
+  );
 }

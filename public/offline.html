@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - Strike Shop</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f3f4f6;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    
+    .offline-container {
+      text-align: center;
+      max-width: 400px;
+      background: white;
+      padding: 3rem 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    }
+    
+    .offline-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 2rem;
+      opacity: 0.5;
+    }
+    
+    h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #111827;
+    }
+    
+    p {
+      font-size: 1.125rem;
+      line-height: 1.75;
+      color: #6b7280;
+      margin-bottom: 2rem;
+    }
+    
+    .actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    
+    .primary-btn {
+      background-color: #3b82f6;
+      color: white;
+    }
+    
+    .primary-btn:hover {
+      background-color: #2563eb;
+    }
+    
+    .secondary-btn {
+      background-color: #e5e7eb;
+      color: #374151;
+    }
+    
+    .secondary-btn:hover {
+      background-color: #d1d5db;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #111827;
+        color: #f9fafb;
+      }
+      
+      .offline-container {
+        background-color: #1f2937;
+      }
+      
+      h1 {
+        color: #f9fafb;
+      }
+      
+      p {
+        color: #d1d5db;
+      }
+      
+      .secondary-btn {
+        background-color: #374151;
+        color: #f9fafb;
+      }
+      
+      .secondary-btn:hover {
+        background-color: #4b5563;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <svg class="offline-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"></path>
+    </svg>
+    
+    <h1>You're Offline</h1>
+    <p>It looks like you've lost your internet connection. Some features may be unavailable until you're back online.</p>
+    
+    <div class="actions">
+      <button class="primary-btn" onclick="window.location.reload()">
+        Try Again
+      </button>
+      <button class="secondary-btn" onclick="window.history.back()">
+        Go Back
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    // Check for connection periodically
+    let isOnline = navigator.onLine;
+    
+    function checkConnection() {
+      if (navigator.onLine && !isOnline) {
+        // Connection restored
+        window.location.reload();
+      }
+      isOnline = navigator.onLine;
+    }
+    
+    // Check every 3 seconds
+    setInterval(checkConnection, 3000);
+    
+    // Also listen for online event
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+  </script>
+</body>
+</html>

@@ -1,90 +1,106 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   PaymentElement,
   Elements,
   useStripe,
   useElements,
-} from '@stripe/react-stripe-js'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, Lock, CreditCard, ShieldCheck } from 'lucide-react'
-import { stripePromise, stripeAppearance } from '@/lib/stripe'
-import { medusaClient } from '@/lib/medusa'
-import { useCartStore } from '@/lib/cart-store'
-import { toast } from '@/hooks/use-toast'
+} from '@stripe/react-stripe-js';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, Lock, CreditCard, ShieldCheck } from 'lucide-react';
+import { stripePromise, stripeAppearance } from '@/lib/stripe';
+import { medusaClient } from '@/lib/medusa';
+import { useCartStore } from '@/lib/cart-store';
+import { toast } from '@/hooks/use-toast';
 
 interface StripePaymentFormProps {
-  cartId: string
-  onSuccess: (order: any) => void
+  cartId: string;
+  onSuccess: (order: any) => void;
 }
 
 function PaymentForm({ cartId, onSuccess }: StripePaymentFormProps) {
-  const stripe = useStripe()
-  const elements = useElements()
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const { clearCart } = useCartStore()
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { clearCart } = useCartStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!stripe || !elements) {
-      return
+      return;
     }
 
-    setIsProcessing(true)
-    setError(null)
+    setIsProcessing(true);
+    setError(null);
 
     try {
       // Confirm the payment
-      const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/order-confirmation`,
-        },
-        redirect: 'if_required',
-      })
+      const { error: stripeError, paymentIntent } = await stripe.confirmPayment(
+        {
+          elements,
+          confirmParams: {
+            return_url: `${window.location.origin}/order-confirmation`,
+          },
+          redirect: 'if_required',
+        }
+      );
 
       if (stripeError) {
         // Handle Stripe errors
-        if (stripeError.type === 'card_error' || stripeError.type === 'validation_error') {
-          setError(stripeError.message || 'Payment failed')
+        if (
+          stripeError.type === 'card_error' ||
+          stripeError.type === 'validation_error'
+        ) {
+          setError(stripeError.message || 'Payment failed');
         } else {
-          setError('An unexpected error occurred')
+          setError('An unexpected error occurred');
         }
-        console.error('Stripe error:', stripeError)
+
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
         // Payment successful - complete the order with Medusa
         try {
-          const { type, data } = await medusaClient.carts.complete(cartId)
-          
+          const completeResponse =
+            await medusaClient.store.cart.complete(cartId);
+          // Handle the response structure for Medusa v2
+          const type = completeResponse.type;
+          const data =
+            'order' in completeResponse
+              ? completeResponse.order
+              : completeResponse.cart;
+
           if (type === 'order') {
             // Clear the cart
-            clearCart()
-            
+            clearCart();
+
             // Show success message
+            const orderId =
+              (data as any)?.display_id || (data as any)?.id || 'N/A';
             toast({
-              title: "Order confirmed!",
-              description: `Your order #${data.display_id} has been placed successfully.`,
-            })
-            
+              title: 'Order confirmed!',
+              description: `Your order #${orderId} has been placed successfully.`,
+            });
+
             // Call success callback
-            onSuccess(data)
+            onSuccess(data);
           }
         } catch (error) {
-          console.error('Error completing order:', error)
-          setError('Payment successful but order completion failed. Please contact support.')
+
+          setError(
+            'Payment successful but order completion failed. Please contact support.'
+          );
         }
       }
     } catch (error) {
-      console.error('Payment error:', error)
-      setError('Payment processing failed. Please try again.')
+
+      setError('Payment processing failed. Please try again.');
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -94,8 +110,8 @@ function PaymentForm({ cartId, onSuccess }: StripePaymentFormProps) {
           <CreditCard className="h-5 w-5 mr-2" />
           Payment Details
         </h3>
-        
-        <PaymentElement 
+
+        <PaymentElement
           options={{
             layout: 'tabs',
             wallets: {
@@ -146,60 +162,49 @@ function PaymentForm({ cartId, onSuccess }: StripePaymentFormProps) {
         Powered by <span className="font-semibold">Stripe</span>
       </p>
     </form>
-  )
+  );
 }
 
-export default function StripePaymentForm({ cartId, onSuccess }: StripePaymentFormProps) {
-  const [clientSecret, setClientSecret] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export default function StripePaymentForm({
+  cartId,
+  onSuccess,
+}: StripePaymentFormProps) {
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Create payment session with Medusa
     const initializePayment = async () => {
       try {
-        // Create payment sessions
-        await medusaClient.carts.createPaymentSessions(cartId)
-        
-        // Set Stripe as the payment provider
-        const { cart } = await medusaClient.carts.setPaymentSession(cartId, {
-          provider_id: 'stripe',
-        })
+        // Create payment intent directly via API since Medusa v2 payment sessions may differ
 
-        // Get the client secret from the payment session
-        const stripeSession = cart.payment_session
-        if (stripeSession && stripeSession.data && stripeSession.data.client_secret) {
-          setClientSecret(stripeSession.data.client_secret)
+        const response = await fetch('/api/payments/create-intent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ cartId }),
+        });
+
+        if (response.ok) {
+          const { client_secret } = await response.json();
+          setClientSecret(client_secret);
         } else {
-          // Fallback: create payment intent directly
-          console.log('No client secret in payment session, creating via API...')
-          const response = await fetch('/api/payments/create-intent', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ cartId }),
-          })
-          
-          if (response.ok) {
-            const { client_secret } = await response.json()
-            setClientSecret(client_secret)
-          } else {
-            throw new Error('Failed to create payment intent')
-          }
+          throw new Error('Failed to create payment intent');
         }
       } catch (error) {
-        console.error('Error initializing payment:', error)
-        setError('Failed to initialize payment. Please try again.')
+
+        setError('Failed to initialize payment. Please try again.');
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
     if (cartId) {
-      initializePayment()
+      initializePayment();
     }
-  }, [cartId])
+  }, [cartId]);
 
   if (isLoading) {
     return (
@@ -207,17 +212,18 @@ export default function StripePaymentForm({ cartId, onSuccess }: StripePaymentFo
         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
         <p className="text-sm text-gray-600">Initializing payment...</p>
       </div>
-    )
+    );
   }
 
   if (error || !clientSecret) {
     return (
       <Alert variant="destructive">
         <AlertDescription>
-          {error || 'Failed to initialize payment. Please refresh and try again.'}
+          {error ||
+            'Failed to initialize payment. Please refresh and try again.'}
         </AlertDescription>
       </Alert>
-    )
+    );
   }
 
   if (!stripePromise) {
@@ -227,7 +233,7 @@ export default function StripePaymentForm({ cartId, onSuccess }: StripePaymentFo
           Stripe is not configured. Please contact support.
         </AlertDescription>
       </Alert>
-    )
+    );
   }
 
   return (
@@ -240,5 +246,5 @@ export default function StripePaymentForm({ cartId, onSuccess }: StripePaymentFo
     >
       <PaymentForm cartId={cartId} onSuccess={onSuccess} />
     </Elements>
-  )
+  );
 }

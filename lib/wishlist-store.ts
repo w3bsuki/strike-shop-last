@@ -1,52 +1,47 @@
-import { create } from "zustand"
-import { persist } from "zustand/middleware"
+import { useStore } from './stores';
 
+// Re-export the WishlistItem interface for backward compatibility
 export interface WishlistItem {
-  id: string
-  name: string
-  price: string
-  image: string
-  slug: string
+  id: string;
+  name: string;
+  price: string;
+  image: string;
+  slug: string;
 }
 
 interface WishlistStore {
-  wishlist: WishlistItem[]
-  addToWishlist: (item: WishlistItem) => void
-  removeFromWishlist: (id: string) => void
-  clearWishlist: () => void
-  isInWishlist: (id: string) => boolean
+  // State
+  wishlist: WishlistItem[];
+
+  // Actions
+  addToWishlist: (item: WishlistItem) => void;
+  removeFromWishlist: (productId: string) => void;
+  isInWishlist: (productId: string) => boolean;
+  clearWishlist: () => void;
+  getWishlistCount: () => number;
 }
 
-export const useWishlistStore = create<WishlistStore>()(
-  persist(
-    (set, get) => ({
-      wishlist: [],
-      addToWishlist: (item) =>
-        set((state) => {
-          const exists = state.wishlist.some((wishlistItem) => wishlistItem.id === item.id)
-          if (exists) return state
-          return { wishlist: [...state.wishlist, item] }
-        }),
-      removeFromWishlist: (id) =>
-        set((state) => ({
-          wishlist: state.wishlist.filter((item) => item.id !== id),
-        })),
-      clearWishlist: () => set({ wishlist: [] }),
-      isInWishlist: (id) => {
-        const state = get()
-        return state.wishlist?.some((item) => item.id === id) || false
-      },
-    }),
-    {
-      name: "strike-wishlist",
-      // Add error handling for localStorage
-      onRehydrateStorage: () => (state) => {
-        // Ensure wishlist is always an array
-        if (state && !state.wishlist) {
-          return { ...state, wishlist: [] }
-        }
-        return state
-      },
-    },
-  ),
-)
+// Create a facade that maintains the exact same API as the original store
+export const useWishlistStore = (): WishlistStore => {
+  const wishlist = useStore((state) => state.wishlist);
+  const actions = useStore((state) => state.actions.wishlist);
+
+  return {
+    // State
+    wishlist: wishlist.items,
+
+    // Actions - all delegated to the unified store
+    addToWishlist: actions.addToWishlist,
+    removeFromWishlist: actions.removeFromWishlist,
+    isInWishlist: actions.isInWishlist,
+    clearWishlist: actions.clearWishlist,
+    getWishlistCount: actions.getWishlistCount,
+  };
+};
+
+// Selector hooks for better performance - now using the unified store
+export const useWishlistCount = () =>
+  useStore((state) => state.wishlist.items.length);
+export const useIsWishlisted = (productId: string) =>
+  useStore((state) => state.actions.wishlist.isInWishlist(productId));
+export const useWishlistItems = () => useStore((state) => state.wishlist.items);

@@ -1,22 +1,32 @@
-"use client"
+'use client';
 
-import React from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import type { ProductFilters as FilterType } from "@/types/integrated"
+import React from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import type { ProductFilters as FilterType } from '@/types/integrated';
 
 interface ProductFiltersProps {
   filters: {
-    categories: Array<{ value: string; label: string; count: number }>
-    sizes: Array<{ value: string; label: string; count: number }>
-    colors: Array<{ value: string; label: string; hex?: string; count: number }>
-    brands: Array<{ value: string; label: string; count: number }>
-    priceRange: { min: number; max: number }
-  }
-  applied: FilterType
+    categories: Array<{ value: string; label: string; count: number }>;
+    sizes: Array<{ value: string; label: string; count: number }>;
+    colors: Array<{
+      value: string;
+      label: string;
+      hex?: string;
+      count: number;
+    }>;
+    brands: Array<{ value: string; label: string; count: number }>;
+    priceRange: { min: number; max: number };
+  };
+  applied: FilterType;
 }
 
 /**
@@ -24,41 +34,41 @@ interface ProductFiltersProps {
  * Handles filter interactions and URL updates
  */
 export function ProductFilters({ filters, applied }: ProductFiltersProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const updateFilter = (type: string, value: string, checked: boolean) => {
-    const params = new URLSearchParams(searchParams.toString())
-    const currentValues = params.get(type)?.split(',').filter(Boolean) || []
+    const params = new URLSearchParams(searchParams.toString());
+    const currentValues = params.get(type)?.split(',').filter(Boolean) || [];
 
     if (checked) {
-      currentValues.push(value)
+      currentValues.push(value);
     } else {
-      const index = currentValues.indexOf(value)
-      if (index > -1) currentValues.splice(index, 1)
+      const index = currentValues.indexOf(value);
+      if (index > -1) currentValues.splice(index, 1);
     }
 
     if (currentValues.length > 0) {
-      params.set(type, currentValues.join(','))
+      params.set(type, currentValues.join(','));
     } else {
-      params.delete(type)
+      params.delete(type);
     }
 
-    router.push(`?${params.toString()}`, { scroll: false })
-  }
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
   const updatePriceRange = (values: number[]) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('minPrice', values[0].toString())
-    params.set('maxPrice', values[1].toString())
-    router.push(`?${params.toString()}`, { scroll: false })
-  }
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('minPrice', values[0].toString());
+    params.set('maxPrice', values[1].toString());
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
   const clearFilters = () => {
-    router.push(window.location.pathname, { scroll: false })
-  }
+    router.push(window.location.pathname, { scroll: false });
+  };
 
-  const hasActiveFilters = searchParams.toString().length > 0
+  const hasActiveFilters = searchParams.toString().length > 0;
 
   return (
     <div className="space-y-4">
@@ -74,7 +84,10 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
         )}
       </div>
 
-      <Accordion type="multiple" defaultValue={["categories", "sizes", "colors", "price"]}>
+      <Accordion
+        type="multiple"
+        defaultValue={['categories', 'sizes', 'colors', 'price']}
+      >
         {/* Categories */}
         {filters.categories.length > 0 && (
           <AccordionItem value="categories">
@@ -84,12 +97,21 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
             <AccordionContent>
               <div className="space-y-2">
                 {filters.categories.map((category) => (
-                  <div key={category.value} className="flex items-center space-x-2">
+                  <div
+                    key={category.value}
+                    className="flex items-center space-x-2"
+                  >
                     <Checkbox
                       id={`category-${category.value}`}
-                      checked={applied.categories?.includes(category.value) || false}
-                      onCheckedChange={(checked) => 
-                        updateFilter('categories', category.value, checked as boolean)
+                      checked={
+                        applied.categories?.includes(category.value) || false
+                      }
+                      onCheckedChange={(checked) =>
+                        updateFilter(
+                          'categories',
+                          category.value,
+                          checked as boolean
+                        )
                       }
                     />
                     <Label
@@ -97,7 +119,9 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
                       className="text-sm font-normal cursor-pointer flex-1 flex justify-between"
                     >
                       <span>{category.label}</span>
-                      <span className="text-muted-foreground">({category.count})</span>
+                      <span className="text-muted-foreground">
+                        ({category.count})
+                      </span>
                     </Label>
                   </div>
                 ))}
@@ -118,10 +142,10 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
                   <button
                     key={size.value}
                     onClick={() => {
-                      const isSelected = applied.sizes?.includes(size.value)
-                      updateFilter('sizes', size.value, !isSelected)
+                      const isSelected = applied.sizes?.includes(size.value);
+                      updateFilter('sizes', size.value, !isSelected);
                     }}
-                    className={`py-2 px-3 text-xs font-medium border transition-colors ${
+                    className={`min-h-[44px] px-3 text-xs font-medium border transition-colors touch-manipulation ${
                       applied.sizes?.includes(size.value)
                         ? 'bg-black text-white border-black'
                         : 'bg-white text-black border-gray-200 hover:border-black'
@@ -144,11 +168,14 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
             <AccordionContent>
               <div className="space-y-2">
                 {filters.colors.map((color) => (
-                  <div key={color.value} className="flex items-center space-x-2">
+                  <div
+                    key={color.value}
+                    className="flex items-center space-x-2"
+                  >
                     <Checkbox
                       id={`color-${color.value}`}
                       checked={applied.colors?.includes(color.value) || false}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         updateFilter('colors', color.value, checked as boolean)
                       }
                     />
@@ -157,13 +184,15 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
                       className="text-sm font-normal cursor-pointer flex-1 flex items-center gap-2"
                     >
                       {color.hex && (
-                        <span 
+                        <span
                           className="w-4 h-4 rounded-full border"
                           style={{ backgroundColor: color.hex }}
                         />
                       )}
                       <span className="flex-1">{color.label}</span>
-                      <span className="text-muted-foreground">({color.count})</span>
+                      <span className="text-muted-foreground">
+                        ({color.count})
+                      </span>
                     </Label>
                   </div>
                 ))}
@@ -191,8 +220,12 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
                 className="w-full"
               />
               <div className="flex items-center justify-between text-xs">
-                <span>£{applied.priceRange?.min || filters.priceRange.min}</span>
-                <span>£{applied.priceRange?.max || filters.priceRange.max}</span>
+                <span>
+                  £{applied.priceRange?.min || filters.priceRange.min}
+                </span>
+                <span>
+                  £{applied.priceRange?.max || filters.priceRange.max}
+                </span>
               </div>
             </div>
           </AccordionContent>
@@ -207,11 +240,14 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
             <AccordionContent>
               <div className="space-y-2">
                 {filters.brands.map((brand) => (
-                  <div key={brand.value} className="flex items-center space-x-2">
+                  <div
+                    key={brand.value}
+                    className="flex items-center space-x-2"
+                  >
                     <Checkbox
                       id={`brand-${brand.value}`}
                       checked={applied.brands?.includes(brand.value) || false}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         updateFilter('brands', brand.value, checked as boolean)
                       }
                     />
@@ -220,7 +256,9 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
                       className="text-sm font-normal cursor-pointer flex-1 flex justify-between"
                     >
                       <span>{brand.label}</span>
-                      <span className="text-muted-foreground">({brand.count})</span>
+                      <span className="text-muted-foreground">
+                        ({brand.count})
+                      </span>
                     </Label>
                   </div>
                 ))}
@@ -230,5 +268,5 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
         )}
       </Accordion>
     </div>
-  )
+  );
 }

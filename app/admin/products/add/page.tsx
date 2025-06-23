@@ -1,105 +1,130 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { ArrowLeft, Save, Trash2, Upload, X } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, Save, Trash2, Upload, X } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function AddProductPage() {
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [images, setImages] = useState<string[]>(["/placeholder.svg?height=200&width=200"])
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [images, setImages] = useState<string[]>([
+    '/placeholder.svg?height=200&width=200',
+  ]);
 
   const [formData, setFormData] = useState({
-    name: "",
-    sku: "",
-    price: "",
-    compareAtPrice: "",
-    description: "",
-    category: "Clothing",
-    status: "Active",
-    tags: "",
-    stock: "100",
-    weight: "",
-    dimensions: "",
-    materials: "",
-    sizes: ["XS", "S", "M", "L", "XL"],
-    colors: ["Black", "White"],
-  })
+    name: '',
+    sku: '',
+    price: '',
+    compareAtPrice: '',
+    description: '',
+    category: 'Clothing',
+    status: 'Active',
+    tags: '',
+    stock: '100',
+    weight: '',
+    dimensions: '',
+    materials: '',
+    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    colors: ['Black', 'White'],
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSizeToggle = (size: string) => {
     setFormData((prev) => {
       if (prev.sizes.includes(size)) {
-        return { ...prev, sizes: prev.sizes.filter((s) => s !== size) }
+        return { ...prev, sizes: prev.sizes.filter((s) => s !== size) };
       } else {
-        return { ...prev, sizes: [...prev.sizes, size] }
+        return { ...prev, sizes: [...prev.sizes, size] };
       }
-    })
-  }
+    });
+  };
 
   const handleColorToggle = (color: string) => {
     setFormData((prev) => {
       if (prev.colors.includes(color)) {
-        return { ...prev, colors: prev.colors.filter((c) => c !== color) }
+        return { ...prev, colors: prev.colors.filter((c) => c !== color) };
       } else {
-        return { ...prev, colors: [...prev.colors, color] }
+        return { ...prev, colors: [...prev.colors, color] };
       }
-    })
-  }
+    });
+  };
 
   const handleAddImage = () => {
-    const newImageIndex = images.length + 1
-    setImages([...images, `/placeholder.svg?height=200&width=200&query=product+${newImageIndex}`])
-  }
+    const newImageIndex = images.length + 1;
+    setImages([
+      ...images,
+      `/placeholder.svg?height=200&width=200&query=product+${newImageIndex}`,
+    ]);
+  };
 
   const handleRemoveImage = (index: number) => {
-    setImages(images.filter((_, i) => i !== index))
-  }
+    setImages(images.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     // In a real app, this would send the data to the server
-    console.log("Product data:", { ...formData, images })
 
-    setIsSubmitting(false)
-    router.push("/admin/products")
-  }
+    setIsSubmitting(false);
+    router.push('/admin/products');
+  };
 
-  const availableSizes = ["XS", "S", "M", "L", "XL", "XXL"]
-  const availableColors = ["Black", "White", "Gray", "Red", "Blue", "Green", "Yellow", "Purple", "Brown", "Navy"]
+  const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+  const availableColors = [
+    'Black',
+    'White',
+    'Gray',
+    'Red',
+    'Blue',
+    'Green',
+    'Yellow',
+    'Purple',
+    'Brown',
+    'Navy',
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Link href="/admin/products" className="text-gray-500 hover:text-gray-700">
+          <Link
+            href="/admin/products"
+            className="text-gray-500 hover:text-gray-700"
+          >
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <h1 className="text-2xl font-bold tracking-tight">Add New Product</h1>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => router.push("/admin/products")}>
+          <Button
+            variant="outline"
+            onClick={() => router.push('/admin/products')}
+          >
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save Product"}
+            {isSubmitting ? 'Saving...' : 'Save Product'}
           </Button>
         </div>
       </div>
@@ -138,7 +163,9 @@ export default function AddProductPage() {
                 <div>
                   <Label htmlFor="price">Price</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2">£</span>
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                      £
+                    </span>
                     <Input
                       id="price"
                       name="price"
@@ -153,7 +180,9 @@ export default function AddProductPage() {
                 <div>
                   <Label htmlFor="compareAtPrice">Compare-at Price</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2">£</span>
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                      £
+                    </span>
                     <Input
                       id="compareAtPrice"
                       name="compareAtPrice"
@@ -235,13 +264,26 @@ export default function AddProductPage() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="stock">Stock quantity</Label>
-                <Input id="stock" name="stock" type="number" value={formData.stock} onChange={handleChange} min="0" />
+                <Input
+                  id="stock"
+                  name="stock"
+                  type="number"
+                  value={formData.stock}
+                  onChange={handleChange}
+                  min="0"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="weight">Weight (kg)</Label>
-                  <Input id="weight" name="weight" value={formData.weight} onChange={handleChange} placeholder="0.0" />
+                  <Input
+                    id="weight"
+                    name="weight"
+                    value={formData.weight}
+                    onChange={handleChange}
+                    placeholder="0.0"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="dimensions">Dimensions (cm)</Label>
@@ -282,8 +324,8 @@ export default function AddProductPage() {
                       onClick={() => handleSizeToggle(size)}
                       className={`px-4 py-2 border ${
                         formData.sizes.includes(size)
-                          ? "bg-black text-white border-black"
-                          : "border-gray-300 hover:border-gray-500"
+                          ? 'bg-black text-white border-black'
+                          : 'border-gray-300 hover:border-gray-500'
                       }`}
                     >
                       {size}
@@ -302,8 +344,8 @@ export default function AddProductPage() {
                       onClick={() => handleColorToggle(color)}
                       className={`px-4 py-2 border ${
                         formData.colors.includes(color)
-                          ? "bg-black text-white border-black"
-                          : "border-gray-300 hover:border-gray-500"
+                          ? 'bg-black text-white border-black'
+                          : 'border-gray-300 hover:border-gray-500'
                       }`}
                     >
                       {color}
@@ -326,7 +368,7 @@ export default function AddProductPage() {
                   <div key={index} className="relative group">
                     <div className="aspect-square relative border border-gray-200 rounded-md overflow-hidden">
                       <Image
-                        src={image || "/placeholder.svg"}
+                        src={image || '/placeholder.svg'}
                         alt={`Product image ${index + 1}`}
                         fill
                         className="object-cover"
@@ -353,7 +395,8 @@ export default function AddProductPage() {
                 </button>
               </div>
               <div className="text-xs text-gray-500">
-                You can add up to 8 images. First image will be used as the product thumbnail.
+                You can add up to 8 images. First image will be used as the
+                product thumbnail.
               </div>
             </div>
           </div>
@@ -362,14 +405,21 @@ export default function AddProductPage() {
           <div className="bg-white p-6 rounded-md border">
             <h2 className="text-lg font-semibold mb-4">Actions</h2>
             <div className="space-y-4">
-              <Button className="w-full" onClick={handleSubmit} disabled={isSubmitting}>
+              <Button
+                className="w-full"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
                 <Save className="h-4 w-4 mr-2" />
-                {isSubmitting ? "Saving..." : "Save Product"}
+                {isSubmitting ? 'Saving...' : 'Save Product'}
               </Button>
               <Button variant="outline" className="w-full">
                 Preview
               </Button>
-              <Button variant="outline" className="w-full text-red-600 hover:bg-red-50 hover:text-red-700">
+              <Button
+                variant="outline"
+                className="w-full text-red-600 hover:bg-red-50 hover:text-red-700"
+              >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
               </Button>
@@ -378,5 +428,5 @@ export default function AddProductPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

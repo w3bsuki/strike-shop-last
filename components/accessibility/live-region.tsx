@@ -1,41 +1,41 @@
-"use client"
+'use client';
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect } from 'react';
 
 interface LiveRegionProps {
-  message?: string
-  politeness?: 'polite' | 'assertive'
-  clearAfter?: number // milliseconds
-  className?: string
-  id?: string
+  message?: string;
+  politeness?: 'polite' | 'assertive';
+  clearAfter?: number; // milliseconds
+  className?: string;
+  id?: string;
 }
 
 /**
  * Live Region Component
  * Announces dynamic content changes to screen readers
  */
-export function LiveRegion({ 
-  message = "", 
+export function LiveRegion({
+  message = '',
   politeness = 'polite',
   clearAfter = 5000,
-  className = "sr-only",
-  id
+  className = 'sr-only',
+  id,
 }: LiveRegionProps) {
-  const [announcement, setAnnouncement] = useState(message)
+  const [announcement, setAnnouncement] = useState(message);
 
   useEffect(() => {
     if (message) {
-      setAnnouncement(message)
+      setAnnouncement(message);
 
       if (clearAfter > 0) {
         const timer = setTimeout(() => {
-          setAnnouncement("")
-        }, clearAfter)
+          setAnnouncement('');
+        }, clearAfter);
 
-        return () => clearTimeout(timer)
+        return () => clearTimeout(timer);
       }
     }
-  }, [message, clearAfter])
+  }, [message, clearAfter]);
 
   return (
     <div
@@ -47,46 +47,53 @@ export function LiveRegion({
     >
       {announcement}
     </div>
-  )
+  );
 }
 
 /**
  * Hook for managing live region announcements
  */
 export function useLiveRegion() {
-  const [message, setMessage] = useState("")
+  const [message, setMessage] = useState('');
 
-  const announce = (text: string, politeness: 'polite' | 'assertive' = 'polite') => {
+  const announce = (
+    text: string,
+    _politeness: 'polite' | 'assertive' = 'polite'
+  ) => {
     // Clear existing message first to ensure re-announcement
-    setMessage("")
-    
+    setMessage('');
+
     // Use setTimeout to ensure state update
     setTimeout(() => {
-      setMessage(text)
-    }, 100)
-  }
+      setMessage(text);
+    }, 100);
+  };
 
   const clear = () => {
-    setMessage("")
-  }
+    setMessage('');
+  };
 
   return {
     message,
     announce,
     clear,
-  }
+  };
 }
 
 /**
  * Global Live Region Provider
  * Place at app root to handle announcements throughout the app
  */
-export function LiveRegionProvider({ children }: { children: React.ReactNode }) {
+export function LiveRegionProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <>
       {children}
       <LiveRegion politeness="polite" id="polite-announcer" />
       <LiveRegion politeness="assertive" id="assertive-announcer" />
     </>
-  )
+  );
 }

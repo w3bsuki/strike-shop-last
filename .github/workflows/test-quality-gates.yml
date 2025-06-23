@@ -1,0 +1,425 @@
+name: 🧪 Test & Quality Gates
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '18'
+  COVERAGE_THRESHOLD: '90'
+
+jobs:
+  # ==========================================
+  # UNIT & INTEGRATION TESTS
+  # ==========================================
+  unit-tests:
+    name: 🔬 Unit & Integration Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: 🔬 Run domain tests
+        run: npm run test:domain -- --coverage --coverageDirectory=coverage/domain
+
+      - name: 🔬 Run unit tests
+        run: npm run test:unit -- --coverage --coverageDirectory=coverage/unit
+
+      - name: 🧩 Run component tests
+        run: npm run test:component -- --coverage --coverageDirectory=coverage/component
+
+      - name: 🔗 Run integration tests
+        run: npm run test:integration -- --coverage --coverageDirectory=coverage/integration
+
+      - name: 📊 Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          directory: ./coverage
+          flags: unittests
+          name: unit-tests-coverage
+
+      - name: 📋 Coverage threshold check
+        run: |
+          node -e "
+            const fs = require('fs');
+            const coverageFiles = ['domain', 'unit', 'component', 'integration'];
+            let totalCoverage = 0;
+            let validFiles = 0;
+            
+            coverageFiles.forEach(type => {
+              const file = \`coverage/\${type}/coverage-summary.json\`;
+              if (fs.existsSync(file)) {
+                const coverage = JSON.parse(fs.readFileSync(file, 'utf8'));
+                const lineCoverage = coverage.total.lines.pct;
+                console.log(\`\${type}: \${lineCoverage}%\`);
+                totalCoverage += lineCoverage;
+                validFiles++;
+              }
+            });
+            
+            const avgCoverage = totalCoverage / validFiles;
+            console.log(\`Average coverage: \${avgCoverage.toFixed(2)}%\`);
+            
+            if (avgCoverage < ${{ env.COVERAGE_THRESHOLD }}) {
+              console.error(\`❌ Coverage \${avgCoverage.toFixed(2)}% is below threshold ${{ env.COVERAGE_THRESHOLD }}%\`);
+              process.exit(1);
+            } else {
+              console.log(\`✅ Coverage \${avgCoverage.toFixed(2)}% meets threshold ${{ env.COVERAGE_THRESHOLD }}%\`);
+            }
+          "
+
+  # ==========================================
+  # E2E TESTS
+  # ==========================================
+  e2e-tests:
+    name: 🎭 End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: 📦 Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: 🏗️ Build application
+        run: npm run build
+
+      - name: 🎭 Run E2E tests
+        run: npm run test:e2e
+        env:
+          CI: true
+
+      - name: 📊 Upload E2E artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # ==========================================
+  # ACCESSIBILITY TESTS
+  # ==========================================
+  accessibility-tests:
+    name: ♿ Accessibility Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: 📦 Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: 🏗️ Build application
+        run: npm run build
+
+      - name: ♿ Run accessibility tests
+        run: npm run test:accessibility
+        env:
+          CI: true
+
+      - name: 📊 Upload accessibility report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: accessibility-report
+          path: test-results/
+          retention-days: 7
+
+  # ==========================================
+  # PERFORMANCE TESTS
+  # ==========================================
+  performance-tests:
+    name: 🚀 Performance Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: 📦 Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: 🏗️ Build application
+        run: npm run build
+
+      - name: 🚀 Run performance tests
+        run: npm run test:performance
+        env:
+          CI: true
+
+      - name: 📊 Upload performance report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-report
+          path: test-results/
+          retention-days: 7
+
+  # ==========================================
+  # VISUAL REGRESSION TESTS
+  # ==========================================
+  visual-tests:
+    name: 👁️ Visual Regression Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: 📦 Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: 🏗️ Build application
+        run: npm run build
+
+      - name: 👁️ Run visual regression tests
+        run: npm run test:visual
+        env:
+          CI: true
+
+      - name: 📊 Upload visual diff artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-diff-report
+          path: test-results/
+          retention-days: 30
+
+  # ==========================================
+  # CODE QUALITY ANALYSIS
+  # ==========================================
+  code-quality:
+    name: 🔍 Code Quality Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: 🔍 Run ESLint
+        run: npm run lint
+
+      - name: 🎨 Check Prettier formatting
+        run: npm run format:check
+
+      - name: 🔧 Type check
+        run: npm run type-check
+
+      - name: 📊 Run SonarCloud analysis
+        if: github.repository_owner == 'your-org' # Replace with actual org
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # ==========================================
+  # COMPREHENSIVE QUALITY GATES
+  # ==========================================
+  quality-gates:
+    name: 🛡️ Quality Gates Summary
+    runs-on: ubuntu-latest
+    needs: [unit-tests, e2e-tests, accessibility-tests, performance-tests, visual-tests, code-quality]
+    if: always()
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: 📊 Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: 🔍 Evaluate quality gates
+        run: |
+          echo "🛡️ Quality Gates Evaluation"
+          echo "================================"
+          
+          # Check if all jobs passed
+          UNIT_TESTS="${{ needs.unit-tests.result }}"
+          E2E_TESTS="${{ needs.e2e-tests.result }}"
+          A11Y_TESTS="${{ needs.accessibility-tests.result }}"
+          PERF_TESTS="${{ needs.performance-tests.result }}"
+          VISUAL_TESTS="${{ needs.visual-tests.result }}"
+          CODE_QUALITY="${{ needs.code-quality.result }}"
+          
+          echo "📋 Unit Tests: $UNIT_TESTS"
+          echo "🎭 E2E Tests: $E2E_TESTS"
+          echo "♿ A11y Tests: $A11Y_TESTS"
+          echo "🚀 Performance: $PERF_TESTS"
+          echo "👁️ Visual Tests: $VISUAL_TESTS"
+          echo "🔍 Code Quality: $CODE_QUALITY"
+          
+          # Count failures
+          FAILURES=0
+          [[ "$UNIT_TESTS" != "success" ]] && ((FAILURES++))
+          [[ "$E2E_TESTS" != "success" ]] && ((FAILURES++))
+          [[ "$A11Y_TESTS" != "success" ]] && ((FAILURES++))
+          [[ "$PERF_TESTS" != "success" ]] && ((FAILURES++))
+          [[ "$VISUAL_TESTS" != "success" ]] && ((FAILURES++))
+          [[ "$CODE_QUALITY" != "success" ]] && ((FAILURES++))
+          
+          echo ""
+          echo "📊 Summary: $FAILURES failures out of 6 quality gates"
+          
+          if [[ $FAILURES -eq 0 ]]; then
+            echo "🎉 ALL QUALITY GATES PASSED!"
+            echo "✨ Code meets enterprise-grade quality standards"
+            exit 0
+          else
+            echo "❌ QUALITY GATES FAILED"
+            echo "🔧 Please fix the failing tests before merging"
+            exit 1
+          fi
+
+      - name: 📊 Generate quality report
+        if: always()
+        run: |
+          # Run comprehensive test coverage script
+          node scripts/test-coverage.js || true
+
+      - name: 📋 Upload quality report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quality-report
+          path: test-reports/
+          retention-days: 30
+
+      - name: 💬 Comment PR with quality results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Read quality report if it exists
+            let reportContent = '## 🧪 Quality Gates Report\n\n';
+            
+            try {
+              const reportPath = 'test-reports/test-report.json';
+              if (fs.existsSync(reportPath)) {
+                const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+                
+                reportContent += `### 📊 Summary\n\n`;
+                reportContent += `- **Test Suites:** ${report.summary.passedSuites}/${report.summary.totalSuites} passed\n`;
+                reportContent += `- **Coverage:** ${report.summary.overallCoverage.toFixed(2)}%\n`;
+                reportContent += `- **Threshold:** ${report.summary.coverageThresholdMet ? '✅ Met' : '❌ Not Met'} (90%)\n\n`;
+                
+                if (report.recommendations.length > 0) {
+                  reportContent += `### 📝 Recommendations\n\n`;
+                  report.recommendations.forEach(rec => {
+                    reportContent += `- ${rec}\n`;
+                  });
+                }
+              }
+            } catch (error) {
+              reportContent += `Error generating report: ${error.message}\n`;
+            }
+            
+            reportContent += `\n### 🔗 Artifacts\n\n`;
+            reportContent += `- [Quality Report](${context.payload.pull_request.html_url}/checks)\n`;
+            reportContent += `- [Test Coverage](${context.payload.pull_request.html_url}/checks)\n`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: reportContent
+            });
+
+# ==========================================
+# DEPENDENCY SECURITY SCAN
+# ==========================================
+security-scan:
+  name: 🔒 Security Scan
+  runs-on: ubuntu-latest
+  
+  steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 🔒 Run security audit
+      run: npm audit --audit-level=high
+
+    - name: 🛡️ Run CodeQL analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        languages: javascript

@@ -1,0 +1,49 @@
+{
+  "removed": [
+    {
+      "package": "critters",
+      "size": 166158
+    },
+    {
+      "package": "swiper",
+      "size": 3407910
+    },
+    {
+      "package": "react-icons",
+      "size": 86188059
+    }
+  ],
+  "warnings": [
+    {
+      "package": "embla-carousel-react",
+      "size": 50629,
+      "usage": 1
+    },
+    {
+      "package": "react-resizable-panels",
+      "size": 1028536,
+      "usage": 1
+    },
+    {
+      "package": "input-otp",
+      "size": 110633,
+      "usage": 1
+    },
+    {
+      "package": "react-day-picker",
+      "size": 743654,
+      "usage": 1
+    }
+  ],
+  "optimizations": [
+    "Added modularizeImports configuration"
+  ],
+  "metrics": {
+    "before": {
+      "nodeModulesSize": 1014138796
+    },
+    "after": {
+      "nodeModulesSize": 924084422
+    }
+  }
+}

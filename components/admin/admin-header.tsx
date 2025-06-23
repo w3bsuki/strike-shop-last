@@ -1,25 +1,37 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Bell, Search, Menu, X } from "lucide-react"
-import { useAuthStore } from "@/lib/auth-store"
-import Image from "next/image"
-import AdminSidebar from "./admin-sidebar"
+import { useState } from 'react';
+import { Bell, Search, Menu, X } from 'lucide-react';
+import { useAuthStore } from '@/lib/auth-store';
+import Image from 'next/image';
+import AdminSidebar from './admin-sidebar';
 
 export default function AdminHeader() {
-  const { user } = useAuthStore()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { user } = useAuthStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [notifications] = useState([
-    { id: 1, message: "New order #STR-2024-003 received", time: "5 minutes ago" },
-    { id: 2, message: "Low stock alert: Monochrome Knit Sweater", time: "1 hour ago" },
-    { id: 3, message: "User John Doe requested a refund", time: "3 hours ago" },
-  ])
-  const [showNotifications, setShowNotifications] = useState(false)
+    {
+      id: 1,
+      message: 'New order #STR-2024-003 received',
+      time: '5 minutes ago',
+    },
+    {
+      id: 2,
+      message: 'Low stock alert: Monochrome Knit Sweater',
+      time: '1 hour ago',
+    },
+    { id: 3, message: 'User John Doe requested a refund', time: '3 hours ago' },
+  ]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   return (
     <>
       <header className="bg-white border-b border-gray-200 h-16 flex items-center px-6 sticky top-0 z-10">
-        <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden mr-4" aria-label="Open mobile menu">
+        <button
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="md:hidden mr-4"
+          aria-label="Open mobile menu"
+        >
           <Menu className="h-6 w-6" />
         </button>
 
@@ -52,14 +64,21 @@ export default function AdminHeader() {
                 </div>
                 <div className="max-h-64 overflow-y-auto">
                   {notifications.map((notification) => (
-                    <div key={notification.id} className="px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
+                    <div
+                      key={notification.id}
+                      className="px-4 py-3 hover:bg-gray-50 border-b border-gray-100"
+                    >
                       <p className="text-sm">{notification.message}</p>
-                      <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {notification.time}
+                      </p>
                     </div>
                   ))}
                 </div>
                 <div className="px-4 py-2 text-center border-t border-gray-200">
-                  <button className="text-sm text-black font-medium hover:underline">View all notifications</button>
+                  <button className="text-sm text-black font-medium hover:underline">
+                    View all notifications
+                  </button>
                 </div>
               </div>
             )}
@@ -87,11 +106,20 @@ export default function AdminHeader() {
       {/* Mobile Sidebar */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setIsMobileMenuOpen(false)}></div>
+          <div
+            className="fixed inset-0 bg-gray-600 bg-opacity-75"
+            onClick={() => setIsMobileMenuOpen(false)}
+          ></div>
           <div className="relative flex flex-col w-full max-w-xs bg-white h-full">
             <div className="h-16 border-b border-gray-200 flex items-center justify-between px-4">
-              <span className="text-lg font-bold tracking-tight">STRIKE™ ADMIN</span>
-              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2" aria-label="Close menu">
+              <span className="text-lg font-bold tracking-tight">
+                STRIKE™ ADMIN
+              </span>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2"
+                aria-label="Close menu"
+              >
                 <X className="h-6 w-6" />
               </button>
             </div>
@@ -102,5 +130,5 @@ export default function AdminHeader() {
         </div>
       )}
     </>
-  )
+  );
 }

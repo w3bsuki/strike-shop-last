@@ -1,0 +1,9 @@
+{
+  "timestamp": "2025-06-23T02:20:43.869Z",
+  "totalSize": 8297587,
+  "totalGzipSize": 2618470,
+  "chunks": 422,
+  "pages": 2,
+  "largestChunk": 696729,
+  "meetsTarget": false
+}

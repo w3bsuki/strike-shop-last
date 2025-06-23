@@ -1,0 +1,295 @@
+# Strike Shop Production Monitoring Alerts Configuration
+
+# Security Alerts (Critical Priority)
+security_alerts:
+  - name: multiple_failed_logins
+    description: 'Multiple failed login attempts detected'
+    condition: |
+      sum(rate(auth_failed_login_total[5m])) by (ip) > 5
+    severity: critical
+    notification:
+      - slack
+      - pagerduty
+      - email
+    actions:
+      - block_ip
+      - notify_security_team
+
+  - name: suspicious_payment_pattern
+    description: 'Unusual payment activity detected'
+    condition: |
+      (
+        sum(rate(payment_attempts_total[5m])) by (user_id) > 10 OR
+        sum(payment_amount_total[5m]) by (user_id) > 10000
+      )
+    severity: critical
+    notification:
+      - slack
+      - security_team
+    actions:
+      - flag_account
+      - manual_review
+
+  - name: admin_unauthorized_access
+    description: 'Unauthorized admin panel access attempt'
+    condition: |
+      sum(rate(admin_access_denied_total[1m])) > 3
+    severity: critical
+    notification:
+      - pagerduty
+      - security_team
+    actions:
+      - log_detailed_info
+      - temporary_lockdown
+
+  - name: api_rate_limit_abuse
+    description: 'API rate limit consistently exceeded'
+    condition: |
+      sum(rate(rate_limit_exceeded_total[5m])) by (ip) > 50
+    severity: high
+    notification:
+      - slack
+    actions:
+      - temporary_ban
+      - investigate_pattern
+
+# Performance Alerts (High Priority)
+performance_alerts:
+  - name: high_response_time
+    description: 'API response time exceeding SLA'
+    condition: |
+      histogram_quantile(0.95, http_request_duration_seconds) > 3
+    severity: high
+    notification:
+      - slack
+      - engineering
+    actions:
+      - scale_up
+      - investigate_bottleneck
+
+  - name: high_error_rate
+    description: 'Error rate exceeding threshold'
+    condition: |
+      sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.01
+    severity: high
+    notification:
+      - pagerduty
+      - engineering
+    actions:
+      - rollback_candidate
+      - incident_response
+
+  - name: database_connection_exhaustion
+    description: 'Database connection pool near capacity'
+    condition: |
+      (pg_stat_database_numbackends / pg_settings_max_connections) > 0.85
+    severity: high
+    notification:
+      - slack
+      - database_team
+    actions:
+      - scale_connections
+      - investigate_leaks
+
+  - name: memory_pressure
+    description: 'High memory usage detected'
+    condition: |
+      (node_memory_usage_bytes / node_memory_total_bytes) > 0.85
+    severity: medium
+    notification:
+      - slack
+    actions:
+      - trigger_gc
+      - prepare_scale
+
+# Business Alerts (Medium Priority)
+business_alerts:
+  - name: payment_failure_spike
+    description: 'Payment failure rate exceeding threshold'
+    condition: |
+      sum(rate(payment_failed_total[5m])) / sum(rate(payment_attempts_total[5m])) > 0.05
+    severity: high
+    notification:
+      - slack
+      - business_team
+      - engineering
+    actions:
+      - check_payment_provider
+      - notify_support
+
+  - name: cart_abandonment_high
+    description: 'Cart abandonment rate too high'
+    condition: |
+      sum(rate(cart_abandoned_total[1h])) / sum(rate(cart_created_total[1h])) > 0.7
+    severity: medium
+    notification:
+      - slack
+      - marketing
+    actions:
+      - trigger_recovery_emails
+      - analyze_funnel
+
+  - name: order_processing_delay
+    description: 'Orders taking too long to process'
+    condition: |
+      histogram_quantile(0.95, order_processing_duration_seconds) > 600
+    severity: medium
+    notification:
+      - slack
+      - operations
+    actions:
+      - investigate_queue
+      - notify_customers
+
+# Infrastructure Alerts (Variable Priority)
+infrastructure_alerts:
+  - name: ssl_certificate_expiry
+    description: 'SSL certificate expiring soon'
+    condition: |
+      ssl_cert_expiry_timestamp - time() < 7 * 24 * 60 * 60
+    severity: high
+    notification:
+      - email
+      - slack
+    actions:
+      - renew_certificate
+      - verify_renewal
+
+  - name: disk_space_low
+    description: 'Disk space running low'
+    condition: |
+      (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+    severity: high
+    notification:
+      - pagerduty
+    actions:
+      - cleanup_logs
+      - expand_storage
+
+  - name: backup_failure
+    description: 'Database backup failed'
+    condition: |
+      time() - backup_last_success_timestamp > 25 * 60 * 60
+    severity: critical
+    notification:
+      - pagerduty
+      - database_team
+    actions:
+      - manual_backup
+      - investigate_failure
+
+# Custom Business Logic Alerts
+custom_alerts:
+  - name: suspicious_order_pattern
+    description: 'Potential fraudulent order pattern'
+    condition: |
+      (
+        count(orders) by (user_id) > 10 in last 1h AND
+        sum(order_total) by (user_id) > 5000 in last 1h
+      )
+    severity: high
+    notification:
+      - security_team
+      - fraud_team
+    actions:
+      - hold_orders
+      - manual_verification
+
+  - name: inventory_mismatch
+    description: 'Inventory count mismatch detected'
+    condition: |
+      abs(calculated_inventory - actual_inventory) > 10
+    severity: medium
+    notification:
+      - operations
+      - warehouse
+    actions:
+      - reconcile_inventory
+      - investigate_discrepancy
+
+# Notification Channels Configuration
+notification_channels:
+  slack:
+    webhook_url: '${SLACK_WEBHOOK_URL}'
+    channel: '#alerts'
+    username: 'Strike Shop Monitor'
+
+  pagerduty:
+    integration_key: '${PAGERDUTY_KEY}'
+    escalation_policy: 'production-oncall'
+
+  email:
+    smtp_host: '${SMTP_HOST}'
+    smtp_port: 587
+    from: 'alerts@strike-shop.com'
+    to:
+      - 'engineering@strike-shop.com'
+      - 'security@strike-shop.com'
+
+  security_team:
+    direct_phone: '${SECURITY_PHONE}'
+    sms_enabled: true
+    voice_enabled: true
+
+# Alert Routing Rules
+routing_rules:
+  - match:
+      severity: critical
+    receivers:
+      - pagerduty
+      - security_team
+    continue: true
+
+  - match:
+      severity: high
+      category: security
+    receivers:
+      - security_team
+      - slack
+
+  - match:
+      severity: high
+    receivers:
+      - pagerduty
+      - slack
+
+  - match:
+      severity: medium
+    receivers:
+      - slack
+      - email
+
+# Escalation Policies
+escalation_policies:
+  default:
+    - wait: 5m
+      notify: ['primary_oncall']
+    - wait: 15m
+      notify: ['secondary_oncall', 'team_lead']
+    - wait: 30m
+      notify: ['engineering_manager', 'cto']
+
+  security:
+    - wait: 0m
+      notify: ['security_oncall', 'primary_oncall']
+    - wait: 5m
+      notify: ['security_lead', 'cto']
+    - wait: 15m
+      notify: ['executive_team']
+
+# Maintenance Windows (UTC)
+maintenance_windows:
+  - name: 'Weekly maintenance'
+    schedule: '0 2 * * 0' # Sunday 2 AM UTC
+    duration: 2h
+    mute_alerts:
+      - 'high_response_time'
+      - 'database_connection_exhaustion'
+
+  - name: 'Monthly updates'
+    schedule: '0 3 1 * *' # First day of month, 3 AM UTC
+    duration: 4h
+    mute_alerts:
+      - 'high_response_time'
+      - 'high_error_rate'
+      - 'database_connection_exhaustion'

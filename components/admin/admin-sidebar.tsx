@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Package,
@@ -14,55 +14,55 @@ import {
   LogOut,
   ChevronRight,
   ChevronDown,
-} from "lucide-react"
-import { useAuthStore } from "@/lib/auth-store"
+} from 'lucide-react';
+import { useAuthStore } from '@/lib/auth-store';
 
 export default function AdminSidebar() {
-  const pathname = usePathname()
-  const { logout } = useAuthStore()
+  const pathname = usePathname();
+  const { logout } = useAuthStore();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     products: true,
     orders: true,
-  })
+  });
 
   const mainNavItems = [
-    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     {
-      id: "products",
-      label: "Products",
+      id: 'products',
+      label: 'Products',
       icon: Package,
       subItems: [
-        { href: "/admin/products", label: "All Products" },
-        { href: "/admin/products/add", label: "Add Product" },
-        { href: "/admin/products/categories", label: "Categories" },
+        { href: '/admin/products', label: 'All Products' },
+        { href: '/admin/products/add', label: 'Add Product' },
+        { href: '/admin/products/categories', label: 'Categories' },
       ],
     },
     {
-      id: "orders",
-      label: "Orders",
+      id: 'orders',
+      label: 'Orders',
       icon: ShoppingBag,
       subItems: [
-        { href: "/admin/orders", label: "All Orders" },
-        { href: "/admin/orders/pending", label: "Pending" },
-        { href: "/admin/orders/shipped", label: "Shipped" },
+        { href: '/admin/orders', label: 'All Orders' },
+        { href: '/admin/orders/pending', label: 'Pending' },
+        { href: '/admin/orders/shipped', label: 'Shipped' },
       ],
     },
-    { href: "/admin/users", label: "Users", icon: Users },
-    { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-    { href: "/admin/discounts", label: "Discounts", icon: Tag },
-    { href: "/admin/settings", label: "Settings", icon: Settings },
-  ]
+    { href: '/admin/users', label: 'Users', icon: Users },
+    { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+    { href: '/admin/discounts', label: 'Discounts', icon: Tag },
+    { href: '/admin/settings', label: 'Settings', icon: Settings },
+  ];
 
   const toggleMenu = (menuId: string) => {
     setOpenMenus((prev) => ({
       ...prev,
       [menuId]: !prev[menuId],
-    }))
-  }
+    }));
+  };
 
   const isActive = (href: string) => {
-    return pathname === href
-  }
+    return pathname === href;
+  };
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex-shrink-0 hidden md:block">
@@ -75,9 +75,9 @@ export default function AdminSidebar() {
       <div className="py-4">
         <nav className="space-y-1 px-2">
           {mainNavItems.map((item) => {
-            const Icon = item.icon
+            const Icon = item.icon;
 
-            if ("subItems" in item && item.subItems) {
+            if ('subItems' in item && item.subItems) {
               return (
                 <div key={item.id} className="space-y-1">
                   <button
@@ -88,7 +88,11 @@ export default function AdminSidebar() {
                       <Icon className="h-5 w-5 mr-3 text-gray-500" />
                       {item.label}
                     </div>
-                    {openMenus[item.id] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    {openMenus[item.id] ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
                   </button>
 
                   {openMenus[item.id] && (
@@ -99,8 +103,8 @@ export default function AdminSidebar() {
                           href={subItem.href}
                           className={`block px-3 py-2 text-sm font-medium rounded-md ${
                             isActive(subItem.href)
-                              ? "bg-gray-100 text-gray-900"
-                              : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                              ? 'bg-gray-100 text-gray-900'
+                              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                           }`}
                         >
                           {subItem.label}
@@ -109,7 +113,7 @@ export default function AdminSidebar() {
                     </div>
                   )}
                 </div>
-              )
+              );
             }
 
             return (
@@ -118,14 +122,14 @@ export default function AdminSidebar() {
                 href={item.href}
                 className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                   isActive(item.href)
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                 }`}
               >
                 <Icon className="h-5 w-5 mr-3 text-gray-500" />
                 {item.label}
               </Link>
-            )
+            );
           })}
         </nav>
       </div>
@@ -140,5 +144,5 @@ export default function AdminSidebar() {
         </button>
       </div>
     </aside>
-  )
+  );
 }

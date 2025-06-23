@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# Allow crawling of important pages
+Allow: /product/
+Allow: /men
+Allow: /women
+Allow: /kids
+Allow: /sale
+Allow: /new
+Allow: /hot
+Allow: /special
+
+# Disallow admin and checkout pages
+Disallow: /admin/
+Disallow: /checkout/
+Disallow: /account/
+Disallow: /api/
+Disallow: /studio/
+Disallow: /sign-in/
+Disallow: /sign-up/
+Disallow: /test-*/
+
+# Disallow duplicate parameter pages
+Disallow: /*?*
+
+# Sitemap location
+Sitemap: https://strike-shop.com/sitemap.xml

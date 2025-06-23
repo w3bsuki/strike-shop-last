@@ -1,17 +1,18 @@
-"use client"
+'use client';
 
-import React, { ErrorInfo, ReactNode } from "react"
-import { ErrorState } from "@/components/ui/error-states"
-import { Button } from "@/components/ui/button"
+import type { ErrorInfo, ReactNode } from 'react';
+import React from 'react';
+import { ErrorState } from '@/components/ui/error-states';
+import { Button } from '@/components/ui/button';
 
 interface Props {
-  children: ReactNode
-  fallback?: ReactNode
+  children: ReactNode;
+  fallback?: ReactNode;
 }
 
 interface State {
-  hasError: boolean
-  error: Error | null
+  hasError: boolean;
+  error: Error | null;
 }
 
 /**
@@ -20,18 +21,17 @@ interface State {
  */
 export class ErrorBoundaryProvider extends React.Component<Props, State> {
   constructor(props: Props) {
-    super(props)
-    this.state = { hasError: false, error: null }
+    super(props);
+    this.state = { hasError: false, error: null };
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error }
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error to error reporting service
-    console.error('Error caught by boundary:', error, errorInfo)
-    
+
     // In production, send to error tracking service (e.g., Sentry)
     if (process.env.NODE_ENV === 'production') {
       // Example: Sentry.captureException(error, { contexts: { react: errorInfo } })
@@ -39,14 +39,14 @@ export class ErrorBoundaryProvider extends React.Component<Props, State> {
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, error: null })
-  }
+    this.setState({ hasError: false, error: null });
+  };
 
   render() {
     if (this.state.hasError) {
       // Custom fallback UI
       if (this.props.fallback) {
-        return <>{this.props.fallback}</>
+        return <>{this.props.fallback}</>;
       }
 
       // Default error UI
@@ -57,12 +57,12 @@ export class ErrorBoundaryProvider extends React.Component<Props, State> {
               title="Application Error"
               message={
                 process.env.NODE_ENV === 'development'
-                  ? this.state.error?.message || "An unexpected error occurred"
-                  : "Something went wrong. Our team has been notified."
+                  ? this.state.error?.message || 'An unexpected error occurred'
+                  : 'Something went wrong. Our team has been notified.'
               }
               onRetry={this.handleReset}
             />
-            
+
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="mt-4 p-4 bg-muted rounded-lg">
                 <summary className="text-sm font-medium cursor-pointer">
@@ -75,10 +75,10 @@ export class ErrorBoundaryProvider extends React.Component<Props, State> {
             )}
           </div>
         </div>
-      )
+      );
     }
 
-    return this.props.children
+    return this.props.children;
   }
 }
 
@@ -87,23 +87,23 @@ export class ErrorBoundaryProvider extends React.Component<Props, State> {
  */
 export function useErrorHandler() {
   return (error: Error) => {
-    throw error
-  }
+    throw error;
+  };
 }
 
 /**
  * Async Error Boundary for Suspense errors
  */
-export function AsyncErrorBoundary({ 
+export function AsyncErrorBoundary({
   children,
-  fallback 
-}: { 
-  children: ReactNode
-  fallback?: ReactNode 
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
 }) {
   return (
     <ErrorBoundaryProvider fallback={fallback}>
       {children}
     </ErrorBoundaryProvider>
-  )
+  );
 }

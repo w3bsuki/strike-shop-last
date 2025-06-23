@@ -22,26 +22,43 @@ module.exports = defineConfig({
     path: "/app",
     backendUrl: process.env.MEDUSA_BACKEND_URL,
   },
-  modules: process.env.REDIS_URL ? [
-    {
-      resolve: "@medusajs/medusa/cache-redis",
-      options: { 
-        redisUrl: process.env.REDIS_URL 
+  modules: [
+    ...(process.env.REDIS_URL ? [
+      {
+        resolve: "@medusajs/medusa/cache-redis",
+        options: { 
+          redisUrl: process.env.REDIS_URL 
+        }
+      },
+      {
+        resolve: "@medusajs/medusa/event-bus-redis", 
+        options: { 
+          redisUrl: process.env.REDIS_URL 
+        }
+      },
+      {
+        resolve: "@medusajs/medusa/workflow-engine-redis",
+        options: { 
+          redis: { 
+            url: process.env.REDIS_URL 
+          } 
+        }
       }
-    },
+    ] : []),
     {
-      resolve: "@medusajs/medusa/event-bus-redis", 
-      options: { 
-        redisUrl: process.env.REDIS_URL 
-      }
-    },
-    {
-      resolve: "@medusajs/medusa/workflow-engine-redis",
-      options: { 
-        redis: { 
-          url: process.env.REDIS_URL 
-        } 
-      }
+      resolve: "@medusajs/medusa/payment",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/payment-stripe",
+            id: "stripe",
+            options: {
+              apiKey: process.env.STRIPE_SECRET_KEY,
+              webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+            },
+          },
+        ],
+      },
     }
-  ] : []
+  ]
 })

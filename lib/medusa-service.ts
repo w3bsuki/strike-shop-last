@@ -1,211 +1,512 @@
-import { medusaClient } from "./medusa"
+import type { MedusaProduct, MedusaProductCategory } from '@/types/medusa';
 
-/**
- * Medusa Product Service
- * Handles all product-related operations with Medusa backend
- */
+// Simple cache implementation
+class SimpleCache<T> {
+  private cache = new Map<string, { data: T; timestamp: number }>();
+  private ttl: number;
 
-export interface MedusaProduct {
-  id: string
-  title: string
-  handle: string
-  description: string
-  status: string
-  thumbnail?: string
-  images?: Array<{ url: string }>
-  variants: Array<{
-    id: string
-    title: string
-    sku?: string
-    prices: Array<{
-      amount: number
-      currency_code: string
-    }>
-    inventory_quantity?: number
-    manage_inventory: boolean
-  }>
-  categories?: Array<{
-    id: string
-    name: string
-    handle: string
-  }>
-  collection?: {
-    id: string
-    title: string
-    handle: string
+  constructor(ttlMinutes: number = 5) {
+    this.ttl = ttlMinutes * 60 * 1000;
+  }
+
+  get(key: string): T | null {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.ttl) {
+      return cached.data;
+    }
+    this.cache.delete(key);
+    return null;
+  }
+
+  set(key: string, data: T): void {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  clear(): void {
+    this.cache.clear();
   }
 }
 
+// Request deduplication
+const pendingRequests = new Map<string, Promise<unknown>>();
+
 export class MedusaProductService {
+  private static cache = new SimpleCache<unknown>(5); // 5 minute cache
   /**
-   * Get all products from Medusa
+   * Get all product categories
+   */
+  static async getCategories(): Promise<MedusaProductCategory[]> {
+    const cacheKey = 'categories:all';
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    // Check for pending request
+    if (pendingRequests.has(cacheKey)) {
+      return pendingRequests.get(cacheKey);
+    }
+
+    const promise = this._fetchCategories(cacheKey);
+    pendingRequests.set(cacheKey, promise);
+
+    try {
+      const result = await promise;
+      return result;
+    } finally {
+      pendingRequests.delete(cacheKey);
+    }
+  }
+
+  private static async _fetchCategories(cacheKey: string) {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/product-categories`,
+        {
+          headers: {
+            'x-publishable-api-key':
+              process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const categories = data.product_categories || [];
+      this.cache.set(cacheKey, categories);
+      return categories;
+    } catch (error) {
+
+      return [];
+    }
+  }
+
+  /**
+   * Get products with optional filtering
    */
   static async getProducts(params?: {
-    collection_id?: string[]
-    category_id?: string[]
-    limit?: number
-    offset?: number
-  }): Promise<MedusaProduct[]> {
+    limit?: number;
+    offset?: number;
+    category_id?: string[];
+    collection_id?: string[];
+    tags?: string[];
+    sales_channel_id?: string[];
+  }): Promise<{ products: MedusaProduct[]; count: number }> {
+    const cacheKey = `products:${JSON.stringify(params || {})}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
     try {
-      // Add region_id to ensure prices are included
-      const searchParams = {
-        ...params,
-        region_id: process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || 'reg_01JXFMWZWX24XQD1BYNTS3N15Q'
-      }
+      // Build URL with proper query parameters including region_id
+      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+      url.searchParams.set('limit', String(params?.limit || 100));
+      url.searchParams.set('offset', String(params?.offset || 0));
+      url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
       
-      const { products } = await medusaClient.products.list(searchParams)
-      return products as MedusaProduct[]
+      if (params?.category_id?.length) {
+        params.category_id.forEach(id => url.searchParams.append('category_id', id));
+      }
+      if (params?.collection_id?.length) {
+        params.collection_id.forEach(id => url.searchParams.append('collection_id', id));
+      }
+      if (params?.tags?.length) {
+        params.tags.forEach(tag => url.searchParams.append('tags', tag));
+      }
+
+      const response = await fetch(url.toString(), {
+        headers: {
+          'x-publishable-api-key':
+            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const result = { products: data.products || [], count: data.count || 0 };
+      this.cache.set(cacheKey, result);
+      return result;
     } catch (error) {
-      console.error('Error fetching products from Medusa:', error)
-      return []
+
+      return { products: [], count: 0 };
     }
   }
 
   /**
-   * Get single product by handle
+   * Get a single product by handle or id
    */
-  static async getProductByHandle(handle: string): Promise<MedusaProduct | null> {
-    try {
-      const { products } = await medusaClient.products.list({ handle })
-      return products[0] as MedusaProduct || null
-    } catch (error) {
-      console.error('Error fetching product:', error)
-      return null
-    }
-  }
+  static async getProduct(handleOrId: string): Promise<MedusaProduct | null> {
+    const cacheKey = `product:${handleOrId}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
 
-  /**
-   * Get product by ID
-   */
-  static async getProductById(id: string): Promise<MedusaProduct | null> {
     try {
-      const { product } = await medusaClient.products.retrieve(id)
-      return product as MedusaProduct
-    } catch (error) {
-      console.error('Error fetching product:', error)
-      return null
-    }
-  }
+      // Try by handle first
+      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+      url.searchParams.set('handle', handleOrId);
+      url.searchParams.set('limit', '1');
+      url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+      
+      const response = await fetch(url.toString(), {
+        headers: {
+          'x-publishable-api-key':
+            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+        },
+      });
 
-  /**
-   * Get all collections
-   */
-  static async getCollections() {
-    try {
-      const { collections } = await medusaClient.collections.list()
-      return collections
-    } catch (error) {
-      console.error('Error fetching collections:', error)
-      return []
-    }
-  }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-  /**
-   * Get all categories
-   */
-  static async getCategories() {
-    try {
-      const { product_categories } = await medusaClient.productCategories.list()
-      return product_categories
-    } catch (error) {
-      console.error('Error fetching categories:', error)
-      return []
-    }
-  }
+      const data = await response.json();
+      
+      if (data.products && data.products.length > 0) {
+        const product = data.products[0];
+        this.cache.set(cacheKey, product);
+        return product;
+      }
 
-  /**
-   * Search products
-   */
-  static async searchProducts(query: string): Promise<MedusaProduct[]> {
-    try {
-      const { products } = await medusaClient.products.list({ q: query })
-      return products as MedusaProduct[]
+      // If not found by handle, try by ID
+      const idUrl = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products/${handleOrId}`);
+      idUrl.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+      
+      const idResponse = await fetch(idUrl.toString(), {
+        headers: {
+          'x-publishable-api-key':
+            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+        },
+      });
+
+      if (idResponse.ok) {
+        const idData = await idResponse.json();
+        if (idData.product) {
+          this.cache.set(cacheKey, idData.product);
+          return idData.product;
+        }
+      }
+
+      return null;
     } catch (error) {
-      console.error('Error searching products:', error)
-      return []
+
+      return null;
     }
   }
 
   /**
    * Get products by category
    */
-  static async getProductsByCategory(categoryId: string): Promise<MedusaProduct[]> {
+  static async getProductsByCategory(categoryId: string, limit = 50): Promise<MedusaProduct[]> {
+    const cacheKey = `products-category:${categoryId}:${limit}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
     try {
-      const { products } = await medusaClient.products.list({
-        category_id: [categoryId]
-      })
-      return products as MedusaProduct[]
+      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+      url.searchParams.set('category_id', categoryId);
+      url.searchParams.set('limit', String(limit));
+      url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+      
+      const response = await fetch(url.toString(), {
+        headers: {
+          'x-publishable-api-key':
+            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const products = data.products || [];
+      this.cache.set(cacheKey, products);
+      return products;
     } catch (error) {
-      console.error('Error fetching products by category:', error)
-      return []
+
+      return [];
     }
   }
 
   /**
-   * Get products by collection
+   * Search products
    */
-  static async getProductsByCollection(collectionId: string): Promise<MedusaProduct[]> {
+  static async searchProducts(query: string, limit = 20): Promise<MedusaProduct[]> {
+    const cacheKey = `search:${query}:${limit}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
     try {
-      const { products } = await medusaClient.products.list({
-        collection_id: [collectionId]
-      })
-      return products as MedusaProduct[]
+      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+      url.searchParams.set('q', query);
+      url.searchParams.set('limit', String(limit));
+      url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+      
+      const response = await fetch(url.toString(), {
+        headers: {
+          'x-publishable-api-key':
+            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const products = data.products || [];
+      this.cache.set(cacheKey, products);
+      return products;
     } catch (error) {
-      console.error('Error fetching products by collection:', error)
-      return []
+
+      return [];
     }
   }
 
   /**
-   * Format price for display
+   * Get featured products (you can customize this logic)
    */
-  static formatPrice(amount: number, currencyCode: string): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currencyCode.toUpperCase(),
-    }).format(amount / 100) // Medusa stores prices in cents
+  static async getFeaturedProducts(limit = 8): Promise<MedusaProduct[]> {
+    const cacheKey = `featured:${limit}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    try {
+      // In production, you might want to use tags or metadata to mark featured products
+      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+      url.searchParams.set('limit', String(limit));
+      url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+      
+      const response = await fetch(url.toString(), {
+        headers: {
+          'x-publishable-api-key':
+            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const products = data.products || [];
+      this.cache.set(cacheKey, products);
+      return products;
+    } catch (error) {
+
+      return [];
+    }
   }
 
   /**
-   * Get the lowest price from variants
+   * Get product recommendations (related products)
    */
-  static getLowestPrice(product: any): { amount: number; currency: string } | null {
-    if (!product.variants || product.variants.length === 0) return null
-    
-    // Handle Medusa v2 calculated_price structure
-    let lowestPrice = null
+  static async getRecommendations(productId: string, limit = 4): Promise<MedusaProduct[]> {
+    const cacheKey = `recommendations:${productId}:${limit}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    try {
+      // Get the current product to find its category
+      const product = await this.getProduct(productId);
+      if (!product || !product.categories?.length) {
+        // If no categories, just get some random products
+        const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+        url.searchParams.set('limit', String(limit + 1));
+        url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+        
+        const response = await fetch(url.toString(), {
+          headers: {
+            'x-publishable-api-key':
+              process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const products = (data.products || []).filter((p: MedusaProduct) => p.id !== productId).slice(0, limit);
+          this.cache.set(cacheKey, products);
+          return products;
+        }
+        return [];
+      }
+
+      // Get products from the same category
+      const categoryId = product.categories[0].id;
+      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+      url.searchParams.set('category_id', categoryId);
+      url.searchParams.set('limit', String(limit + 1));
+      url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+      
+      const response = await fetch(url.toString(), {
+        headers: {
+          'x-publishable-api-key':
+            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      // Filter out the current product
+      const products = (data.products || []).filter((p: any) => p.id !== productId).slice(0, limit);
+      this.cache.set(cacheKey, products);
+      return products;
+    } catch (error) {
+
+      return [];
+    }
+  }
+
+  /**
+   * Get all collections
+   */
+  static async getCollections(): Promise<unknown[]> {
+    const cacheKey = 'collections:all';
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/collections`);
+      url.searchParams.set('limit', '100');
+      // Note: collections endpoint doesn't require region_id
+      
+      const response = await fetch(url.toString(), {
+        headers: {
+          'x-publishable-api-key':
+            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const collections = data.collections || [];
+      this.cache.set(cacheKey, collections);
+      return collections;
+    } catch (error) {
+
+      return [];
+    }
+  }
+
+  /**
+   * Get lowest price from product variants (updated for Medusa v2)
+   */
+  static getLowestPrice(
+    product: MedusaProduct
+  ): { amount: number; currency: string } | null {
+    if (!product.variants?.length) return null;
+
+    let lowestPrice: { amount: number; currency: string } | null = null;
     
     for (const variant of product.variants) {
-      // Check for calculated_price (v2 format)
-      if (variant.calculated_price && variant.calculated_price.calculated_amount) {
+      // Handle new Medusa v2 calculated_price structure
+      if (variant.calculated_price) {
         const price = {
           amount: variant.calculated_price.calculated_amount,
-          currency_code: variant.calculated_price.currency_code
-        }
+          currency: variant.calculated_price.currency_code,
+        };
         
         if (!lowestPrice || price.amount < lowestPrice.amount) {
-          lowestPrice = price
+          lowestPrice = price;
         }
       }
-      // Fallback to prices array (v1 format)
-      else if (variant.prices && variant.prices.length > 0) {
-        if (!lowestPrice || variant.prices[0].amount < lowestPrice.amount) {
-          lowestPrice = variant.prices[0]
+      // Fallback to old prices structure if available
+      else if (variant.prices?.length) {
+        for (const price of variant.prices) {
+          if (!lowestPrice || price.amount < lowestPrice.amount) {
+            lowestPrice = {
+              amount: price.amount,
+              currency: price.currency_code,
+            };
+          }
         }
       }
     }
-    
-    if (!lowestPrice) {
-      // Return default price if no prices found
-      return {
-        amount: 0,
-        currency: 'eur'
-      }
-    }
-    
+
+    return lowestPrice;
+  }
+
+  /**
+   * Transform Medusa product to match expected format
+   */
+  static transformProduct(product: MedusaProduct): MedusaProduct & {
+    price: { amount: number; currency_code: string; formatted: string } | null;
+  } {
+    const variant = product.variants?.[0];
+    const lowestPrice = this.getLowestPrice(product);
+
     return {
-      amount: lowestPrice.amount,
-      currency: lowestPrice.currency_code
+      id: product.id,
+      handle: product.handle,
+      title: product.title,
+      description: product.description,
+      thumbnail: product.thumbnail || product.images?.[0]?.url,
+      images:
+        product.images?.map((img) => ({
+          url: img.url,
+          alt: product.title,
+        })) || [],
+      variants:
+        product.variants?.map((v) => ({
+          id: v.id,
+          title: v.title,
+          sku: v.sku,
+          // Include both old and new price structures
+          prices: v.prices?.map((p) => ({
+            amount: p.amount,
+            currency_code: p.currency_code,
+          })) || [],
+          calculated_price: v.calculated_price || null,
+          inventory_quantity: v.inventory_quantity || 0,
+        })) || [],
+      categories:
+        product.categories?.map((cat) => ({
+          id: cat.id,
+          name: cat.name,
+          handle: cat.handle,
+        })) || [],
+      price: lowestPrice
+        ? {
+            amount: lowestPrice.amount,
+            currency_code: lowestPrice.currency,
+            formatted: this.formatPrice(lowestPrice.amount, lowestPrice.currency),
+          }
+        : null,
+    };
+  }
+
+  /**
+   * Format price helper
+   */
+  static formatPrice(amount: number, currencyCode: string): string {
+    // Determine locale based on currency
+    let locale = 'en-US';
+    if (currencyCode.toLowerCase() === 'eur') {
+      locale = 'de-DE'; // Use German locale for EUR formatting
+    } else if (currencyCode.toLowerCase() === 'gbp') {
+      locale = 'en-GB';
     }
+    
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currencyCode.toUpperCase(),
+    }).format(amount / 100);
   }
 }
+
+// Export convenience functions
+export const getProducts = MedusaProductService.getProducts;
+export const getProduct = MedusaProductService.getProduct;
+export const getCategories = MedusaProductService.getCategories;
+export const getProductsByCategory = MedusaProductService.getProductsByCategory;
+export const searchProducts = MedusaProductService.searchProducts;
+export const getFeaturedProducts = MedusaProductService.getFeaturedProducts;
+export const getRecommendations = MedusaProductService.getRecommendations;

@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import Image from "next/image"
+import { useState } from 'react';
+import Image from 'next/image';
 import {
   Search,
   Filter,
@@ -14,128 +14,149 @@ import {
   ChevronRight,
   X,
   UserPlus,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 // Mock user data
 const mockUsers = Array.from({ length: 50 }, (_, i) => {
-  const roles = ["customer", "customer", "customer", "admin", "customer"]
-  const role = roles[Math.floor(Math.random() * roles.length)]
+  const roles = ['customer', 'customer', 'customer', 'admin', 'customer'];
+  const role = roles[Math.floor(Math.random() * roles.length)];
 
-  const date = new Date()
-  date.setDate(date.getDate() - Math.floor(Math.random() * 365))
+  const date = new Date();
+  date.setDate(date.getDate() - Math.floor(Math.random() * 365));
 
   const firstNames = [
-    "Emma",
-    "Michael",
-    "Sophia",
-    "James",
-    "Olivia",
-    "William",
-    "Ava",
-    "Benjamin",
-    "Charlotte",
-    "Lucas",
-  ]
+    'Emma',
+    'Michael',
+    'Sophia',
+    'James',
+    'Olivia',
+    'William',
+    'Ava',
+    'Benjamin',
+    'Charlotte',
+    'Lucas',
+  ];
   const lastNames = [
-    "Wilson",
-    "Brown",
-    "Martinez",
-    "Johnson",
-    "Davis",
-    "Miller",
-    "Garcia",
-    "Rodriguez",
-    "Wilson",
-    "Anderson",
-  ]
+    'Wilson',
+    'Brown',
+    'Martinez',
+    'Johnson',
+    'Davis',
+    'Miller',
+    'Garcia',
+    'Rodriguez',
+    'Wilson',
+    'Anderson',
+  ];
 
-  const firstName = firstNames[i % 10]
-  const lastName = lastNames[i % 10]
+  const firstName = firstNames[i % 10];
+  const lastName = lastNames[i % 10];
 
   return {
     id: `user_${i + 1}`,
     firstName,
     lastName,
-    email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
+    email: `${(firstName ?? "user").toLowerCase()}.${(lastName ?? "name").toLowerCase()}@example.com`,
     avatar: `/placeholder.svg?height=40&width=40&query=avatar+${i + 1}`,
     role,
-    status: Math.random() > 0.1 ? "active" : "inactive",
+    status: Math.random() > 0.1 ? 'active' : 'inactive',
     orders: Math.floor(Math.random() * 20),
     totalSpent: `£${(Math.floor(Math.random() * 10000) / 100).toFixed(2)}`,
     createdAt: date.toISOString(),
-  }
-})
+  };
+});
 
 export default function UsersPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [sortField, setSortField] = useState<string | null>("createdAt")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
-  const [selectedRole, setSelectedRole] = useState<string | null>(null)
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState<string | null>('createdAt');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
-  const itemsPerPage = 10
+  const itemsPerPage = 10;
 
   // Filter and sort users
   const filteredUsers = mockUsers.filter((user) => {
     const matchesSearch =
-      searchTerm === "" ||
-      `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      searchTerm === '' ||
+      `${user.firstName} ${user.lastName}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesRole = selectedRole === null || user.role === selectedRole
-    const matchesStatus = selectedStatus === null || user.status === selectedStatus
+    const matchesRole = selectedRole === null || user.role === selectedRole;
+    const matchesStatus =
+      selectedStatus === null || user.status === selectedStatus;
 
-    return matchesSearch && matchesRole && matchesStatus
-  })
+    return matchesSearch && matchesRole && matchesStatus;
+  });
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
-    if (!sortField) return 0
+    if (!sortField) return 0;
 
-    let comparison = 0
-    if (sortField === "name") {
-      comparison = `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)
-    } else if (sortField === "orders") {
-      comparison = a.orders - b.orders
-    } else if (sortField === "totalSpent") {
-      const aAmount = Number.parseFloat(a.totalSpent.replace(/[^0-9.]/g, ""))
-      const bAmount = Number.parseFloat(b.totalSpent.replace(/[^0-9.]/g, ""))
-      comparison = aAmount - bAmount
-    } else if (sortField === "createdAt") {
-      comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    let comparison = 0;
+    if (sortField === 'name') {
+      comparison = `${a.firstName} ${a.lastName}`.localeCompare(
+        `${b.firstName} ${b.lastName}`
+      );
+    } else if (sortField === 'orders') {
+      comparison = a.orders - b.orders;
+    } else if (sortField === 'totalSpent') {
+      const aAmount = Number.parseFloat(a.totalSpent.replace(/[^0-9.]/g, ''));
+      const bAmount = Number.parseFloat(b.totalSpent.replace(/[^0-9.]/g, ''));
+      comparison = aAmount - bAmount;
+    } else if (sortField === 'createdAt') {
+      comparison =
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     }
 
-    return sortDirection === "asc" ? comparison : -comparison
-  })
+    return sortDirection === 'asc' ? comparison : -comparison;
+  });
 
   // Pagination
-  const totalPages = Math.ceil(sortedUsers.length / itemsPerPage)
-  const paginatedUsers = sortedUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  const totalPages = Math.ceil(sortedUsers.length / itemsPerPage);
+  const paginatedUsers = sortedUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleSort = (field: string) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      setSortField(field)
-      setSortDirection("asc")
+      setSortField(field);
+      setSortDirection('asc');
     }
-  }
+  };
 
   // Get unique roles and statuses for filter
-  const roles = Array.from(new Set(mockUsers.map((u) => u.role)))
-  const statuses = Array.from(new Set(mockUsers.map((u) => u.status)))
+  const roles = Array.from(new Set(mockUsers.map((u) => u.role)));
+  const statuses = Array.from(new Set(mockUsers.map((u) => u.status)));
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-GB", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
-  }
+    return new Date(dateString).toLocaleDateString('en-GB', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -168,10 +189,15 @@ export default function UsersPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSelectedRole(null)}>All Roles</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedRole(null)}>
+                All Roles
+              </DropdownMenuItem>
               {roles.map((role) => (
-                <DropdownMenuItem key={role} onClick={() => setSelectedRole(role)}>
-                  {role.charAt(0).toUpperCase() + role.slice(1)}
+                <DropdownMenuItem
+                  key={role}
+                  onClick={() => setSelectedRole(role || null)}
+                >
+                  {role ? role.charAt(0).toUpperCase() + role.slice(1) : ''}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -185,9 +211,14 @@ export default function UsersPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSelectedStatus(null)}>All Statuses</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedStatus(null)}>
+                All Statuses
+              </DropdownMenuItem>
               {statuses.map((status) => (
-                <DropdownMenuItem key={status} onClick={() => setSelectedStatus(status)}>
+                <DropdownMenuItem
+                  key={status}
+                  onClick={() => setSelectedStatus(status)}
+                >
                   {status.charAt(0).toUpperCase() + status.slice(1)}
                 </DropdownMenuItem>
               ))}
@@ -201,16 +232,24 @@ export default function UsersPage() {
         <div className="flex flex-wrap gap-2">
           {selectedRole && (
             <div className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center">
-              Role: {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}
-              <button onClick={() => setSelectedRole(null)} className="ml-2 text-gray-500 hover:text-gray-700">
+              Role:{' '}
+              {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}
+              <button
+                onClick={() => setSelectedRole(null)}
+                className="ml-2 text-gray-500 hover:text-gray-700"
+              >
                 <X className="h-3 w-3" />
               </button>
             </div>
           )}
           {selectedStatus && (
             <div className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center">
-              Status: {selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1)}
-              <button onClick={() => setSelectedStatus(null)} className="ml-2 text-gray-500 hover:text-gray-700">
+              Status:{' '}
+              {selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1)}
+              <button
+                onClick={() => setSelectedStatus(null)}
+                className="ml-2 text-gray-500 hover:text-gray-700"
+              >
                 <X className="h-3 w-3" />
               </button>
             </div>
@@ -218,8 +257,8 @@ export default function UsersPage() {
           {(selectedRole || selectedStatus) && (
             <button
               onClick={() => {
-                setSelectedRole(null)
-                setSelectedStatus(null)
+                setSelectedRole(null);
+                setSelectedStatus(null);
               }}
               className="text-sm text-blue-600 hover:underline"
             >
@@ -236,7 +275,10 @@ export default function UsersPage() {
             <TableRow>
               <TableHead className="w-[50px]"></TableHead>
               <TableHead>
-                <button onClick={() => handleSort("name")} className="flex items-center hover:text-gray-700">
+                <button
+                  onClick={() => handleSort('name')}
+                  className="flex items-center hover:text-gray-700"
+                >
                   Name
                   <ArrowUpDown className="ml-2 h-3 w-3" />
                 </button>
@@ -245,19 +287,28 @@ export default function UsersPage() {
               <TableHead>Role</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>
-                <button onClick={() => handleSort("orders")} className="flex items-center hover:text-gray-700">
+                <button
+                  onClick={() => handleSort('orders')}
+                  className="flex items-center hover:text-gray-700"
+                >
                   Orders
                   <ArrowUpDown className="ml-2 h-3 w-3" />
                 </button>
               </TableHead>
               <TableHead>
-                <button onClick={() => handleSort("totalSpent")} className="flex items-center hover:text-gray-700">
+                <button
+                  onClick={() => handleSort('totalSpent')}
+                  className="flex items-center hover:text-gray-700"
+                >
                   Total Spent
                   <ArrowUpDown className="ml-2 h-3 w-3" />
                 </button>
               </TableHead>
               <TableHead>
-                <button onClick={() => handleSort("createdAt")} className="flex items-center hover:text-gray-700">
+                <button
+                  onClick={() => handleSort('createdAt')}
+                  className="flex items-center hover:text-gray-700"
+                >
                   Joined
                   <ArrowUpDown className="ml-2 h-3 w-3" />
                 </button>
@@ -272,7 +323,7 @@ export default function UsersPage() {
                   <TableCell>
                     <div className="relative h-8 w-8 rounded-full overflow-hidden">
                       <Image
-                        src={user.avatar || "/placeholder.svg"}
+                        src={user.avatar || '/placeholder.svg'}
                         alt={`${user.firstName} ${user.lastName}`}
                         fill
                         className="object-cover"
@@ -286,19 +337,24 @@ export default function UsersPage() {
                   <TableCell>
                     <span
                       className={`px-2 py-1 text-xs rounded-full ${
-                        user.role === "admin" ? "bg-purple-100 text-purple-800" : "bg-gray-100 text-gray-800"
+                        (user.role ?? "") === "admin"
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-gray-100 text-gray-800'
                       }`}
                     >
-                      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'N/A'}
                     </span>
                   </TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 text-xs rounded-full ${
-                        user.status === "active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        user.status === 'active'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
                       }`}
                     >
-                      {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                      {user.status.charAt(0).toUpperCase() +
+                        user.status.slice(1)}
                     </span>
                   </TableCell>
                   <TableCell>{user.orders}</TableCell>
@@ -332,7 +388,10 @@ export default function UsersPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-gray-500">
+                <TableCell
+                  colSpan={9}
+                  className="text-center py-8 text-gray-500"
+                >
                   No users found
                 </TableCell>
               </TableRow>
@@ -345,8 +404,9 @@ export default function UsersPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-            {Math.min(currentPage * itemsPerPage, filteredUsers.length)} of {filteredUsers.length} users
+            Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
+            {Math.min(currentPage * itemsPerPage, filteredUsers.length)} of{' '}
+            {filteredUsers.length} users
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -372,5 +432,5 @@ export default function UsersPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

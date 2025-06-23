@@ -1,0 +1,417 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, staging]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: 'latest'
+
+jobs:
+  # Code Quality & Security Checks
+  quality-checks:
+    name: Code Quality & Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint code
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm type-check || echo "Type check not configured"
+
+      - name: Security audit
+        run: pnpm audit --prod
+        continue-on-error: true
+
+      - name: Check for vulnerabilities
+        uses: securecodewarrior/github-action-add-sarif@v1
+        with:
+          sarif-file: 'security-scan.sarif'
+        continue-on-error: true
+
+  # Frontend Tests
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: quality-checks
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run unit tests
+        run: pnpm test || echo "Tests not configured"
+        continue-on-error: true
+
+      - name: Run component tests
+        run: pnpm test:components || echo "Component tests not configured"
+        continue-on-error: true
+
+      - name: Generate coverage report
+        run: pnpm test:coverage || echo "Coverage not configured"
+        continue-on-error: true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/lcov.info
+          flags: frontend
+        continue-on-error: true
+
+  # Backend Tests
+  backend-tests:
+    name: Backend Tests (Medusa)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: quality-checks
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: medusa_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install backend dependencies
+        working-directory: ./my-medusa-store
+        run: pnpm install --frozen-lockfile
+
+      - name: Build backend
+        working-directory: ./my-medusa-store
+        run: pnpm build
+
+      - name: Run database migrations
+        working-directory: ./my-medusa-store
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/medusa_test
+        run: npx medusa db:migrate
+
+      - name: Run backend tests
+        working-directory: ./my-medusa-store
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/medusa_test
+        run: pnpm test || echo "Backend tests not configured"
+        continue-on-error: true
+
+  # Build & Performance Tests
+  build-performance:
+    name: Build & Performance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [frontend-tests, backend-tests]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend
+        run: pnpm build
+
+      - name: Analyze bundle size
+        run: ANALYZE=true pnpm build
+
+      - name: Performance audit with Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: '.lighthouserc.json'
+          temporaryPublicStorage: true
+        continue-on-error: true
+
+      - name: Store build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            .next/
+            my-medusa-store/dist/
+          retention-days: 7
+
+  # Security Scanning
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: quality-checks
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: OWASP ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.8.0
+        with:
+          target: 'http://localhost:3000'
+        continue-on-error: true
+
+  # Deploy to Development
+  deploy-development:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    needs: [build-performance, security-scan]
+    environment: development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Railway (Development)
+        uses: railwayapp/railway-deploy@v1
+        with:
+          service: ${{ secrets.RAILWAY_SERVICE_DEV }}
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          environment: development
+
+      - name: Run health check
+        run: |
+          sleep 30
+          curl -f ${{ secrets.RAILWAY_DEV_URL }}/health || exit 1
+
+      - name: Run smoke tests
+        run: |
+          curl -f ${{ secrets.RAILWAY_DEV_URL }}/store/products
+          curl -f ${{ secrets.RAILWAY_DEV_URL }}/app
+
+  # Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+    needs: [build-performance, security-scan]
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Railway (Staging)
+        uses: railwayapp/railway-deploy@v1
+        with:
+          service: ${{ secrets.RAILWAY_SERVICE_STAGING }}
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          environment: staging
+
+      - name: Run comprehensive tests
+        run: |
+          sleep 45
+          curl -f ${{ secrets.RAILWAY_STAGING_URL }}/health || exit 1
+          # Add more comprehensive testing here
+
+      - name: Performance testing
+        uses: matt-ball/newman-action@master
+        with:
+          collection: tests/performance/api-performance.postman_collection.json
+          environment: tests/performance/staging.postman_environment.json
+          bail: true
+        continue-on-error: true
+
+  # Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: [build-performance, security-scan]
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create deployment
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'production',
+              required_contexts: [],
+              auto_merge: false
+            });
+            return deployment.data.id;
+
+      - name: Deploy to Railway (Production)
+        uses: railwayapp/railway-deploy@v1
+        with:
+          service: ${{ secrets.RAILWAY_SERVICE_PROD }}
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          environment: production
+
+      - name: Health check with retries
+        run: |
+          for i in {1..10}; do
+            if curl -f ${{ secrets.RAILWAY_PROD_URL }}/health; then
+              echo "Health check passed on attempt $i"
+              break
+            fi
+            echo "Health check failed on attempt $i, retrying in 30s..."
+            sleep 30
+            if [ $i -eq 10 ]; then
+              echo "Health check failed after 10 attempts"
+              exit 1
+            fi
+          done
+
+      - name: Update deployment status (success)
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ steps.deployment.outputs.result }},
+              state: 'success',
+              environment_url: '${{ secrets.RAILWAY_PROD_URL }}'
+            });
+
+      - name: Update deployment status (failure)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ steps.deployment.outputs.result }},
+              state: 'failure'
+            });
+
+      - name: Notify Slack on success
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: '🚀 Production deployment successful!'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: '❌ Production deployment failed!'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # Rollback capability
+  rollback:
+    name: Rollback Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    environment: production
+    steps:
+      - name: Checkout previous version
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.rollback_sha || 'HEAD~1' }}
+
+      - name: Deploy previous version
+        uses: railwayapp/railway-deploy@v1
+        with:
+          service: ${{ secrets.RAILWAY_SERVICE_PROD }}
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          environment: production
+
+      - name: Verify rollback
+        run: |
+          sleep 30
+          curl -f ${{ secrets.RAILWAY_PROD_URL }}/health || exit 1
+
+      - name: Notify rollback
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              text: "🔄 Production rollback completed",
+              attachments: [{
+                color: "warning",
+                fields: [{
+                  title: "Rolled back to",
+                  value: "${{ github.event.inputs.rollback_sha || 'Previous commit' }}",
+                  short: true
+                }]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -1,21 +1,26 @@
-"use client"
+'use client';
 
-import React from "react"
-import { Heart } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import React from 'react';
+import { Heart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 interface ProductDetailsProps {
   product: {
-    name: string
-    price: string
-    originalPrice?: string
-    sku?: string
-    description?: string
-    colors?: number
-  }
-  isWishlisted: boolean
-  onWishlistToggle: () => void
+    name: string;
+    price: string;
+    originalPrice?: string;
+    sku?: string;
+    description?: string;
+    colors?: number;
+  };
+  isWishlisted: boolean;
+  onWishlistToggle: () => void;
 }
 
 export function ProductDetails({
@@ -23,8 +28,9 @@ export function ProductDetails({
   isWishlisted,
   onWishlistToggle,
 }: ProductDetailsProps) {
-  const description = product.description || 
-    "Premium quality streetwear piece crafted with attention to detail and modern design aesthetics."
+  const description =
+    product.description ||
+    'Premium quality streetwear piece crafted with attention to detail and modern design aesthetics.';
 
   return (
     <div className="space-y-4 mb-6">
@@ -34,7 +40,9 @@ export function ProductDetails({
             "{product.name}"
           </h1>
           <div className="flex items-baseline space-x-2">
-            <span className="text-lg lg:text-xl font-bold">{product.price}</span>
+            <span className="text-lg lg:text-xl font-bold">
+              {product.price}
+            </span>
             {product.originalPrice && (
               <span className="text-sm text-[var(--subtle-text-color)] line-through">
                 {product.originalPrice}
@@ -47,28 +55,28 @@ export function ProductDetails({
             </p>
           )}
         </div>
-        
+
         <Button
           variant="ghost"
           size="icon"
           onClick={onWishlistToggle}
           className="ml-4"
-          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <Heart
             className={`h-5 w-5 ${
-              isWishlisted ? "fill-current text-red-500" : ""
+              isWishlisted ? 'fill-current text-red-500' : ''
             }`}
           />
         </Button>
       </div>
-      
+
       {product.colors && product.colors > 1 && (
         <p className="text-[10px] text-[var(--subtle-text-color)]">
           AVAILABLE IN {product.colors} COLORS
         </p>
       )}
-      
+
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="description">
           <AccordionTrigger className="text-xs font-bold uppercase tracking-wider py-3">
@@ -78,7 +86,7 @@ export function ProductDetails({
             {description}
           </AccordionContent>
         </AccordionItem>
-        
+
         <AccordionItem value="details">
           <AccordionTrigger className="text-xs font-bold uppercase tracking-wider py-3">
             "DETAILS & CARE"
@@ -93,21 +101,23 @@ export function ProductDetails({
             </ul>
           </AccordionContent>
         </AccordionItem>
-        
+
         <AccordionItem value="shipping">
           <AccordionTrigger className="text-xs font-bold uppercase tracking-wider py-3">
             "SHIPPING & RETURNS"
           </AccordionTrigger>
           <AccordionContent className="text-xs text-[var(--subtle-text-color)] leading-relaxed">
             <p className="mb-2">
-              Free shipping on orders over £100. Standard delivery takes 3-5 business days.
+              Free shipping on orders over £100. Standard delivery takes 3-5
+              business days.
             </p>
             <p>
-              Free returns within 30 days. Items must be unworn with tags attached.
+              Free returns within 30 days. Items must be unworn with tags
+              attached.
             </p>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
     </div>
-  )
+  );
 }

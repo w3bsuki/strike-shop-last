@@ -1,0 +1,234 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/lib/clerk-mock';
+import { Heart, ShoppingBag, Trash2, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
+
+import Header from '@/components/header';
+import Footer from '@/components/footer';
+import { Button } from '@/components/ui/button';
+import { useWishlist, useWishlistActions, useCartActions } from '@/lib/stores';
+// import { cn } from '@/lib/utils';
+
+export default function WishlistPage() {
+  const router = useRouter();
+  const { isSignedIn, isLoaded } = useUser();
+  const wishlist = useWishlist();
+  const { removeFromWishlist, clearWishlist } = useWishlistActions();
+  const { addItem } = useCartActions();
+  const [isMovingToCart, setIsMovingToCart] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push('/sign-in?redirect_url=/wishlist');
+      return;
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  const handleRemoveFromWishlist = (productId: string) => {
+    removeFromWishlist(productId);
+  };
+
+  const handleMoveToCart = async (item: { id: string; name: string; price: string; image: string }) => {
+    setIsMovingToCart(item.id);
+    try {
+      // Add to cart - using addItem with product ID and variant ID
+      await addItem(item.id, item.id, 1); // Using item.id as variant ID for now
+      // Remove from wishlist
+      removeFromWishlist(item.id);
+    } catch (error) {
+
+    } finally {
+      setIsMovingToCart(null);
+    }
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
+    }).format(price / 100);
+  };
+
+  if (!isLoaded || !isSignedIn) {
+    return (
+      <main className="bg-white min-h-screen">
+        <Header />
+        <div className="section-padding">
+          <div className="strike-container max-w-2xl mx-auto text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
+            <p className="mt-4 text-sm text-gray-600">Loading your wishlist...</p>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    );
+  }
+
+  return (
+    <main className="bg-white min-h-screen">
+      <Header />
+      <div className="section-padding">
+        <div className="strike-container max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.back()}
+                  className="hover:bg-gray-100"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+                <div>
+                  <h1 className="text-2xl font-bold uppercase tracking-wider">
+                    My Wishlist
+                  </h1>
+                  <p className="text-sm text-[var(--subtle-text-color)]">
+                    {wishlist.items.length} {wishlist.items.length === 1 ? 'item' : 'items'} saved
+                  </p>
+                </div>
+              </div>
+              {wishlist.items.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearWishlist}
+                  className="text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Clear All
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Wishlist Content */}
+          {wishlist.items.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="mb-6">
+                <Heart className="h-24 w-24 text-gray-300 mx-auto mb-4" />
+                <h2 className="text-xl font-bold uppercase tracking-wider mb-2">
+                  Your wishlist is empty
+                </h2>
+                <p className="text-[var(--subtle-text-color)] max-w-md mx-auto">
+                  Save items you love by clicking the heart icon on any product. 
+                  They&rsquo;ll appear here for easy access later.
+                </p>
+              </div>
+              <Link href="/">
+                <Button className="button-primary">
+                  Start Shopping
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {wishlist.items.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="group bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-in"
+                  style={{
+                    animationDelay: `${index * 100}ms`,
+                  }}
+                >
+                  <div className="relative aspect-square overflow-hidden bg-gray-50">
+                    <Image
+                      src={item.image || '/placeholder.jpg'}
+                      alt={item.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    />
+                    
+                    {/* Remove from wishlist button */}
+                    <button
+                      onClick={() => handleRemoveFromWishlist(item.id)}
+                      className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors opacity-0 group-hover:opacity-100"
+                      aria-label="Remove from wishlist"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </button>
+                  </div>
+
+                  <div className="p-4 space-y-3">
+                    <div>
+                      <h3 className="font-medium text-sm uppercase tracking-wider line-clamp-2">
+                        {item.name}
+                      </h3>
+                      <p className="text-lg font-bold mt-1">
+                        {typeof item.price === 'string' ? item.price : formatPrice(item.price)}
+                      </p>
+                    </div>
+
+                    <div className="flex space-x-2">
+                      <Button
+                        size="sm"
+                        className="flex-1 button-primary"
+                        onClick={() => handleMoveToCart(item)}
+                        disabled={isMovingToCart === item.id}
+                      >
+                        {isMovingToCart === item.id ? (
+                          <div className="flex items-center">
+                            <div className="animate-spin rounded-full h-3 w-3 border-b border-white mr-2"></div>
+                            Adding...
+                          </div>
+                        ) : (
+                          <>
+                            <ShoppingBag className="h-4 w-4 mr-2" />
+                            Add to Cart
+                          </>
+                        )}
+                      </Button>
+                      <Link href={`/product/${item.slug || item.id}`}>
+                        <Button size="sm" variant="outline" className="button-secondary">
+                          View
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Continue Shopping */}
+          {wishlist.items.length > 0 && (
+            <div className="mt-12 text-center">
+              <Link href="/">
+                <Button variant="outline" className="button-secondary">
+                  Continue Shopping
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+      <Footer />
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.6s ease-out forwards;
+          opacity: 0;
+        }
+      `}</style>
+    </main>
+  );
+}

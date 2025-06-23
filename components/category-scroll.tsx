@@ -1,119 +1,75 @@
-"use client"
-
-import { useState, useRef, useEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import Link from 'next/link';
+import Image from 'next/image';
+import { SectionHeader } from '@/components/ui/section-header';
 
 type Category = {
-  id: string
-  name: string
-  count: number
-  image: string
-  slug: string
-}
+  id: string;
+  name: string;
+  count: number;
+  image: string;
+  slug: string;
+};
 
 interface CategoryScrollProps {
-  title: string
-  categories: Category[]
+  title: string;
+  categories: Category[];
 }
 
-export default function CategoryScroll({ title, categories }: CategoryScrollProps) {
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const [canScrollLeft, setCanScrollLeft] = useState(false)
-  const [canScrollRight, setCanScrollRight] = useState(false)
-
-  const checkScrollability = () => {
-    if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
-      setCanScrollLeft(scrollLeft > 0)
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1) // -1 for precision
-    }
-  }
-
-  useEffect(() => {
-    checkScrollability()
-    window.addEventListener("resize", checkScrollability)
-    return () => window.removeEventListener("resize", checkScrollability)
-  }, [categories])
-
-  const scroll = (direction: "left" | "right") => {
-    if (scrollRef.current) {
-      const scrollAmount = scrollRef.current.clientWidth * 0.75
-      scrollRef.current.scrollBy({ left: direction === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" })
-      setTimeout(checkScrollability, 350) // Re-check after scroll animation
-    }
-  }
+export default function CategoryScroll({
+  title,
+  categories,
+}: CategoryScrollProps) {
 
   return (
-    <section className="section-padding">
+    <section className="py-16 bg-white">
       <div className="strike-container">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="section-title">"{title}"</h2>
-          <div className="flex items-center space-x-2">
-            <Link href="/categories" className="hidden sm:flex">
-              <Button variant="strike-text" className="text-xs">
-                SHOP ALL <ChevronRight className="ml-1 h-3 w-3" />
-              </Button>
-            </Link>
-            <div className="hidden md:flex space-x-2">
-              {canScrollLeft && (
-                <button
-                  onClick={() => scroll("left")}
-                  className="p-1.5 border border-subtle hover:border-black"
-                  aria-label="Scroll left"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-              )}
-              {canScrollRight && (
-                <button
-                  onClick={() => scroll("right")}
-                  className="p-1.5 border border-subtle hover:border-black"
-                  aria-label="Scroll right"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              )}
-            </div>
+        <SectionHeader 
+          title={title}
+          ctaText="SHOP ALL"
+          ctaHref="/categories"
+        />
+
+        {/* Universal Horizontal Scroll Layout */}
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="flex gap-6 pb-4 min-w-max">
+            {categories.map((category, index) => (
+              <Link
+                href={`/${category.slug}`}
+                key={category.id}
+                className="group block flex-shrink-0"
+              >
+                <div className="relative w-48 h-64 bg-gray-100 overflow-hidden transition-all duration-300 hover:shadow-2xl">
+                  <Image
+                    src={category.image}
+                    alt={`${category.name} category`}
+                    fill
+                    className="object-cover filter brightness-90 group-hover:brightness-100 group-hover:scale-105 transition-all duration-500"
+                    sizes="192px"
+                    priority={index < 3}
+                  />
+                  
+                  {/* Sophisticated overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-300" />
+                  
+                  {/* Text content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-white font-typewriter text-lg font-bold uppercase tracking-wider mb-1 transform group-hover:translate-y-[-2px] transition-transform duration-300">
+                      {category.name}
+                    </h3>
+                    <p className="text-white/80 font-typewriter text-xs uppercase tracking-wide">
+                      {category.count} items
+                    </p>
+                  </div>
+
+                  {/* Hover indicator */}
+                  <div className="absolute top-4 right-4 w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-0 group-hover:scale-100" />
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
 
-        <div
-          ref={scrollRef}
-          className="flex overflow-x-auto gap-3 md:gap-4 pb-1 horizontal-scroll"
-          onScroll={checkScrollability}
-        >
-          {categories.map((category) => (
-            <Link
-              href={`/${category.slug}`}
-              key={category.id}
-              className="category-card flex-shrink-0 w-[60vw] sm:w-[40vw] md:w-[28vw] lg:w-[22vw] max-w-[280px]" // Adjusted widths
-            >
-              <div className="relative">
-                <Image
-                  src={category.image || "/placeholder.svg"}
-                  alt={category.name}
-                  width={280}
-                  height={280}
-                  className="category-card-image"
-                />
-                <div className="category-card-overlay" />
-                <div className="category-card-content">
-                  <h3 className="category-card-title">"{category.name}"</h3>
-                  <p className="category-card-count">{category.count} ITEMS</p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-        <div className="mt-6 text-center sm:hidden">
-          <Link href="/categories" className="button-secondary !py-2 !px-4 !text-[10px]">
-            SHOP ALL CATEGORIES
-          </Link>
-        </div>
       </div>
     </section>
-  )
+  );
 }

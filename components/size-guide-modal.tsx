@@ -1,35 +1,52 @@
-"use client"
+'use client';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { ReactNode } from "react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { ReactNode } from 'react';
 
 const topsData = [
-  { size: "XS", chest: "34-36", waist: "28-30" },
-  { size: "S", chest: "36-38", waist: "30-32" },
-  { size: "M", chest: "38-40", waist: "32-34" },
-  { size: "L", chest: "40-42", waist: "34-36" },
-  { size: "XL", chest: "42-44", waist: "36-38" },
-  { size: "XXL", chest: "44-46", waist: "38-40" },
-]
+  { size: 'XS', chest: '34-36', waist: '28-30' },
+  { size: 'S', chest: '36-38', waist: '30-32' },
+  { size: 'M', chest: '38-40', waist: '32-34' },
+  { size: 'L', chest: '40-42', waist: '34-36' },
+  { size: 'XL', chest: '42-44', waist: '36-38' },
+  { size: 'XXL', chest: '44-46', waist: '38-40' },
+];
 
 const bottomsData = [
-  { size: "XS", waist: "28-30", hips: "34-36" },
-  { size: "S", waist: "30-32", hips: "36-38" },
-  { size: "M", waist: "32-34", hips: "38-40" },
-  { size: "L", waist: "34-36", hips: "40-42" },
-  { size: "XL", waist: "36-38", hips: "42-44" },
-  { size: "XXL", waist: "38-40", hips: "44-46" },
-]
+  { size: 'XS', waist: '28-30', hips: '34-36' },
+  { size: 'S', waist: '30-32', hips: '36-38' },
+  { size: 'M', waist: '32-34', hips: '38-40' },
+  { size: 'L', waist: '34-36', hips: '40-42' },
+  { size: 'XL', waist: '36-38', hips: '42-44' },
+  { size: 'XXL', waist: '38-40', hips: '44-46' },
+];
 
 interface SizeGuideModalProps {
-  children?: ReactNode
-  isOpen?: boolean
-  onClose?: () => void
+  children?: ReactNode;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export function SizeGuideModal({ children, isOpen, onClose }: SizeGuideModalProps) {
+export function SizeGuideModal({
+  children,
+  isOpen,
+  onClose,
+}: SizeGuideModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose?.()}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
@@ -43,7 +60,9 @@ export function SizeGuideModal({ children, isOpen, onClose }: SizeGuideModalProp
             <TabsTrigger value="bottoms">Bottoms</TabsTrigger>
           </TabsList>
           <TabsContent value="tops">
-            <p className="text-sm text-muted-foreground mb-4">Measurements are in inches.</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Measurements are in inches.
+            </p>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -64,7 +83,9 @@ export function SizeGuideModal({ children, isOpen, onClose }: SizeGuideModalProp
             </Table>
           </TabsContent>
           <TabsContent value="bottoms">
-            <p className="text-sm text-muted-foreground mb-4">Measurements are in inches.</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Measurements are in inches.
+            </p>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -87,5 +108,5 @@ export function SizeGuideModal({ children, isOpen, onClose }: SizeGuideModalProp
         </Tabs>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

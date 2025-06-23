@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
+import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import {
   Search,
   Plus,
@@ -16,94 +16,114 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 // Mock product data
 const mockProducts = Array.from({ length: 50 }, (_, i) => ({
   id: `prod_${i + 1}`,
   name: [
-    "Monochrome Knit Sweater",
-    "Technical Bomber Jacket",
-    "Utility Crossbody Bag",
-    "Oversized Graphic Hoodie",
-    "Chunky Sole Sneakers",
-    "Diagonal Stripe Overshirt",
-    "Logo Embroidered Cap",
-    "Industrial Cargo Pants",
-    "Arrow Runner 2.0",
-    "Signature Arrow Tote Bag",
+    'Monochrome Knit Sweater',
+    'Technical Bomber Jacket',
+    'Utility Crossbody Bag',
+    'Oversized Graphic Hoodie',
+    'Chunky Sole Sneakers',
+    'Diagonal Stripe Overshirt',
+    'Logo Embroidered Cap',
+    'Industrial Cargo Pants',
+    'Arrow Runner 2.0',
+    'Signature Arrow Tote Bag',
   ][i % 10],
   sku: `STR-${String.fromCharCode(65 + (i % 26))}-${100 + i}`,
-  category: ["Clothing", "Footwear", "Accessories", "Bags", "Homeware"][i % 5],
+  category: ['Clothing', 'Footwear', 'Accessories', 'Bags', 'Homeware'][i % 5],
   price: `£${Math.floor(Math.random() * 900) + 100}`,
   stock: Math.floor(Math.random() * 100),
-  status: ["Active", "Active", "Active", "Draft", "Out of Stock"][i % 5],
+  status: ['Active', 'Active', 'Active', 'Draft', 'Out of Stock'][i % 5],
   image: `/placeholder.svg?height=40&width=40&query=product+${i + 1}`,
-  createdAt: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString(),
-}))
+  createdAt: new Date(
+    Date.now() - Math.floor(Math.random() * 10000000000)
+  ).toISOString(),
+}));
 
 export default function ProductsPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [sortField, setSortField] = useState<string | null>(null)
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
-  const itemsPerPage = 10
+  const itemsPerPage = 10;
 
   // Filter and sort products
   const filteredProducts = mockProducts.filter((product) => {
     const matchesSearch =
-      searchTerm === "" ||
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchTerm.toLowerCase())
+      searchTerm === '' ||
+      (product.name ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory = selectedCategory === null || product.category === selectedCategory
-    const matchesStatus = selectedStatus === null || product.status === selectedStatus
+    const matchesCategory =
+      selectedCategory === null || product.category === selectedCategory;
+    const matchesStatus =
+      selectedStatus === null || product.status === selectedStatus;
 
-    return matchesSearch && matchesCategory && matchesStatus
-  })
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (!sortField) return 0
+    if (!sortField) return 0;
 
-    let comparison = 0
-    if (sortField === "name") {
-      comparison = a.name.localeCompare(b.name)
-    } else if (sortField === "price") {
-      const aPrice = Number.parseFloat(a.price.replace(/[^0-9.]/g, ""))
-      const bPrice = Number.parseFloat(b.price.replace(/[^0-9.]/g, ""))
-      comparison = aPrice - bPrice
-    } else if (sortField === "stock") {
-      comparison = a.stock - b.stock
-    } else if (sortField === "createdAt") {
-      comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    let comparison = 0;
+    if (sortField === 'name') {
+      comparison = (a.name ?? "").localeCompare(b.name ?? "");
+    } else if (sortField === 'price') {
+      const aPrice = Number.parseFloat(a.price.replace(/[^0-9.]/g, ''));
+      const bPrice = Number.parseFloat(b.price.replace(/[^0-9.]/g, ''));
+      comparison = aPrice - bPrice;
+    } else if (sortField === 'stock') {
+      comparison = a.stock - b.stock;
+    } else if (sortField === 'createdAt') {
+      comparison =
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     }
 
-    return sortDirection === "asc" ? comparison : -comparison
-  })
+    return sortDirection === 'asc' ? comparison : -comparison;
+  });
 
   // Pagination
-  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage)
-  const paginatedProducts = sortedProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+  const paginatedProducts = sortedProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleSort = (field: string) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      setSortField(field)
-      setSortDirection("asc")
+      setSortField(field);
+      setSortDirection('asc');
     }
-  }
+  };
 
   // Get unique categories for filter
-  const categories = Array.from(new Set(mockProducts.map((p) => p.category)))
-  const statuses = Array.from(new Set(mockProducts.map((p) => p.status)))
+  const categories = Array.from(new Set(mockProducts.map((p) => p.category)));
+  const statuses = Array.from(new Set(mockProducts.map((p) => p.status)));
 
   return (
     <div className="space-y-6">
@@ -138,9 +158,14 @@ export default function ProductsPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSelectedCategory(null)}>All Categories</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedCategory(null)}>
+                All Categories
+              </DropdownMenuItem>
               {categories.map((category) => (
-                <DropdownMenuItem key={category} onClick={() => setSelectedCategory(category)}>
+                <DropdownMenuItem
+                  key={category}
+                  onClick={() => setSelectedCategory(category || null)}
+                >
                   {category}
                 </DropdownMenuItem>
               ))}
@@ -155,9 +180,14 @@ export default function ProductsPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSelectedStatus(null)}>All Statuses</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedStatus(null)}>
+                All Statuses
+              </DropdownMenuItem>
               {statuses.map((status) => (
-                <DropdownMenuItem key={status} onClick={() => setSelectedStatus(status)}>
+                <DropdownMenuItem
+                  key={status}
+                  onClick={() => setSelectedStatus(status || null)}
+                >
                   {status}
                 </DropdownMenuItem>
               ))}
@@ -172,7 +202,10 @@ export default function ProductsPage() {
           {selectedCategory && (
             <div className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center">
               Category: {selectedCategory}
-              <button onClick={() => setSelectedCategory(null)} className="ml-2 text-gray-500 hover:text-gray-700">
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className="ml-2 text-gray-500 hover:text-gray-700"
+              >
                 <X className="h-3 w-3" />
               </button>
             </div>
@@ -180,7 +213,10 @@ export default function ProductsPage() {
           {selectedStatus && (
             <div className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center">
               Status: {selectedStatus}
-              <button onClick={() => setSelectedStatus(null)} className="ml-2 text-gray-500 hover:text-gray-700">
+              <button
+                onClick={() => setSelectedStatus(null)}
+                className="ml-2 text-gray-500 hover:text-gray-700"
+              >
                 <X className="h-3 w-3" />
               </button>
             </div>
@@ -188,8 +224,8 @@ export default function ProductsPage() {
           {(selectedCategory || selectedStatus) && (
             <button
               onClick={() => {
-                setSelectedCategory(null)
-                setSelectedStatus(null)
+                setSelectedCategory(null);
+                setSelectedStatus(null);
               }}
               className="text-sm text-blue-600 hover:underline"
             >
@@ -206,7 +242,10 @@ export default function ProductsPage() {
             <TableRow>
               <TableHead className="w-[80px]">Image</TableHead>
               <TableHead>
-                <button onClick={() => handleSort("name")} className="flex items-center hover:text-gray-700">
+                <button
+                  onClick={() => handleSort('name')}
+                  className="flex items-center hover:text-gray-700"
+                >
                   Product Name
                   <ArrowUpDown className="ml-2 h-3 w-3" />
                 </button>
@@ -214,13 +253,19 @@ export default function ProductsPage() {
               <TableHead>SKU</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>
-                <button onClick={() => handleSort("price")} className="flex items-center hover:text-gray-700">
+                <button
+                  onClick={() => handleSort('price')}
+                  className="flex items-center hover:text-gray-700"
+                >
                   Price
                   <ArrowUpDown className="ml-2 h-3 w-3" />
                 </button>
               </TableHead>
               <TableHead>
-                <button onClick={() => handleSort("stock")} className="flex items-center hover:text-gray-700">
+                <button
+                  onClick={() => handleSort('stock')}
+                  className="flex items-center hover:text-gray-700"
+                >
                   Stock
                   <ArrowUpDown className="ml-2 h-3 w-3" />
                 </button>
@@ -236,29 +281,35 @@ export default function ProductsPage() {
                   <TableCell>
                     <div className="relative h-10 w-10 rounded overflow-hidden">
                       <Image
-                        src={product.image || "/placeholder.svg"}
-                        alt={product.name}
+                        src={product.image || '/placeholder.svg'}
+                        alt={(product.name ?? "")}
                         fill
                         sizes="40px"
                         className="object-cover"
                       />
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell className="font-mono text-xs">{product.sku}</TableCell>
+                  <TableCell className="font-medium">{(product.name ?? "")}</TableCell>
+                  <TableCell className="font-mono text-xs">
+                    {product.sku}
+                  </TableCell>
                   <TableCell>{product.category}</TableCell>
                   <TableCell>{product.price}</TableCell>
                   <TableCell>
-                    <span className={`${product.stock < 10 ? "text-red-600" : ""}`}>{product.stock}</span>
+                    <span
+                      className={`${product.stock < 10 ? 'text-red-600' : ''}`}
+                    >
+                      {product.stock}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 text-xs rounded-full ${
-                        product.status === "Active"
-                          ? "bg-green-100 text-green-800"
-                          : product.status === "Draft"
-                            ? "bg-gray-100 text-gray-800"
-                            : "bg-red-100 text-red-800"
+                        product.status === 'Active'
+                          ? 'bg-green-100 text-green-800'
+                          : product.status === 'Draft'
+                            ? 'bg-gray-100 text-gray-800'
+                            : 'bg-red-100 text-red-800'
                       }`}
                     >
                       {product.status}
@@ -296,7 +347,10 @@ export default function ProductsPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                <TableCell
+                  colSpan={8}
+                  className="text-center py-8 text-gray-500"
+                >
                   No products found
                 </TableCell>
               </TableRow>
@@ -309,8 +363,9 @@ export default function ProductsPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-            {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} products
+            Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
+            {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of{' '}
+            {filteredProducts.length} products
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -336,5 +391,5 @@ export default function ProductsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

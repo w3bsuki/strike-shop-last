@@ -1,26 +1,30 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useAuthStore } from "@/lib/auth-store"
-import AdminSidebar from "@/components/admin/admin-sidebar"
-import AdminHeader from "@/components/admin/admin-header"
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/lib/auth-store';
+import AdminSidebar from '@/components/admin/admin-sidebar';
+import AdminHeader from '@/components/admin/admin-header';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, user } = useAuthStore()
-  const router = useRouter()
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { isAuthenticated, user } = useAuthStore();
+  const router = useRouter();
 
   // Check if user is authenticated and is an admin
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push("/admin/login")
+      router.push('/admin/login');
     }
-  }, [isAuthenticated, user, router])
+  }, [isAuthenticated, user, router]);
 
   if (!isAuthenticated) {
-    return null
+    return null;
   }
 
   return (
@@ -31,5 +35,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <main className="flex-1 p-6 overflow-auto">{children}</main>
       </div>
     </div>
-  )
+  );
 }

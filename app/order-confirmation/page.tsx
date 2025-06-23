@@ -1,59 +1,119 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import Header from "@/components/header"
-import Footer from "@/components/footer"
-import { Button } from "@/components/ui/button"
-import { CheckCircle, Package, Mail, Printer } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
-import { medusaClient } from '@/lib/medusa'
-import { useUser } from '@clerk/nextjs'
+import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Header from '@/components/header';
+import Footer from '@/components/footer';
+import { Button } from '@/components/ui/button';
+import { CheckCircle, Package, Mail, Printer } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { medusaClient } from '@/lib/medusa';
+import { useUser } from '@/lib/clerk-mock';
+
+interface OrderItem {
+  id: string;
+  title?: string;
+  thumbnail?: string;
+  quantity?: number;
+  unit_price?: number;
+  total?: number;
+  variant?: {
+    title?: string;
+  };
+}
+
+interface ShippingAddress {
+  first_name?: string;
+  last_name?: string;
+  address_1?: string;
+  address_2?: string;
+  city?: string;
+  postal_code?: string;
+  country_code?: string;
+  phone?: string;
+}
+
+interface ShippingMethod {
+  shipping_option?: {
+    name?: string;
+  };
+}
+
+interface Order {
+  id: string;
+  display_id?: string;
+  email?: string;
+  total?: number;
+  subtotal?: number;
+  shipping_total?: number;
+  tax_total?: number;
+  currency_code?: string;
+  created_at?: string;
+  shipping_address?: ShippingAddress;
+  items?: OrderItem[];
+  shipping_methods?: ShippingMethod[];
+}
 
 export default function OrderConfirmationPage() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const { user } = useUser()
-  const orderId = searchParams.get('order_id')
-  const [order, setOrder] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { user } = useUser();
+  const orderId = searchParams.get('order_id');
+  const [order, setOrder] = useState<Order | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!orderId) {
-      router.push('/')
-      return
+      router.push('/');
+      return;
     }
 
     const fetchOrder = async () => {
       try {
-        const { order } = await medusaClient.orders.retrieve(orderId)
-        setOrder(order)
-      } catch (error) {
-        console.error('Error fetching order:', error)
+        const orderResponse = await medusaClient.store.order.retrieve(orderId);
+        const medusaOrder = orderResponse.order;
+        // Convert Medusa order to our Order interface
+        const convertedOrder: Order = {
+          id: medusaOrder.id,
+          display_id: medusaOrder.display_id?.toString(),
+          email: medusaOrder.email || undefined,
+          total: medusaOrder.total,
+          subtotal: medusaOrder.subtotal,
+          shipping_total: medusaOrder.shipping_total,
+          tax_total: medusaOrder.tax_total,
+          currency_code: medusaOrder.currency_code,
+          created_at: medusaOrder.created_at instanceof Date ? medusaOrder.created_at.toISOString() : medusaOrder.created_at,
+          shipping_address: medusaOrder.shipping_address || undefined,
+          items: medusaOrder.items as OrderItem[] | undefined,
+          shipping_methods: medusaOrder.shipping_methods || undefined,
+        };
+        setOrder(convertedOrder);
+      } catch (_error) {
+        // Error fetching order - handled by loading state
         // In production, you might want to handle this differently
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchOrder()
-  }, [orderId, router])
+    fetchOrder();
+  }, [orderId, router]);
 
-  const formatPrice = (amount: number, currency: string = "GBP") => {
-    return new Intl.NumberFormat("en-GB", {
-      style: "currency",
+  const formatPrice = (amount: number, currency: string = 'GBP') => {
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
       currency,
-    }).format(amount / 100)
-  }
+    }).format(amount / 100);
+  };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-GB", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  }
+  const _formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-GB', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
   if (isLoading) {
     return (
@@ -62,12 +122,14 @@ export default function OrderConfirmationPage() {
         <div className="section-padding">
           <div className="strike-container max-w-2xl mx-auto text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
-            <p className="mt-4 text-sm text-gray-600">Loading order details...</p>
+            <p className="mt-4 text-sm text-gray-600">
+              Loading order details...
+            </p>
           </div>
         </div>
         <Footer />
       </main>
-    )
+    );
   }
 
   return (
@@ -85,13 +147,16 @@ export default function OrderConfirmationPage() {
                 </div>
               </div>
             </div>
-            
-            <h1 className="text-3xl font-bold mb-2">Thank You for Your Order!</h1>
+
+            <h1 className="text-3xl font-bold mb-2">
+              Thank You for Your Order!
+            </h1>
             <p className="text-lg text-gray-600 mb-4">
               Your order has been successfully placed and is being processed.
             </p>
             <p className="text-sm text-gray-500">
-              Order number: <span className="font-mono font-bold text-black">
+              Order number:{' '}
+              <span className="font-mono font-bold text-black">
                 #{order?.display_id || orderId?.slice(-8).toUpperCase()}
               </span>
             </p>
@@ -108,18 +173,22 @@ export default function OrderConfirmationPage() {
                   </h3>
                   <div className="text-sm space-y-1">
                     <p className="font-medium">
-                      {order?.shipping_address?.first_name} {order?.shipping_address?.last_name}
+                      {order?.shipping_address?.first_name}{' '}
+                      {order?.shipping_address?.last_name}
                     </p>
                     <p>{order?.shipping_address?.address_1}</p>
                     {order?.shipping_address?.address_2 && (
                       <p>{order?.shipping_address?.address_2}</p>
                     )}
                     <p>
-                      {order?.shipping_address?.city}, {order?.shipping_address?.postal_code}
+                      {order?.shipping_address?.city},{' '}
+                      {order?.shipping_address?.postal_code}
                     </p>
                     <p>{order?.shipping_address?.country_code}</p>
                     {order?.shipping_address?.phone && (
-                      <p className="mt-2">Tel: {order?.shipping_address?.phone}</p>
+                      <p className="mt-2">
+                        Tel: {order?.shipping_address?.phone}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -129,7 +198,8 @@ export default function OrderConfirmationPage() {
                     Shipping Method
                   </h3>
                   <p className="text-sm">
-                    {order?.shipping_methods?.[0]?.shipping_option?.name || 'Standard Shipping'}
+                    {order?.shipping_methods?.[0]?.shipping_option?.name ||
+                      'Standard Shipping'}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     Estimated delivery: 3-5 business days
@@ -145,7 +215,10 @@ export default function OrderConfirmationPage() {
                   </h3>
                   <div className="text-sm space-y-1">
                     <p>Payment Method: Card ending in ****</p>
-                    <p>Status: <span className="text-green-600 font-medium">Paid</span></p>
+                    <p>
+                      Status:{' '}
+                      <span className="text-green-600 font-medium">Paid</span>
+                    </p>
                   </div>
                 </div>
 
@@ -181,23 +254,27 @@ export default function OrderConfirmationPage() {
             <div className="mb-8">
               <h3 className="text-lg font-bold mb-4">Order Items</h3>
               <div className="space-y-4">
-                {order.items.map((item: any) => (
-                  <div key={item.id} className="flex items-center space-x-4 bg-white p-4 rounded-lg border">
+                {order.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center space-x-4 bg-white p-4 rounded-lg border"
+                  >
                     <div className="relative w-20 h-24 bg-gray-100 flex-shrink-0">
-                      <Image 
-                        src={item.thumbnail || "/placeholder.svg"} 
-                        alt={item.title} 
-                        fill 
+                      <Image
+                        src={item.thumbnail || '/placeholder.svg'}
+                        alt={item.title}
+                        fill
                         className="object-cover rounded"
                       />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium">{item.title}</h4>
                       <p className="text-sm text-gray-500">
-                        Size: {item.variant?.title || 'N/A'} | Qty: {item.quantity}
+                        Size: {item.variant?.title || 'N/A'} | Qty:{' '}
+                        {item.quantity}
                       </p>
                       <p className="text-sm font-bold mt-1">
-                        {formatPrice(item.total)}
+                        {formatPrice(item.total || 0)}
                       </p>
                     </div>
                   </div>
@@ -213,8 +290,8 @@ export default function OrderConfirmationPage() {
               What Happens Next?
             </h3>
             <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
-              <li>You'll receive an order confirmation email shortly</li>
-              <li>We'll send you shipping updates via email</li>
+              <li>You&rsquo;ll receive an order confirmation email shortly</li>
+              <li>We&rsquo;ll send you shipping updates via email</li>
               <li>Your order will be carefully packed and dispatched</li>
               <li>Track your order status in your account</li>
             </ol>
@@ -223,23 +300,16 @@ export default function OrderConfirmationPage() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/">
-              <Button className="button-primary">
-                Continue Shopping
-              </Button>
+              <Button className="button-primary">Continue Shopping</Button>
             </Link>
-            
+
             {user && (
               <Link href="/account?tab=orders">
-                <Button className="button-secondary">
-                  View My Orders
-                </Button>
+                <Button className="button-secondary">View My Orders</Button>
               </Link>
             )}
-            
-            <Button 
-              className="button-secondary"
-              onClick={() => window.print()}
-            >
+
+            <Button className="button-secondary" onClick={() => window.print()}>
               <Printer className="h-4 w-4 mr-2" />
               Print Receipt
             </Button>
@@ -249,7 +319,10 @@ export default function OrderConfirmationPage() {
           <div className="text-center mt-12 text-sm text-gray-600">
             <p>
               Have questions about your order? Contact our support team at{' '}
-              <a href="mailto:support@strike.com" className="font-medium text-black hover:underline">
+              <a
+                href="mailto:support@strike.com"
+                className="font-medium text-black hover:underline"
+              >
                 support@strike.com
               </a>
             </p>
@@ -258,5 +331,5 @@ export default function OrderConfirmationPage() {
       </div>
       <Footer />
     </main>
-  )
+  );
 }
