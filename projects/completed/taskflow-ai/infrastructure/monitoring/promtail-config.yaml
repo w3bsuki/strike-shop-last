@@ -1,0 +1,138 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Backend application logs
+  - job_name: backend
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: taskflow-backend
+          app: backend
+          environment: staging
+          __path__: /app/logs/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\S+) (?P<level>\S+) (?P<logger>\S+) - (?P<message>.*)$'
+      - timestamp:
+          source: timestamp
+          format: '2006-01-02T15:04:05.000Z'
+      - labels:
+          level:
+          logger:
+
+  # Celery worker logs
+  - job_name: celery
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: taskflow-celery
+          app: celery
+          environment: staging
+          __path__: /celery/logs/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^\[(?P<timestamp>[^\]]+)\] (?P<level>\S+)/(?P<process>\S+) (?P<message>.*)$'
+      - timestamp:
+          source: timestamp
+          format: '2006-01-02 15:04:05,999'
+      - labels:
+          level:
+          process:
+
+  # Nginx access logs
+  - job_name: nginx-access
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx
+          log_type: access
+          environment: staging
+          __path__: /nginx/logs/access.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<remote_addr>\S+) - (?P<remote_user>\S+) \[(?P<time_local>[^\]]+)\] "(?P<method>\S+) (?P<path>\S+) (?P<protocol>\S+)" (?P<status>\d+) (?P<body_bytes_sent>\d+) "(?P<http_referer>[^"]*)" "(?P<http_user_agent>[^"]*)".*$'
+      - labels:
+          method:
+          status:
+      - metrics:
+          http_requests_total:
+            type: Counter
+            description: "Total number of HTTP requests"
+            prefix: nginx_
+            max_idle_duration: 24h
+            config:
+              action: inc
+              match_all: true
+          http_request_size_bytes:
+            type: Histogram
+            description: "HTTP request size in bytes"
+            prefix: nginx_
+            max_idle_duration: 24h
+            config:
+              value: body_bytes_sent
+              buckets: [100, 1000, 10000, 100000, 1000000]
+
+  # Nginx error logs
+  - job_name: nginx-error
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx
+          log_type: error
+          environment: staging
+          __path__: /nginx/logs/error.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>\w+)\] (?P<pid>\d+)#(?P<tid>\d+): (?P<message>.*)$'
+      - timestamp:
+          source: timestamp
+          format: '2006/01/02 15:04:05'
+      - labels:
+          level:
+
+  # Docker container logs
+  - job_name: containers
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: containers
+          environment: staging
+          __path__: /var/lib/docker/containers/*/*log
+    pipeline_stages:
+      - docker:
+      - labels:
+          container_name:
+          container_id:
+      - match:
+          selector: '{container_name="taskflow-backend-staging"}'
+          stages:
+            - labels:
+                app: backend
+      - match:
+          selector: '{container_name="taskflow-frontend-staging"}'
+          stages:
+            - labels:
+                app: frontend
+      - match:
+          selector: '{container_name="taskflow-postgres-staging"}'
+          stages:
+            - labels:
+                app: postgres
+      - match:
+          selector: '{container_name="taskflow-redis-staging"}'
+          stages:
+            - labels:
+                app: redis
