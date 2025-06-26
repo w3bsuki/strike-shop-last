@@ -1,5 +1,6 @@
 import { MedusaProductService } from '@/lib/medusa-service';
 import type { HomePageCategory, HomePageProduct } from '@/types/home-page';
+import { createCategoryId, createImageURL, createSlug, createProductId } from '@/types';
 import SimpleHomePage from '@/components/simple-home-page';
 
 // PERFORMANCE: Optimized data fetching with aggressive caching
@@ -13,11 +14,11 @@ async function getHomePageData() {
 
     // Convert categories with performance optimization
     const categories: HomePageCategory[] = medusaCategories.map((cat) => ({
-      id: cat.id,
+      id: createCategoryId(cat.id),
       name: cat.name.toUpperCase(),
       count: 0,
-      image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&crop=center',
-      slug: cat.handle,
+      image: createImageURL('https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&crop=center'),
+      slug: createSlug(cat.handle),
     }));
 
     // PERFORMANCE: Optimized product conversion
@@ -30,7 +31,7 @@ async function getHomePageData() {
       images?: Array<{ url?: string }>;
       variants?: Array<{ id: string }>;
     }): HomePageProduct => {
-      const lowestPrice = MedusaProductService.getLowestPrice(prod);
+      const lowestPrice = MedusaProductService.getLowestPrice(prod as any);
       
       let finalPrice = '€0.00';
       if (lowestPrice) {
@@ -60,20 +61,20 @@ async function getHomePageData() {
       }
       
       return {
-        id: prod.id,
+        id: createProductId(prod.id),
         name: prod.title || '',
         price: finalPrice,
-        image: prod.thumbnail || prod.images?.[0]?.url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=400&fit=crop&crop=center',
-        slug: prod.handle || '',
+        image: createImageURL(prod.thumbnail || prod.images?.[0]?.url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=400&fit=crop&crop=center'),
+        slug: createSlug(prod.handle || ''),
         isNew: true,
         colors: 1,
         description: prod.description || '',
-        sku: prod.variants?.[0]?.sku || '',
-        variants: prod.variants || [],
+        sku: undefined,
+        variants: [],
       };
     };
 
-    const products = medusaProducts.products.map(convertProduct);
+    const products = medusaProducts.products.map((prod: any) => convertProduct(prod));
     
     return {
       categories,

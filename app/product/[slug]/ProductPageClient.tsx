@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Header from '@/components/header';
+import { SiteHeader } from '@/components/navigation';
 import Footer from '@/components/footer';
 import Image from 'next/image';
 import { Minus, Plus, Heart } from 'lucide-react';
@@ -83,7 +83,7 @@ export default function ProductPageClient({
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.images[0],
+      image: product.images[0] || '',
       slug: slug,
     };
     if (isInWishlist(product.id)) {
@@ -128,7 +128,7 @@ export default function ProductPageClient({
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://strike-shop.com';
   const productJsonLd = productData
-    ? generateProductJsonLd(productData as SanityProduct, `${baseUrl}/product/${slug}`)
+    ? generateProductJsonLd(productData as any, `${baseUrl}/product/${slug}`)
     : null;
 
   return (
@@ -140,7 +140,7 @@ export default function ProductPageClient({
           dangerouslySetInnerHTML={{ __html: productJsonLd }}
         />
       )}
-      <Header />
+      <SiteHeader />
       <div className="section-padding">
         <div className="strike-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">

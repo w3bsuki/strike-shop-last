@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import Header from '@/components/header';
+import { SiteHeader } from '@/components/navigation';
 import Footer from '@/components/footer';
 
 // PERFORMANCE: Simple search implementation without external dependencies
@@ -60,7 +60,7 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
   
   return (
     <main className="bg-white min-h-screen">
-      <Header />
+      <SiteHeader />
       <Suspense fallback={<SearchPageSkeleton />}>
         <SearchPageComponent 
           initialQuery={initialQuery}

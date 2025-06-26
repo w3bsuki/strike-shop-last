@@ -60,13 +60,20 @@ export default function HeroBannerV2({
         </div>
       </div>
 
-      {/* Ticker Banner */}
-      <div className="absolute bottom-0 left-0 right-0 bg-black text-white py-2 md:py-3 overflow-hidden">
-        <div className="marquee-container">
-          <div className="marquee-content">
-            {[...Array(20)].map((_, i) => (
-              <span key={i} className="inline-block text-xs md:text-sm font-typewriter font-medium uppercase tracking-wider mx-8">
-                FREE SHIPPING WORLDWIDE • 30 DAY RETURNS • STRIKE GUARANTEE
+      {/* Infinite Scrolling Trust Factors */}
+      <div className="absolute bottom-0 left-0 right-0 bg-black text-white py-3 md:py-4 overflow-hidden">
+        <div className="relative flex">
+          <div className="animate-marquee whitespace-nowrap flex">
+            {[...Array(10)].map((_, i) => (
+              <span key={`first-${i}`} className="inline-block text-sm md:text-base font-typewriter font-medium uppercase tracking-wide mx-6 md:mx-8">
+                FREE SHIPPING WORLDWIDE • 30 DAY RETURNS • STRIKE GUARANTEE • VERIFIED AUTHENTIC • 
+              </span>
+            ))}
+          </div>
+          <div className="animate-marquee2 whitespace-nowrap flex absolute top-0">
+            {[...Array(10)].map((_, i) => (
+              <span key={`second-${i}`} className="inline-block text-sm md:text-base font-typewriter font-medium uppercase tracking-wide mx-6 md:mx-8">
+                FREE SHIPPING WORLDWIDE • 30 DAY RETURNS • STRIKE GUARANTEE • VERIFIED AUTHENTIC • 
               </span>
             ))}
           </div>

@@ -48,6 +48,8 @@ export function SignUpForm({
               setFormData({ ...formData, firstName: e.target.value })
             }
             className="search-input pl-10"
+            autoComplete="given-name"
+            enterKeyHint="next"
             required
           />
         </div>
@@ -61,6 +63,8 @@ export function SignUpForm({
               setFormData({ ...formData, lastName: e.target.value })
             }
             className="search-input pl-10"
+            autoComplete="family-name"
+            enterKeyHint="next"
             required
           />
         </div>
@@ -74,6 +78,8 @@ export function SignUpForm({
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           className="search-input pl-10"
+          autoComplete="email"
+          enterKeyHint="next"
           required
         />
       </div>
@@ -86,6 +92,8 @@ export function SignUpForm({
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           className="search-input pl-10"
+          autoComplete="tel"
+          enterKeyHint="next"
         />
       </div>
 
@@ -99,12 +107,14 @@ export function SignUpForm({
             setFormData({ ...formData, password: e.target.value })
           }
           className="search-input pl-10 pr-10"
+          autoComplete="new-password"
+          enterKeyHint="done"
           required
         />
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--subtle-text-color)]"
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--subtle-text-color)] min-h-touch min-w-touch flex items-center justify-center -mt-5"
         >
           {showPassword ? (
             <EyeOff className="h-4 w-4" />
@@ -122,7 +132,7 @@ export function SignUpForm({
           onChange={(e) =>
             setFormData({ ...formData, newsletter: e.target.checked })
           }
-          className="h-4 w-4"
+          className="min-h-touch min-w-touch"
         />
         <label
           htmlFor="newsletter"

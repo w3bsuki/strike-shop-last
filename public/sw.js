@@ -27,6 +27,10 @@ const CACHE_CONFIG = {
     maxAge: 24 * 60 * 60 * 1000, // 1 day
     maxEntries: 50,
   },
+  fonts: {
+    maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year for fonts
+    maxEntries: 20,
+  },
 }
 
 // API endpoints to cache
@@ -43,6 +47,8 @@ const STATIC_ASSETS = [
   '/',
   '/offline.html',
   '/manifest.json',
+  '/fonts/CourierPrime-Regular.ttf',
+  '/fonts/CourierPrime-Bold.ttf',
 ]
 
 // Install event - precache static assets
@@ -200,7 +206,7 @@ function isImageRequest(request) {
 
 function isStaticAsset(request) {
   const url = new URL(request.url)
-  return url.pathname.match(/\.(js|css|woff2?|ttf|otf)$/)
+  return url.pathname.match(/\.(js|css|woff2?|ttf|otf)$/) || url.pathname.startsWith('/fonts/')
 }
 
 async function fetchAndCache(request, cache) {
@@ -268,4 +274,33 @@ self.addEventListener('message', (event) => {
       })
     )
   }
+  
+  if (event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
 })
+
+// Background sync for critical data
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-critical') {
+    event.waitUntil(syncCriticalData())
+  }
+})
+
+async function syncCriticalData() {
+  // Sync cart and user data when back online
+  try {
+    const cache = await caches.open(API_CACHE)
+    const requests = await cache.keys()
+    
+    const criticalRequests = requests.filter(req => 
+      req.url.includes('/api/cart') || req.url.includes('/api/user')
+    )
+    
+    for (const request of criticalRequests) {
+      await fetch(request).catch(() => {})
+    }
+  } catch (error) {
+    console.error('[SW] Sync failed:', error)
+  }
+}

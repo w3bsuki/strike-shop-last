@@ -3,7 +3,7 @@
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/header';
+import { SiteHeader } from '@/components/navigation';
 import Footer from '@/components/footer';
 import { useCartStore } from '@/lib/cart-store';
 import { useUser } from '@/lib/clerk-mock';
@@ -12,11 +12,30 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, Truck, Shield } from 'lucide-react';
-import { EnhancedCheckoutForm } from '@/components/checkout/enhanced-checkout-form';
-// TODO: Implement dynamic import after resolving TypeScript configuration issues
-// The dynamic import pattern is ready but requires tsconfig adjustments
+import dynamic from 'next/dynamic';
 import { medusaClient } from '@/lib/medusa';
 import { toast } from '@/hooks/use-toast';
+
+// BUNDLE OPTIMIZATION: Lazy load checkout form (includes Stripe SDK)
+const EnhancedCheckoutForm = dynamic(
+  () => import('@/components/checkout/enhanced-checkout-form').then(mod => ({ default: mod.EnhancedCheckoutForm })),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <div className="animate-pulse">
+          <div className="h-10 bg-gray-200 rounded mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-12 bg-gray-100 rounded"></div>
+            <div className="h-12 bg-gray-100 rounded"></div>
+            <div className="h-12 bg-gray-100 rounded"></div>
+          </div>
+          <div className="h-12 bg-gray-900 rounded mt-6"></div>
+        </div>
+      </div>
+    ),
+    ssr: false // Payment forms don't need SSR
+  }
+);
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -152,7 +171,7 @@ export default function CheckoutPage() {
 
   return (
     <main className="bg-white min-h-screen">
-      <Header />
+      <SiteHeader />
       <div className="section-padding">
         <div className="strike-container">
           <div className="max-w-6xl mx-auto">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useAria, AccessibleField, AriaAlert, AriaStatus } from './aria-helpers';
 import { AccessibleButton } from './aria-helpers';
 
@@ -202,7 +202,7 @@ export function AccessibleInput({
     <AccessibleField
       label={label}
       description={description}
-      error={displayError}
+      error={displayError || undefined}
       required={required}
       className={className}
     >
@@ -307,7 +307,7 @@ export function AccessibleTextarea({
     <AccessibleField
       label={label}
       description={description}
-      error={displayError}
+      error={displayError || undefined}
       required={required}
       className={className}
     >
@@ -495,7 +495,7 @@ export const FormValidators = {
  * Example usage component
  */
 export function ContactFormExample() {
-  const handleSubmit = useCallback((formData: FormData, validation: FormValidationResult) => {
+  const handleSubmit = useCallback((formData: FormData, _validation: FormValidationResult) => {
     console.log('Form submitted:', Object.fromEntries(formData));
   }, []);
 

@@ -8,6 +8,9 @@ import {
   generateWebsiteJsonLd,
 } from '@/lib/seo';
 import { ProvidersWrapper } from './providers-wrapper';
+import { SkipLink } from '@/components/accessibility/skip-link';
+import { LiveRegionProvider } from '@/components/accessibility/live-region';
+import { ServiceWorkerRegistration } from '@/components/service-worker-registration';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://strike-shop.com';
 
@@ -99,8 +102,9 @@ export const metadata: Metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5, // Allow zooming for accessibility
+  userScalable: true, // Allow zooming for accessibility
+  viewportFit: 'cover', // Enable safe area support for notched devices
   colorScheme: 'light dark',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
@@ -134,10 +138,24 @@ export default function RootLayout({
         <link rel="preload" href="/fonts/CourierPrime-Regular.ttf" as="font" type="font/ttf" crossOrigin="" />
         <link rel="preload" href="/fonts/CourierPrime-Bold.ttf" as="font" type="font/ttf" crossOrigin="" />
         
-        {/* CRITICAL: DNS prefetch for external domains */}
+        {/* CRITICAL: DNS prefetch and preconnect for external domains */}
         <link rel="dns-prefetch" href="//cdn.sanity.io" />
         <link rel="dns-prefetch" href="//medusa-public-images.s3.eu-west-1.amazonaws.com" />
-        <link rel="dns-prefetch" href="//images.unsplash.com" />
+        <link rel="dns-prefetch" href="//clerk.com" />
+        <link rel="dns-prefetch" href="//stripe.com" />
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="" />
+        <link rel="preconnect" href="https://medusa-public-images.s3.eu-west-1.amazonaws.com" crossOrigin="" />
+        <link rel="preconnect" href="https://clerk.com" crossOrigin="" />
+        <link rel="preconnect" href="https://stripe.com" crossOrigin="" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="" />
+        
+        {/* PERFORMANCE: Prefetch critical API endpoints */}
+        <link rel="prefetch" href="/api/products" />
+        <link rel="prefetch" href="/api/categories" />
+        
+        {/* PERFORMANCE: Resource hints for faster font loading */}
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         
         {/* STRUCTURED DATA: Essential for SEO */}
         <Script
@@ -154,8 +172,12 @@ export default function RootLayout({
         />
       </head>
       <body className="font-typewriter">
+        <SkipLink />
         <ProvidersWrapper>
-          {children}
+          <LiveRegionProvider>
+            {children}
+            <ServiceWorkerRegistration />
+          </LiveRegionProvider>
         </ProvidersWrapper>
       </body>
     </html>

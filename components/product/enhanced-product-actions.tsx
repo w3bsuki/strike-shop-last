@@ -142,7 +142,7 @@ export function EnhancedProductActions({ product, slug }: ProductActionsProps) {
         </h3>
         <div className="flex items-center space-x-3">
           <button
-            className="border border-gray-300 hover:border-black disabled:opacity-50 disabled:cursor-not-allowed h-11 w-11 flex items-center justify-center touch-manipulation transition-colors"
+            className="border border-gray-300 hover:border-black disabled:opacity-50 disabled:cursor-not-allowed min-h-touch min-w-touch flex items-center justify-center touch-manipulation transition-colors"
             onClick={decrementQuantity}
             disabled={quantity <= 1}
             aria-label="Decrease quantity"
@@ -153,7 +153,7 @@ export function EnhancedProductActions({ product, slug }: ProductActionsProps) {
             {quantity}
           </span>
           <button
-            className="border border-gray-300 hover:border-black disabled:opacity-50 disabled:cursor-not-allowed h-11 w-11 flex items-center justify-center touch-manipulation transition-colors"
+            className="border border-gray-300 hover:border-black disabled:opacity-50 disabled:cursor-not-allowed min-h-touch min-w-touch flex items-center justify-center touch-manipulation transition-colors"
             onClick={incrementQuantity}
             disabled={quantity >= maxQuantity}
             aria-label="Increase quantity"

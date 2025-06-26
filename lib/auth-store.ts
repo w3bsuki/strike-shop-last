@@ -59,6 +59,7 @@ interface AuthStore {
   setUser: (user: User | null) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
+  clearError: () => void;
 
   // Address management
   addAddress: (address: Address) => void;
@@ -105,6 +106,7 @@ export const useAuthStore = (): AuthStore => {
     setUser: actions.setUser,
     setLoading: actions.setLoading,
     setError: actions.setError,
+    clearError: actions.clearError,
     addAddress: actions.addAddress,
     updateAddress: actions.updateAddress,
     deleteAddress: actions.deleteAddress,

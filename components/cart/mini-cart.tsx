@@ -114,21 +114,21 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
                       <div className="flex items-center justify-between mt-3">
                         <div className="flex items-center space-x-2">
                           <button
-                            className="border border-gray-300 hover:border-black h-8 w-8 flex items-center justify-center touch-manipulation transition-colors"
+                            className="border border-gray-300 hover:border-black min-h-touch min-w-touch flex items-center justify-center touch-manipulation transition-colors"
                             onClick={() => updateItem({ itemId: item.id, size: item.size || 'default', quantity: Math.max(1, item.quantity - 1) })}
                             disabled={isUpdatingItem || item.quantity <= 1}
                           >
-                            <Minus className="h-3 w-3" />
+                            <Minus className="h-5 w-5" />
                           </button>
                           <span className="text-xs font-mono w-8 text-center">
                             {item.quantity}
                           </span>
                           <button
-                            className="border border-gray-300 hover:border-black h-8 w-8 flex items-center justify-center touch-manipulation transition-colors"
+                            className="border border-gray-300 hover:border-black min-h-touch min-w-touch flex items-center justify-center touch-manipulation transition-colors"
                             onClick={() => updateItem({ itemId: item.id, size: item.size || 'default', quantity: item.quantity + 1 })}
                             disabled={isUpdatingItem}
                           >
-                            <Plus className="h-3 w-3" />
+                            <Plus className="h-5 w-5" />
                           </button>
                         </div>
                         

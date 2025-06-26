@@ -1,5 +1,6 @@
 import { MedusaProductService } from '@/lib/medusa-service';
 import type { HomePageCategory, HomePageProduct } from '@/types/home-page';
+import { createCategoryId, createImageURL, createSlug, createProductId } from '@/types';
 import HomePageClient from '@/components/home-page-client';
 
 // PERFORMANCE: Optimized data fetching with aggressive caching
@@ -34,11 +35,11 @@ async function getHomePageData() {
                    categoryImages['default'];
       
       return {
-        id: cat.id,
+        id: createCategoryId(cat.id),
         name: cat.name.toUpperCase(),
         count: 0,
-        image,
-        slug: cat.handle,
+        image: createImageURL(image || ''),
+        slug: createSlug(cat.handle),
       };
     });
 
@@ -46,32 +47,32 @@ async function getHomePageData() {
     if (categories.length < 4) {
       const fallbackCategories: HomePageCategory[] = [
         {
-          id: 'men-fallback',
+          id: createCategoryId('men-fallback'),
           name: "MEN'S CLOTHING",
           count: 0,
-          image: categoryImages['men'],
-          slug: 'men',
+          image: createImageURL(categoryImages['men'] || ''),
+          slug: createSlug('men'),
         },
         {
-          id: 'women-fallback',
+          id: createCategoryId('women-fallback'),
           name: "WOMEN'S CLOTHING",
           count: 0,
-          image: categoryImages['women'],
-          slug: 'women',
+          image: createImageURL(categoryImages['women'] || ''),
+          slug: createSlug('women'),
         },
         {
-          id: 'footwear-fallback',
+          id: createCategoryId('footwear-fallback'),
           name: 'FOOTWEAR',
           count: 0,
-          image: categoryImages['footwear'],
-          slug: 'footwear',
+          image: createImageURL(categoryImages['footwear'] || ''),
+          slug: createSlug('footwear'),
         },
         {
-          id: 'accessories-fallback',
+          id: createCategoryId('accessories-fallback'),
           name: 'ACCESSORIES',
           count: 0,
-          image: categoryImages['accessories'],
-          slug: 'accessories',
+          image: createImageURL(categoryImages['accessories'] || ''),
+          slug: createSlug('accessories'),
         },
       ];
       
@@ -88,7 +89,7 @@ async function getHomePageData() {
       images?: Array<{ url?: string }>;
       variants?: Array<{ id: string }>;
     }): HomePageProduct => {
-      const lowestPrice = MedusaProductService.getLowestPrice(prod);
+      const lowestPrice = MedusaProductService.getLowestPrice(prod as any);
       
       let finalPrice = '€0.00';
       if (lowestPrice) {
@@ -118,20 +119,20 @@ async function getHomePageData() {
       }
       
       return {
-        id: prod.id,
+        id: createProductId(prod.id),
         name: prod.title || '',
         price: finalPrice,
-        image: prod.thumbnail || prod.images?.[0]?.url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=400&fit=crop&crop=center',
-        slug: prod.handle || '',
+        image: createImageURL(prod.thumbnail || prod.images?.[0]?.url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=400&fit=crop&crop=center'),
+        slug: createSlug(prod.handle || ''),
         isNew: true,
         colors: 1,
         description: prod.description || '',
-        sku: prod.variants?.[0]?.sku || '',
-        variants: prod.variants || [],
+        sku: undefined,
+        variants: [],
       };
     };
 
-    const products = medusaProducts.products.map(convertProduct);
+    const products = medusaProducts.products.map((prod: any) => convertProduct(prod));
     
     return {
       categories,

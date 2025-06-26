@@ -7,10 +7,14 @@ import { cn } from '@/lib/utils';
  */
 export function ProductCardSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn('space-y-3', className)}>
-      <Skeleton className="aspect-[3/4] w-full" />
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-3/4" />
+    <div className={cn('space-y-0', className)}>
+      {/* Image skeleton with exact aspect ratio */}
+      <div className="relative bg-gray-100" style={{ aspectRatio: '3/4' }}>
+        <Skeleton className="absolute inset-0" />
+      </div>
+      {/* Content skeleton with exact min-height */}
+      <div className="space-y-2 p-3" style={{ minHeight: '4.5rem' }}>
+        <Skeleton className="h-3 w-3/4" />
         <Skeleton className="h-4 w-1/2" />
       </div>
     </div>
@@ -85,7 +89,10 @@ export function ProductDetailsSkeleton() {
 export function CartItemSkeleton() {
   return (
     <div className="flex gap-4 p-4">
-      <Skeleton className="h-24 w-24 shrink-0" />
+      {/* Cart item image with 3/4 aspect ratio */}
+      <div className="shrink-0 relative bg-gray-100" style={{ width: '96px', aspectRatio: '3/4' }}>
+        <Skeleton className="absolute inset-0" />
+      </div>
       <div className="flex-1 space-y-2">
         <Skeleton className="h-4 w-3/4" />
         <Skeleton className="h-4 w-1/2" />
@@ -100,9 +107,11 @@ export function CartItemSkeleton() {
  */
 export function CategoryCardSkeleton() {
   return (
-    <div className="space-y-3">
-      <Skeleton className="aspect-square w-full" />
-      <Skeleton className="h-4 w-2/3 mx-auto" />
+    <div className="space-y-0">
+      {/* Category image skeleton with 4/5 aspect ratio */}
+      <div className="relative bg-gray-100" style={{ aspectRatio: '4/5' }}>
+        <Skeleton className="absolute inset-0" />
+      </div>
     </div>
   );
 }
@@ -279,15 +288,29 @@ export function CategoryScrollSkeleton({ count = 6 }: { count?: number }) {
  */
 export function HeroBannerSkeleton() {
   return (
-    <section className="relative h-[70vh] bg-gray-100">
-      <Skeleton className="w-full h-full" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Skeleton className="h-12 w-64 mx-auto" />
-          <Skeleton className="h-6 w-96 mx-auto" />
-          <Skeleton className="h-12 w-40 mx-auto" />
+    <>
+      {/* Desktop hero skeleton */}
+      <section className="hidden md:block relative bg-gray-100" style={{ aspectRatio: '16/9' }}>
+        <Skeleton className="absolute inset-0" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <Skeleton className="h-12 w-64 mx-auto" />
+            <Skeleton className="h-6 w-96 mx-auto" />
+            <Skeleton className="h-12 w-40 mx-auto" />
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+      {/* Mobile hero skeleton */}
+      <section className="md:hidden relative bg-gray-100" style={{ aspectRatio: '4/5' }}>
+        <Skeleton className="absolute inset-0" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <Skeleton className="h-10 w-48 mx-auto" />
+            <Skeleton className="h-5 w-64 mx-auto" />
+            <Skeleton className="h-10 w-32 mx-auto" />
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

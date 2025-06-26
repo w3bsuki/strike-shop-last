@@ -49,10 +49,11 @@ export function WishlistButton({
       size={showLabel ? 'default' : 'icon'}
       onClick={handleToggle}
       className={cn(
-        'bg-white/80 backdrop-blur-sm hover:bg-white z-20 transition-all duration-200',
+        'bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-200',
         isWishlisted && 'text-red-500',
         className
       )}
+      style={{ zIndex: 'var(--z-dropdown)' }}
       aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
     >
       <Heart

@@ -58,7 +58,7 @@ export function PerformanceReport() {
   if (!isVisible || process.env.NODE_ENV !== 'development') return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-[500] max-w-sm">
+    <div className="fixed bottom-4 right-4 max-w-sm" style={{ zIndex: 'var(--z-notification)' }}>
       <Card className="bg-black/90 text-white backdrop-blur-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-mono flex items-center justify-between">

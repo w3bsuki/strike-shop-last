@@ -549,38 +549,3 @@ export class ErrorHandler {
   }
 }
 
-/**
- * Custom error class that extends the built-in Error but with our domain error structure
- */
-abstract class DomainError extends Error {
-  public readonly code: string;
-  public readonly timestamp: Date;
-  public readonly context?: Record<string, unknown>;
-
-  constructor(
-    message: string,
-    code: string,
-    context?: Record<string, unknown>
-  ) {
-    super(message);
-    this.name = this.constructor.name;
-    this.code = code;
-    this.timestamp = new Date();
-    this.context = context;
-
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
-    }
-  }
-
-  toJSON(): Record<string, unknown> {
-    return {
-      name: this.name,
-      message: this.message,
-      code: this.code,
-      timestamp: this.timestamp.toISOString(),
-      context: this.context,
-      stack: this.stack,
-    };
-  }
-}

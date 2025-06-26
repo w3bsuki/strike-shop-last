@@ -51,9 +51,9 @@ export function ColorContrastProvider({ children }: ColorContrastProviderProps) 
     if (color.startsWith('#')) {
       const hex = color.slice(1);
       if (hex.length === 3) {
-        const r = parseInt(hex[0] + hex[0], 16);
-        const g = parseInt(hex[1] + hex[1], 16);
-        const b = parseInt(hex[2] + hex[2], 16);
+        const r = parseInt((hex[0] || '0') + (hex[0] || '0'), 16);
+        const g = parseInt((hex[1] || '0') + (hex[1] || '0'), 16);
+        const b = parseInt((hex[2] || '0') + (hex[2] || '0'), 16);
         return [r, g, b];
       } else if (hex.length === 6) {
         const r = parseInt(hex.slice(0, 2), 16);
@@ -66,15 +66,15 @@ export function ColorContrastProvider({ children }: ColorContrastProviderProps) 
     // Handle rgb colors
     const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
     if (rgbMatch) {
-      return [parseInt(rgbMatch[1]), parseInt(rgbMatch[2]), parseInt(rgbMatch[3])];
+      return [parseInt(rgbMatch[1] || '0'), parseInt(rgbMatch[2] || '0'), parseInt(rgbMatch[3] || '0')];
     }
 
     // Handle hsl colors - simplified conversion
     const hslMatch = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
     if (hslMatch) {
-      const h = parseInt(hslMatch[1]) / 360;
-      const s = parseInt(hslMatch[2]) / 100;
-      const l = parseInt(hslMatch[3]) / 100;
+      const h = parseInt(hslMatch[1] || '0') / 360;
+      const s = parseInt(hslMatch[2] || '0') / 100;
+      const l = parseInt(hslMatch[3] || '0') / 100;
       
       const c = (1 - Math.abs(2 * l - 1)) * s;
       const x = c * (1 - Math.abs((h * 6) % 2 - 1));
@@ -113,7 +113,7 @@ export function ColorContrastProvider({ children }: ColorContrastProviderProps) 
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
     
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return 0.2126 * (r || 0) + 0.7152 * (g || 0) + 0.0722 * (b || 0);
   };
 
   // Calculate contrast ratio
@@ -138,8 +138,8 @@ export function ColorContrastProvider({ children }: ColorContrastProviderProps) 
     fontSize: number = 14
   ): ColorContrastResult => {
     const ratio = getContrastRatio(foreground, background);
-    const isLargeText = fontSize >= 18 || (fontSize >= 14 && bold);
     const bold = false; // Would need to be passed as parameter
+    const isLargeText = fontSize >= 18 || (fontSize >= 14 && bold);
     
     // WCAG AA requirements
     const aaRequirement = isLargeText ? 3 : 4.5;

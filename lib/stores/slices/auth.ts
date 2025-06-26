@@ -73,6 +73,11 @@ export const createAuthSlice: StateCreator<
         set((state) => ({
           auth: { ...state.auth, error },
         })),
+      
+      clearError: () =>
+        set((state) => ({
+          auth: { ...state.auth, error: null },
+        })),
 
       // Address management
       addAddress: (address: Address) => {

@@ -5,11 +5,12 @@ import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 
 // BUNDLE OPTIMIZATION: Lazy load QuickView to reduce initial bundle
-const ProductQuickView = dynamic(
-  () => import('@/components/product/quick-view/index').then(mod => ({ default: mod.ProductQuickView })),
+// Using the new modular QuickView implementation
+const QuickViewModalModular = dynamic(
+  () => import('@/components/quick-view/quick-view-modal-modular').then(mod => ({ default: mod.QuickViewModalModular })),
   {
     loading: () => (
-      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center" style={{ zIndex: 'var(--z-modal)' }}>
         <div className="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 animate-pulse">
           <div className="flex space-x-6">
             <div className="w-1/2">
@@ -36,6 +37,7 @@ const ProductQuickView = dynamic(
  * OPTIMIZED: Global QuickViewModal Component
  * 
  * Provides seamless product quick view experience with:
+ * - Modular, reusable modal components
  * - Dynamic loading for performance (reduces initial bundle)
  * - Smooth loading states
  * - Perfect mobile responsiveness
@@ -53,7 +55,7 @@ export function QuickViewModal() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
       </div>
     }>
-      <ProductQuickView
+      <QuickViewModalModular
         product={currentProduct}
         isOpen={isOpen}
         onClose={closeQuickView}

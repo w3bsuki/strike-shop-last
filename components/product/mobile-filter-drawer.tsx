@@ -20,7 +20,7 @@ export function MobileFilterDrawer({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] lg:hidden">
+    <div className="fixed inset-0 lg:hidden" style={{ zIndex: 'var(--z-modal)' }}>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"

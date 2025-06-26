@@ -124,11 +124,14 @@ const ProductCardComponent = ({
         {productDescription}
       </div>
 
-      <div className="product-card-image-wrapper relative">
+      <div 
+        className="product-card-image-wrapper relative bg-gray-100" 
+        style={{ aspectRatio: '3/4' }}
+      >
         <ProductImage
           src={imageSrc}
           alt={`${product.name}${product.soldOut ? ' - sold out' : ''}`}
-          className="product-card-image"
+          className="product-card-image absolute inset-0 w-full h-full object-cover"
           priority={priority}
           sizes="(max-width: 640px) 176px, (max-width: 768px) 192px, (max-width: 1024px) 208px, 240px"
         />
@@ -195,7 +198,7 @@ const ProductCardComponent = ({
         </AccessibleButton>
       </div>
 
-      <div className="product-card-content">
+      <div className="product-card-content" style={{ minHeight: '4.5rem' }}>
         <Link 
           href={`/product/${product.slug}`} 
           className="block focus:outline-2 focus:outline-offset-2 focus:outline-primary rounded-none"

@@ -87,22 +87,24 @@ export default function Header() {
       {isNewsletterVisible && (
         <Landmark 
           role="banner" 
-          className="bg-black text-center py-2 text-[10px] font-normal tracking-wider relative uppercase"
+          className="bg-black text-white py-3 md:py-4 relative"
           label="Newsletter signup banner"
         >
-          <div className="relative">
-            <p className="px-12 font-typewriter font-medium text-white">
-              Sign up to our community newsletter for 10% off your next order
-            </p>
-            <AccessibleButton
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation bg-transparent text-white hover:bg-white/10 focus:bg-white/10"
-              onClick={handleNewsletterDismiss}
-              variant="ghost"
-              description="Closes the newsletter signup banner"
-            >
-              <X className="h-3.5 w-3.5" aria-hidden="true" />
-              <span className="sr-only">Close newsletter banner</span>
-            </AccessibleButton>
+          <div className="strike-container">
+            <div className="flex items-center justify-center relative">
+              <p className="text-sm md:text-base font-typewriter font-medium tracking-wide text-center text-white">
+                SIGN UP FOR 10% OFF YOUR FIRST ORDER
+              </p>
+              <AccessibleButton
+                className="absolute right-0 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation bg-transparent text-white hover:bg-white/20 focus:bg-white/20 transition-colors"
+                onClick={handleNewsletterDismiss}
+                variant="ghost"
+                description="Closes the newsletter signup banner"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+                <span className="sr-only">Close newsletter banner</span>
+              </AccessibleButton>
+            </div>
           </div>
         </Landmark>
       )}
@@ -114,7 +116,7 @@ export default function Header() {
         label="Main site header"
       >
         <nav className="strike-container" role="navigation" aria-label="Main navigation">
-          <div className="flex items-center justify-between h-14">
+          <div className="flex items-center justify-between h-14 relative">
             {/* Mobile Menu Button - Left Side */}
             <div className="lg:hidden flex items-center">
               <AccessibleButton
@@ -132,7 +134,7 @@ export default function Header() {
               </AccessibleButton>
             </div>
 
-            {/* Logo - Left on Desktop, Centered on Mobile */}
+            {/* Logo - Left Side Desktop, Center Mobile */}
             <div className="flex-1 flex justify-center lg:justify-start lg:flex-none">
               <Link
                 href="/"
@@ -143,17 +145,21 @@ export default function Header() {
               </Link>
             </div>
 
-            {/* Desktop Categories - Integrated into Main Navbar */}
-            <div className="hidden lg:flex items-center space-x-6">
+            {/* Desktop Categories - Center */}
+            <div className="hidden lg:flex items-center space-x-8 flex-1 justify-center">
               {navItems.map((item) => (
-                <Link key={item.label} href={item.href} className="nav-link">
-                  "{item.label}"
+                <Link 
+                  key={item.label} 
+                  href={item.href} 
+                  className="nav-link text-sm font-medium uppercase tracking-wider hover:opacity-70 transition-opacity"
+                >
+                  {item.label}
                 </Link>
               ))}
             </div>
 
             {/* Right Side Icons */}
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-1 lg:flex-none">
               {/* Mobile Wishlist Button */}
               {isSignedIn && (
                 <Link href="/wishlist" className="relative lg:hidden flex items-center p-2 min-h-[44px] min-w-[44px] justify-center touch-manipulation hover:bg-gray-50 transition-colors rounded-sm">
@@ -169,7 +175,7 @@ export default function Header() {
               
               {/* Search Button */}
               <button
-                className="hidden sm:flex items-center p-3 min-h-[44px] min-w-[44px] justify-center touch-manipulation hover:bg-gray-50 transition-colors rounded-sm"
+                className="flex items-center p-3 min-h-[44px] min-w-[44px] justify-center touch-manipulation hover:bg-gray-50 transition-colors rounded-sm"
                 aria-label="Search"
                 onClick={() => setIsSearchVisible(!isSearchVisible)}
               >
@@ -264,21 +270,34 @@ export default function Header() {
           </div>
         )}
 
-        {/* Search Bar - Mobile - Fixed */}
-        <div className="sm:hidden border-t border-subtle py-3">
-          <div className="strike-container">
-            <div className="relative">
-              <form onSubmit={handleMobileSearch} className="relative w-full">
-                <Input
-                  placeholder="Search products..."
-                  className="search-input w-full h-12 text-sm"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </form>
+        {/* Search Bar - Mobile */}
+        {isSearchVisible && (
+          <div className="sm:hidden border-t border-subtle py-3">
+            <div className="strike-container">
+              <div className="relative">
+                <form onSubmit={handleMobileSearch} className="relative w-full">
+                  <Input
+                    placeholder="Search products..."
+                    className="search-input w-full h-12 text-sm"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 hover:text-black p-1 min-h-[32px] min-w-[32px] flex items-center justify-center touch-manipulation"
+                    onClick={() => {
+                      setIsSearchVisible(false);
+                      setSearchQuery('');
+                    }}
+                  >
+                    ESC
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </Landmark>
 
       {/* Mobile Menu Overlay - Slides from Left */}
@@ -319,10 +338,10 @@ export default function Header() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="block nav-link text-sm py-2 border-b border-subtle/50"
+                  className="block nav-link text-sm py-2 border-b border-subtle/50 uppercase tracking-wider"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  "{item.label}"
+                  {item.label}
                 </Link>
               ))}
             </nav>

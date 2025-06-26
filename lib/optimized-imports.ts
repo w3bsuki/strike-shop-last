@@ -8,7 +8,7 @@ export { Search } from 'lucide-react/dist/esm/icons/search';
 export { Menu } from 'lucide-react/dist/esm/icons/menu';
 export { X } from 'lucide-react/dist/esm/icons/x';
 export { ShoppingCart } from 'lucide-react/dist/esm/icons/shopping-cart';
-export { User } from 'lucide-react/dist/esm/icons/user';
+export { User as UserIcon } from 'lucide-react/dist/esm/icons/user';
 export { Heart } from 'lucide-react/dist/esm/icons/heart';
 export { Star } from 'lucide-react/dist/esm/icons/star';
 export { Plus } from 'lucide-react/dist/esm/icons/plus';
@@ -68,6 +68,7 @@ export const ReactQueryDevtools = process.env.NODE_ENV === 'development'
 
 // Clerk - Specific imports only
 export { useUser, useAuth, SignIn, SignUp, UserButton } from '@clerk/nextjs';
+export type { User as ClerkUser } from '@clerk/nextjs';
 
 // Stripe - Tree-shaken imports
 export { loadStripe } from '@stripe/stripe-js';

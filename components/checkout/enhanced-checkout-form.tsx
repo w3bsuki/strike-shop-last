@@ -88,7 +88,7 @@ function CheckoutForm({ clientSecret, onPaymentSuccess, onPaymentError }: Checko
           <button
             type="button"
             onClick={() => setPaymentMethod('auto')}
-            className={`p-4 border text-left transition-all ${
+            className={`p-4 border text-left transition-all min-h-touch ${
               paymentMethod === 'auto'
                 ? 'border-black bg-gray-50'
                 : 'border-gray-300 hover:border-gray-400'
@@ -101,7 +101,7 @@ function CheckoutForm({ clientSecret, onPaymentSuccess, onPaymentError }: Checko
           <button
             type="button"
             onClick={() => setPaymentMethod('card')}
-            className={`p-4 border text-left transition-all ${
+            className={`p-4 border text-left transition-all min-h-touch ${
               paymentMethod === 'card'
                 ? 'border-black bg-gray-50'
                 : 'border-gray-300 hover:border-gray-400'
@@ -114,7 +114,7 @@ function CheckoutForm({ clientSecret, onPaymentSuccess, onPaymentError }: Checko
           <button
             type="button"
             onClick={() => setPaymentMethod('klarna')}
-            className={`p-4 border text-left transition-all ${
+            className={`p-4 border text-left transition-all min-h-touch ${
               paymentMethod === 'klarna'
                 ? 'border-black bg-gray-50'
                 : 'border-gray-300 hover:border-gray-400'
@@ -214,7 +214,7 @@ function CheckoutForm({ clientSecret, onPaymentSuccess, onPaymentError }: Checko
       <Button
         type="submit"
         disabled={!stripe || isProcessing}
-        className="w-full py-4 bg-black text-white hover:bg-gray-800 disabled:bg-gray-300 font-mono text-sm font-bold uppercase tracking-wider"
+        className="w-full py-4 bg-black text-white hover:bg-gray-800 disabled:bg-gray-300 font-mono text-sm font-bold uppercase tracking-wider min-h-touch-lg"
       >
         {isProcessing ? (
           <>

@@ -242,6 +242,79 @@ global.scrollTo = jest.fn();
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
+// Mock Request and Response for Next.js
+if (!global.Request) {
+  global.Request = class Request {
+    constructor(input, init) {
+      this.url = typeof input === 'string' ? input : input.url;
+      this.method = init?.method || 'GET';
+      this.headers = new Headers(init?.headers);
+      this.body = init?.body;
+    }
+    
+    json() {
+      return Promise.resolve(JSON.parse(this.body || '{}'));
+    }
+    
+    text() {
+      return Promise.resolve(this.body || '');
+    }
+  };
+}
+
+if (!global.Response) {
+  global.Response = class Response {
+    constructor(body, init) {
+      this.body = body;
+      this.status = init?.status || 200;
+      this.statusText = init?.statusText || 'OK';
+      this.headers = new Headers(init?.headers);
+      this.ok = this.status >= 200 && this.status < 300;
+    }
+    
+    json() {
+      return Promise.resolve(JSON.parse(this.body || '{}'));
+    }
+    
+    text() {
+      return Promise.resolve(this.body || '');
+    }
+  };
+}
+
+if (!global.Headers) {
+  global.Headers = class Headers {
+    constructor(init) {
+      this._headers = {};
+      if (init) {
+        Object.entries(init).forEach(([key, value]) => {
+          this._headers[key.toLowerCase()] = value;
+        });
+      }
+    }
+    
+    get(name) {
+      return this._headers[name.toLowerCase()] || null;
+    }
+    
+    set(name, value) {
+      this._headers[name.toLowerCase()] = value;
+    }
+    
+    has(name) {
+      return name.toLowerCase() in this._headers;
+    }
+    
+    delete(name) {
+      delete this._headers[name.toLowerCase()];
+    }
+    
+    entries() {
+      return Object.entries(this._headers);
+    }
+  };
+}
+
 // Mock fetch
 global.fetch = jest.fn();
 
@@ -269,3 +342,46 @@ global.console = {
   warn: jest.fn(),
   error: jest.fn(),
 };
+
+// Mock lucide-react icon imports
+const mockIcon = (props) => {
+  const React = require('react');
+  return React.createElement('svg', { ...props, 'data-testid': 'mock-icon' });
+};
+
+// Create list of icon names and their paths
+const iconMap = {
+  'search': 'Search',
+  'menu': 'Menu',
+  'x': 'X',
+  'shopping-cart': 'ShoppingCart',
+  'user': 'User',
+  'heart': 'Heart',
+  'star': 'Star',
+  'plus': 'Plus',
+  'minus': 'Minus',
+  'chevron-down': 'ChevronDown',
+  'chevron-up': 'ChevronUp',
+  'chevron-left': 'ChevronLeft',
+  'chevron-right': 'ChevronRight',
+  'filter': 'Filter',
+  'sliders-horizontal': 'SlidersHorizontal',
+  'grid-3x3': 'Grid3X3',
+  'list': 'List',
+  'trash-2': 'Trash2',
+  'edit': 'Edit',
+  'eye': 'Eye',
+  'eye-off': 'EyeOff',
+  'check': 'Check',
+  'alert-circle': 'AlertCircle',
+  'info': 'Info',
+  'loader-2': 'Loader2',
+};
+
+// Mock individual icon imports
+Object.entries(iconMap).forEach(([path, name]) => {
+  jest.mock(`lucide-react/dist/esm/icons/${path}`, () => ({
+    [name]: mockIcon,
+    default: mockIcon,
+  }), { virtual: true });
+});

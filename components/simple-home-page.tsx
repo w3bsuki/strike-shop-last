@@ -1,4 +1,4 @@
-import SimpleHeader from './simple-header';
+import { SiteHeader } from '@/components/navigation';
 import type { HomePageProps } from '@/types/home-page';
 
 export default function SimpleHomePage({
@@ -8,7 +8,7 @@ export default function SimpleHomePage({
 }: HomePageProps) {
   return (
     <main className="bg-white">
-      <SimpleHeader />
+      <SiteHeader />
       
       {/* Hero Section */}
       <section className="relative h-[60vh] bg-gray-100 flex items-center justify-center">

@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import SimpleHeader from '@/components/simple-header';
+import { SiteHeader } from '@/components/navigation';
 
 export default function WishlistPage() {
   return (
     <main className="bg-white min-h-screen">
-      <SimpleHeader />
+      <SiteHeader />
       <div className="container px-4 py-16">
         <h1 className="text-2xl font-bold mb-8">My Wishlist</h1>
         <p className="mb-4">Your wishlist is empty.</p>

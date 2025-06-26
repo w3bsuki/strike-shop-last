@@ -62,6 +62,7 @@ export interface AuthActions {
   setUser: (user: User | null) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
+  clearError: () => void;
   addAddress: (address: Address) => void;
   updateAddress: (addressId: string, updates: Partial<Address>) => void;
   deleteAddress: (addressId: string) => void;

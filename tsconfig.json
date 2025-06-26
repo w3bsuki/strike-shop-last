@@ -79,6 +79,13 @@
     "medusa-config.*.ts",
     "my-medusa-store",
     "sanity-studio/**/*",
-    "sanity/**/*"
+    "sanity/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "__tests__/**/*",
+    "jest.config.*",
+    "scripts/**/*"
   ]
 }

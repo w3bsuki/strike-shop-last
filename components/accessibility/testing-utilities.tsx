@@ -199,7 +199,7 @@ export function AccessibilityTestPanel() {
   const warningCount = issues.filter(issue => issue.type === 'warning').length;
 
   return (
-    <div className="fixed bottom-4 right-4 w-96 max-h-96 bg-white border-2 border-gray-300 shadow-lg z-[9999] overflow-hidden flex flex-col">
+    <div className="fixed bottom-4 right-4 w-96 max-h-96 bg-white border-2 border-gray-300 shadow-lg z-tooltip overflow-hidden flex flex-col">
       <div className="bg-gray-100 p-3 border-b flex justify-between items-center">
         <h3 className="font-bold text-sm">Accessibility Audit</h3>
         <button
@@ -347,7 +347,7 @@ export function FocusDebugger() {
   }
 
   return (
-    <div className="fixed top-4 right-4 bg-white border p-4 shadow-lg z-[9999]">
+    <div className="fixed top-4 right-4 bg-white border p-4 shadow-lg z-tooltip">
       <h4 className="font-bold mb-2">Focus Debugger</h4>
       <button
         onClick={() => setIsActive(!isActive)}
@@ -425,7 +425,7 @@ export function ScreenReaderDebugger() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 w-80 bg-white border shadow-lg z-[9999] max-h-60 overflow-y-auto">
+    <div className="fixed bottom-4 left-4 w-80 bg-white border shadow-lg z-tooltip max-h-60 overflow-y-auto">
       <div className="bg-gray-100 p-2 border-b">
         <h4 className="font-bold text-sm">Screen Reader Announcements</h4>
       </div>
@@ -505,7 +505,7 @@ export function ColorContrastChecker() {
   const contrast = selectedElement ? getElementContrast(selectedElement) : null;
 
   return (
-    <div className="fixed top-20 right-4 bg-white border p-4 shadow-lg z-[9999] w-64">
+    <div className="fixed top-20 right-4 bg-white border p-4 shadow-lg z-tooltip w-64">
       <h4 className="font-bold mb-2">Color Contrast Checker</h4>
       
       <button

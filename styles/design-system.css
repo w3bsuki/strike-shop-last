@@ -1,0 +1,476 @@
+/**
+ * Strike Shop Design System CSS
+ * Global CSS variables and utility classes for consistent design
+ */
+
+/* ============================================================================
+   Root Design Tokens
+   ============================================================================ */
+
+:root {
+  /* Typography Scale with Responsive Clamp */
+  --font-size-xs: clamp(0.625rem, 0.5rem + 0.5vw, 0.75rem);
+  --font-size-sm: clamp(0.75rem, 0.625rem + 0.5vw, 0.875rem);
+  --font-size-base: clamp(0.875rem, 0.75rem + 0.5vw, 1rem);
+  --font-size-lg: clamp(1rem, 0.875rem + 0.5vw, 1.125rem);
+  --font-size-xl: clamp(1.125rem, 1rem + 0.5vw, 1.25rem);
+  --font-size-2xl: clamp(1.25rem, 1.125rem + 0.75vw, 1.5rem);
+  --font-size-3xl: clamp(1.5rem, 1.25rem + 1vw, 1.875rem);
+  --font-size-4xl: clamp(1.875rem, 1.5rem + 1.5vw, 2.25rem);
+  --font-size-5xl: clamp(2.25rem, 1.875rem + 2vw, 3rem);
+  --font-size-6xl: clamp(3rem, 2.25rem + 3vw, 3.75rem);
+  
+  /* Line Heights */
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+  --line-height-loose: 1.75;
+  
+  /* Letter Spacing */
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+  --letter-spacing-strike: 0.1em;
+  --letter-spacing-strike-wide: 0.15em;
+  
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Spacing Scale */
+  --space-0: 0px;
+  --space-px: 1px;
+  --space-0-5: 0.125rem;  /* 2px */
+  --space-1: 0.25rem;     /* 4px */
+  --space-1-5: 0.375rem;  /* 6px */
+  --space-2: 0.5rem;      /* 8px */
+  --space-2-5: 0.625rem;  /* 10px */
+  --space-3: 0.75rem;     /* 12px */
+  --space-3-5: 0.875rem;  /* 14px */
+  --space-4: 1rem;        /* 16px */
+  --space-5: 1.25rem;     /* 20px */
+  --space-6: 1.5rem;      /* 24px */
+  --space-7: 1.75rem;     /* 28px */
+  --space-8: 2rem;        /* 32px */
+  --space-9: 2.25rem;     /* 36px */
+  --space-10: 2.5rem;     /* 40px */
+  --space-11: 2.75rem;    /* 44px - minimum touch target */
+  --space-12: 3rem;       /* 48px - comfortable touch target */
+  --space-14: 3.5rem;     /* 56px */
+  --space-16: 4rem;       /* 64px */
+  --space-20: 5rem;       /* 80px */
+  --space-24: 6rem;       /* 96px */
+  
+  /* Touch Targets */
+  --touch-target-min: 2.75rem; /* 44px */
+  --touch-target-comfortable: 3rem; /* 48px */
+  
+  /* Strike Brand Colors */
+  --color-strike-black: hsl(0 0% 0%);
+  --color-strike-white: hsl(0 0% 100%);
+  --color-strike-gray-50: hsl(0 0% 98%);
+  --color-strike-gray-100: hsl(0 0% 96%);
+  --color-strike-gray-200: hsl(0 0% 90%);
+  --color-strike-gray-300: hsl(0 0% 80%);
+  --color-strike-gray-400: hsl(0 0% 65%);
+  --color-strike-gray-500: hsl(0 0% 50%);
+  --color-strike-gray-600: hsl(0 0% 40%);
+  --color-strike-gray-700: hsl(0 0% 30%);
+  --color-strike-gray-800: hsl(0 0% 20%);
+  --color-strike-gray-900: hsl(0 0% 10%);
+  --color-strike-gray-950: hsl(0 0% 5%);
+  
+  /* Semantic Colors */
+  --color-error: hsl(0 84% 60%);
+  --color-warning: hsl(38 92% 50%);
+  --color-success: hsl(142 71% 45%);
+  --color-info: hsl(210 100% 50%);
+  
+  /* Border Radius */
+  --radius-none: 0;
+  --radius-subtle: 2px;
+  --radius-soft: 4px;
+  
+  /* Shadows */
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  
+  /* Animation Durations */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+  
+  /* Animation Easings */
+  --easing-linear: linear;
+  --easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* Z-Index Scale */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* ============================================================================
+   Mobile-First Responsive Typography
+   ============================================================================ */
+
+/* Base typography setup */
+html {
+  font-size: 16px; /* Base font size for rem calculations */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Typewriter', 'Courier Prime', ui-monospace, monospace;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-normal);
+  color: var(--color-strike-black);
+  background-color: var(--color-strike-white);
+}
+
+/* Heading styles with responsive sizing */
+h1 {
+  font-size: var(--font-size-4xl);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-6);
+}
+
+h2 {
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-5);
+}
+
+h3 {
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-tight);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-4);
+}
+
+h4 {
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-normal);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-3);
+}
+
+h5 {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-normal);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-3);
+}
+
+h6 {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-wide);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-2);
+}
+
+/* Body text styles */
+p {
+  margin-bottom: var(--space-4);
+  line-height: var(--line-height-relaxed);
+}
+
+/* Strike-specific text styles */
+.text-strike-xs {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-strike);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+}
+
+.text-strike-sm {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-strike);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+}
+
+.text-strike-base {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-wider);
+  font-weight: var(--font-weight-medium);
+}
+
+.text-strike-lg {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-wider);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ============================================================================
+   Consistent Spacing Utilities
+   ============================================================================ */
+
+/* Padding utilities */
+.p-0 { padding: var(--space-0); }
+.p-1 { padding: var(--space-1); }
+.p-2 { padding: var(--space-2); }
+.p-3 { padding: var(--space-3); }
+.p-4 { padding: var(--space-4); }
+.p-5 { padding: var(--space-5); }
+.p-6 { padding: var(--space-6); }
+.p-8 { padding: var(--space-8); }
+.p-10 { padding: var(--space-10); }
+.p-12 { padding: var(--space-12); }
+
+/* Margin utilities */
+.m-0 { margin: var(--space-0); }
+.m-1 { margin: var(--space-1); }
+.m-2 { margin: var(--space-2); }
+.m-3 { margin: var(--space-3); }
+.m-4 { margin: var(--space-4); }
+.m-5 { margin: var(--space-5); }
+.m-6 { margin: var(--space-6); }
+.m-8 { margin: var(--space-8); }
+.m-10 { margin: var(--space-10); }
+.m-12 { margin: var(--space-12); }
+
+/* Gap utilities for flexbox/grid */
+.gap-0 { gap: var(--space-0); }
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-5 { gap: var(--space-5); }
+.gap-6 { gap: var(--space-6); }
+.gap-8 { gap: var(--space-8); }
+
+/* ============================================================================
+   Touch Target Standards
+   ============================================================================ */
+
+/* Ensure minimum touch target sizes */
+button,
+a,
+input,
+select,
+textarea,
+[role="button"],
+[role="link"],
+[role="checkbox"],
+[role="radio"],
+[tabindex]:not([tabindex="-1"]) {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+}
+
+/* Mobile-specific touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role="button"],
+  [role="link"] {
+    min-height: var(--touch-target-comfortable);
+    min-width: var(--touch-target-comfortable);
+  }
+}
+
+/* ============================================================================
+   Component-specific Design Tokens
+   ============================================================================ */
+
+/* Button styles */
+.strike-button {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-strike);
+  text-transform: uppercase;
+  padding: var(--space-2-5) var(--space-6);
+  min-height: var(--space-10);
+  border-radius: var(--radius-none);
+  transition: all var(--duration-base) var(--easing-out);
+}
+
+.strike-button-sm {
+  font-size: var(--font-size-xs);
+  padding: var(--space-2) var(--space-4);
+  min-height: var(--space-8);
+}
+
+.strike-button-lg {
+  font-size: var(--font-size-base);
+  padding: var(--space-3) var(--space-8);
+  min-height: var(--space-12);
+}
+
+/* Input styles */
+.strike-input {
+  font-size: var(--font-size-base);
+  padding: var(--space-2) var(--space-3);
+  min-height: var(--space-10);
+  border-radius: var(--radius-none);
+  border: 1px solid var(--color-strike-gray-300);
+  transition: border-color var(--duration-base) var(--easing-out);
+}
+
+.strike-input:focus {
+  outline: none;
+  border-color: var(--color-strike-black);
+  box-shadow: 0 0 0 2px var(--color-strike-gray-200);
+}
+
+/* Card styles */
+.strike-card {
+  padding: var(--space-4);
+  border: 1px solid var(--color-strike-gray-200);
+  border-radius: var(--radius-none);
+  background-color: var(--color-strike-white);
+  transition: box-shadow var(--duration-base) var(--easing-out);
+}
+
+.strike-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================================================
+   Mobile-First Media Queries
+   ============================================================================ */
+
+/* Small devices (landscape phones, 640px and up) */
+@media (min-width: 640px) {
+  .sm\:text-strike-xs { font-size: var(--font-size-xs); }
+  .sm\:text-strike-sm { font-size: var(--font-size-sm); }
+  .sm\:text-strike-base { font-size: var(--font-size-base); }
+  .sm\:text-strike-lg { font-size: var(--font-size-lg); }
+  
+  .sm\:p-4 { padding: var(--space-4); }
+  .sm\:p-6 { padding: var(--space-6); }
+  .sm\:p-8 { padding: var(--space-8); }
+  
+  .sm\:gap-4 { gap: var(--space-4); }
+  .sm\:gap-6 { gap: var(--space-6); }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  .md\:text-strike-sm { font-size: var(--font-size-sm); }
+  .md\:text-strike-base { font-size: var(--font-size-base); }
+  .md\:text-strike-lg { font-size: var(--font-size-lg); }
+  .md\:text-strike-xl { font-size: var(--font-size-xl); }
+  
+  .md\:p-6 { padding: var(--space-6); }
+  .md\:p-8 { padding: var(--space-8); }
+  .md\:p-10 { padding: var(--space-10); }
+  
+  .md\:gap-6 { gap: var(--space-6); }
+  .md\:gap-8 { gap: var(--space-8); }
+}
+
+/* Large devices (desktops, 1024px and up) */
+@media (min-width: 1024px) {
+  .lg\:text-strike-base { font-size: var(--font-size-base); }
+  .lg\:text-strike-lg { font-size: var(--font-size-lg); }
+  .lg\:text-strike-xl { font-size: var(--font-size-xl); }
+  .lg\:text-strike-2xl { font-size: var(--font-size-2xl); }
+  
+  .lg\:p-8 { padding: var(--space-8); }
+  .lg\:p-10 { padding: var(--space-10); }
+  .lg\:p-12 { padding: var(--space-12); }
+  
+  .lg\:gap-8 { gap: var(--space-8); }
+  .lg\:gap-10 { gap: var(--space-10); }
+}
+
+/* ============================================================================
+   Utility Classes
+   ============================================================================ */
+
+/* Animation utilities */
+.transition-all {
+  transition: all var(--duration-base) var(--easing-out);
+}
+
+.transition-fast {
+  transition-duration: var(--duration-fast);
+}
+
+.transition-slow {
+  transition-duration: var(--duration-slow);
+}
+
+/* Focus utilities */
+.focus-ring:focus {
+  outline: 2px solid var(--color-strike-black);
+  outline-offset: 2px;
+}
+
+/* Hover utilities */
+@media (hover: hover) {
+  .hover\:shadow-sm:hover { box-shadow: var(--shadow-sm); }
+  .hover\:shadow-md:hover { box-shadow: var(--shadow-md); }
+  .hover\:shadow-lg:hover { box-shadow: var(--shadow-lg); }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  * {
+    border-width: 2px !important;
+  }
+  
+  .strike-button,
+  .strike-input,
+  .strike-card {
+    border: 2px solid currentColor !important;
+  }
+}
+
+/* Dark mode variables (if needed in future) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark mode color overrides can be added here */
+  }
+}

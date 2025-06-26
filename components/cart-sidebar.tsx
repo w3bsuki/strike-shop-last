@@ -58,7 +58,7 @@ export default function CartSidebar() {
   const total = subtotal + shipping;
 
   return (
-    <div className="fixed inset-0 z-[300] lg:z-50">
+    <div className="fixed inset-0" style={{ zIndex: 'var(--z-modal)' }}>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"

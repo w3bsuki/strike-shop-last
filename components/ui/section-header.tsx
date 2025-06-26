@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 interface SectionHeaderProps {
+  id?: string;
   title: string;
   ctaText?: string;
   ctaHref?: string;
@@ -11,6 +12,7 @@ interface SectionHeaderProps {
 }
 
 export function SectionHeader({ 
+  id,
   title, 
   ctaText = "VIEW ALL", 
   ctaHref,
@@ -19,32 +21,32 @@ export function SectionHeader({
   variant = 'default'
 }: SectionHeaderProps) {
   const headerClasses = cn(
-    "flex items-baseline justify-between",
+    "flex items-start sm:items-baseline justify-between gap-2 sm:gap-4",
     {
-      'mb-4 md:mb-6': variant === 'default',
-      'mb-6 md:mb-8': variant === 'large', 
-      'mb-3 md:mb-4': variant === 'compact'
+      'mb-3 sm:mb-4 md:mb-6': variant === 'default',
+      'mb-4 sm:mb-6 md:mb-8': variant === 'large', 
+      'mb-2 sm:mb-3 md:mb-4': variant === 'compact'
     },
     className
   );
 
   const titleClasses = cn(
-    "font-bold uppercase tracking-wider font-typewriter",
+    "font-bold uppercase tracking-wider font-typewriter leading-tight",
     {
-      'text-xs': variant === 'default' || variant === 'compact',
-      'text-sm md:text-base': variant === 'large'
+      'text-xs sm:text-sm': variant === 'default' || variant === 'compact',
+      'text-sm sm:text-base md:text-lg': variant === 'large'
     }
   );
 
   const ctaClasses = cn(
     "group uppercase font-typewriter hover:opacity-70 transition-opacity duration-200",
-    "text-xs tracking-wider flex items-center gap-1",
+    "text-xs tracking-wider flex items-center gap-1 flex-shrink-0 self-start sm:self-baseline",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
   );
 
   return (
     <div className={headerClasses}>
-      <h2 className={titleClasses}>
+      <h2 id={id} className={titleClasses}>
         {title}
       </h2>
       {showCta && ctaHref && (

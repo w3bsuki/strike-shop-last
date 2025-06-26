@@ -1,42 +1,51 @@
-import React from 'react';
-import { ProductCard } from './product-card';
-import type { IntegratedProduct } from '@/types/integrated';
+"use client";
 
-interface ProductGridProps {
-  products: IntegratedProduct[];
-  className?: string;
-  priority?: boolean; // For above-the-fold products
-}
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
 
-/**
- * Server Component - Product Grid
- * Renders a grid of product cards
- */
-export function ProductGrid({
-  products,
-  className = '',
-  priority = false,
-}: ProductGridProps) {
-  if (!products || products.length === 0) {
+const productGridVariants = cva(
+  "grid gap-4 md:gap-6",
+  {
+    variants: {
+      cols: {
+        2: "grid-cols-2",
+        3: "grid-cols-2 md:grid-cols-3",
+        4: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+        5: "grid-cols-2 md:grid-cols-3 lg:grid-cols-5",
+        6: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6",
+      },
+      gap: {
+        none: "gap-0",
+        sm: "gap-2 md:gap-3",
+        default: "gap-4 md:gap-6",
+        lg: "gap-6 md:gap-8",
+      },
+    },
+    defaultVariants: {
+      cols: 4,
+      gap: "default",
+    },
+  }
+);
+
+export interface ProductGridProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof productGridVariants> {}
+
+const ProductGrid = React.forwardRef<HTMLDivElement, ProductGridProps>(
+  ({ className, cols, gap, children, ...props }, ref) => {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">No products found</p>
+      <div
+        ref={ref}
+        className={cn(productGridVariants({ cols, gap }), className)}
+        {...props}
+      >
+        {children}
       </div>
     );
   }
+);
+ProductGrid.displayName = "ProductGrid";
 
-  return (
-    <div
-      className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 ${className}`}
-    >
-      {products.map((product, index) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          priority={priority && index < 4} // Prioritize first 4 images if priority is true
-          className="touch-manipulation"
-        />
-      ))}
-    </div>
-  );
-}
+export { ProductGrid, productGridVariants };

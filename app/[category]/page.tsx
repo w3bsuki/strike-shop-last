@@ -1,4 +1,4 @@
-import Header from '@/components/header';
+import { SiteHeader } from '@/components/navigation';
 import Footer from '@/components/footer';
 import CategoryPageClient from '@/components/category-page-client';
 import { QuickViewProvider } from '@/contexts/QuickViewContext';
@@ -71,7 +71,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   return (
     <QuickViewProvider>
       <main className="bg-white">
-        <Header />
+        <SiteHeader />
         <CategoryPageClient
           categoryName={categoryName}
           initialProducts={products}

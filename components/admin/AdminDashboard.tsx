@@ -18,13 +18,17 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-// Temporarily commented out for build fix
-// import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
-// import {
-//   ChartContainer,
-//   ChartTooltip,
-//   ChartTooltipContent,
-// } from '@/components/ui/chart';
+// BUNDLE OPTIMIZATION: Lazy load Recharts components (~1MB)
+import {
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart-dynamic';
 
 export function AdminDashboard() {
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month' | 'year'>(
@@ -238,10 +242,29 @@ export function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <div className="h-[300px]">
-            {/* Temporarily disabled chart for build */}
-            <div className="h-full flex items-center justify-center border border-dashed border-gray-300 rounded">
-              <p className="text-gray-500">Revenue Chart - Temporarily disabled for build</p>
-            </div>
+            <ChartContainer
+              config={{
+                revenue: {
+                  label: 'Revenue',
+                  color: 'hsl(var(--primary))',
+                },
+              }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={revenueData}>
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="var(--color-revenue)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
           </div>
         </CardContent>
       </Card>

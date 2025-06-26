@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Header from '@/components/header';
+import { SiteHeader } from '@/components/navigation';
 import Footer from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Package, Mail, Printer } from 'lucide-react';
@@ -107,18 +107,11 @@ export default function OrderConfirmationPage() {
     }).format(amount / 100);
   };
 
-  const _formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   if (isLoading) {
     return (
       <main className="bg-white min-h-screen">
-        <Header />
+        <SiteHeader />
         <div className="section-padding">
           <div className="strike-container max-w-2xl mx-auto text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
@@ -134,7 +127,7 @@ export default function OrderConfirmationPage() {
 
   return (
     <main className="bg-white min-h-screen">
-      <Header />
+      <SiteHeader />
       <div className="section-padding">
         <div className="strike-container max-w-4xl mx-auto">
           {/* Success Message */}
@@ -262,7 +255,7 @@ export default function OrderConfirmationPage() {
                     <div className="relative w-20 h-24 bg-gray-100 flex-shrink-0">
                       <Image
                         src={item.thumbnail || '/placeholder.svg'}
-                        alt={item.title}
+                        alt={item.title || 'Product image'}
                         fill
                         className="object-cover rounded"
                       />
@@ -270,8 +263,7 @@ export default function OrderConfirmationPage() {
                     <div className="flex-1">
                       <h4 className="font-medium">{item.title}</h4>
                       <p className="text-sm text-gray-500">
-                        Size: {item.variant?.title || 'N/A'} | Qty:{' '}
-                        {item.quantity}
+                        Size: {item.variant?.title || 'N/A'} | Qty: {item.quantity}
                       </p>
                       <p className="text-sm font-bold mt-1">
                         {formatPrice(item.total || 0)}

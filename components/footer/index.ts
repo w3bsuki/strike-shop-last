@@ -1,0 +1,9 @@
+export { Footer } from './footer';
+export { FooterSection } from './footer-section';
+export { FooterHeader } from './footer-header';
+export { FooterNav } from './footer-nav';
+export { FooterLink } from './footer-link';
+export { FooterNewsletter } from './footer-newsletter';
+export { FooterSocial } from './footer-social';
+export { FooterBottom } from './footer-bottom';
+export { FooterLogo } from './footer-logo';

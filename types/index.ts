@@ -13,7 +13,8 @@ export type {
 export {
   createProductId, createVariantId, createCartId, createLineItemId,
   createUserId, createCustomerId, createOrderId, createCategoryId,
-  createEmail, createPrice, createQuantity, createCurrencyCode
+  createEmail, createPrice, createQuantity, createCurrencyCode,
+  createImageURL, createSlug, createSKU
 } from './branded';
 
 // Advanced utility types

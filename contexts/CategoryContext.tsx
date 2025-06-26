@@ -36,6 +36,7 @@ interface CategoryContextValue {
   filteredProducts: Product[];
   sortedProducts: Product[];
   activeFiltersCount: number;
+  isLoading: boolean;
 
   // Filter state
   filters: FilterState;
@@ -71,6 +72,7 @@ export function CategoryProvider({
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
+  const [isLoading, setIsLoading] = useState(false);
 
   const filteredProducts = useMemo(() => {
     return initialProducts.filter((product) => {
@@ -161,6 +163,7 @@ export function CategoryProvider({
     filteredProducts,
     sortedProducts,
     activeFiltersCount,
+    isLoading,
     filters,
     setSearchQuery,
     toggleColor,

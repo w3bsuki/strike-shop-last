@@ -48,12 +48,15 @@ export function OptimizedImage({
   const [isInView, setIsInView] = useState(priority);
   const imgRef = useRef<HTMLDivElement>(null);
 
-  // PERFORMANCE: Generate ultra-light optimized blur placeholder
+  // PERFORMANCE: Generate ultra-light optimized blur placeholder with better compression
   const defaultBlurDataURL = 
     blurDataURL || 
     `data:image/svg+xml;base64,${btoa(
       `<svg width="${width || 400}" height="${height || 300}" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill="#f3f4f6"/>
+        <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="20" />
+        </filter>
+        <rect width="100%" height="100%" fill="#f3f4f6" filter="url(#blur)"/>
         <rect width="100%" height="100%" fill="url(#gradient)" opacity="0.3"/>
         <defs>
           <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -79,8 +82,8 @@ export function OptimizedImage({
         });
       },
       {
-        rootMargin: '100px', // Increased margin for better UX
-        threshold: 0.1,
+        rootMargin: '200px', // Further increased for mobile networks
+        threshold: 0.01, // Lower threshold for earlier loading
         // PERFORMANCE: Use passive event listeners
       }
     );
@@ -103,7 +106,8 @@ export function OptimizedImage({
     onError?.();
   };
 
-  const containerStyle = aspectRatio ? { aspectRatio } : {};
+  // Ensure aspect ratio is always applied for layout stability
+  const containerStyle = aspectRatio ? { aspectRatio } : width && height ? { aspectRatio: `${width}/${height}` } : {};
 
   return (
     <div
@@ -127,6 +131,7 @@ export function OptimizedImage({
           width={width}
           height={height}
           className={cn(
+            'absolute inset-0 w-full h-full',
             'transition-opacity duration-300 ease-in-out',
             isLoaded ? 'opacity-100' : 'opacity-0',
             objectFit === 'cover' && 'object-cover',
@@ -145,9 +150,10 @@ export function OptimizedImage({
           loading={priority ? 'eager' : 'lazy'}
           onLoad={handleLoad}
           onError={handleError}
-          style={{ width: '100%', height: '100%' }}
           // PERFORMANCE: Optimize image decoding
           decoding="async"
+          // PERFORMANCE: Fetch priority for LCP images
+          fetchPriority={priority ? 'high' : 'low'}
         />
       )}
       
@@ -182,8 +188,8 @@ export function ProductImage({
       src={src}
       alt={alt}
       width={400}
-      height={500}
-      aspectRatio="4/5"
+      height={533} // 3:4 aspect ratio (400 * 4/3)
+      aspectRatio="3/4"
       priority={priority}
       className={cn('rounded-lg', className)}
       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
