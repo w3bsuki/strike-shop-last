@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Header from '@/components/header';
+import { SiteHeader } from '@/components/navigation';
 import { useUser, SignInButton, UserButton } from '@/lib/clerk-mock';
 import { useWishlistCount } from '@/lib/stores';
 import { useRouter } from 'next/navigation';
@@ -10,6 +10,36 @@ import { useAria, useFocusManager, useFocusTrap } from '@/components/accessibili
 // Mock dependencies
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+}));
+
+// Mock navigation components
+jest.mock('@/components/navigation/newsletter-banner', () => ({
+  NewsletterBanner: () => (
+    <div role="banner" aria-label="Newsletter signup banner">
+      <p>SIGN UP FOR 10% OFF YOUR FIRST ORDER</p>
+      <button aria-label="Close newsletter banner">X</button>
+    </div>
+  ),
+}));
+
+jest.mock('@/components/navigation/navbar', () => ({
+  NavBar: () => <nav>NavBar</nav>,
+}));
+
+jest.mock('@/components/navigation/mobile-nav', () => ({
+  MobileNav: () => <div>MobileNav</div>,
+}));
+
+jest.mock('@/components/navigation/search-bar', () => ({
+  SearchBar: ({ variant }: any) => (
+    <button aria-label="Search" data-variant={variant}>Search</button>
+  ),
+}));
+
+jest.mock('@/components/navigation/user-nav', () => ({
+  UserNav: ({ showCart }: any) => (
+    <div data-show-cart={showCart}>UserNav</div>
+  ),
 }));
 
 jest.mock('next/link', () => {
@@ -95,7 +125,7 @@ jest.mock('@/components/accessibility/aria-helpers', () => ({
   ),
 }));
 
-describe('Header', () => {
+describe('SiteHeader', () => {
   const mockPush = jest.fn();
   const mockAnnounceToScreenReader = jest.fn();
   const mockRestoreFocus = jest.fn();
@@ -125,7 +155,7 @@ describe('Header', () => {
 
   describe('Rendering', () => {
     it('renders all navigation items', () => {
-      render(<Header />);
+      render(<SiteHeader />);
       
       const navItems = ['SALE', 'NEW', 'HOT', 'MEN', 'WOMEN', 'KIDS', 'SPECIAL'];
       navItems.forEach(item => {
@@ -134,7 +164,7 @@ describe('Header', () => {
     });
 
     it('renders logo with correct link', () => {
-      render(<Header />);
+      render(<SiteHeader />);
       
       const logo = screen.getByLabelText('STRIKE home');
       expect(logo).toBeInTheDocument();
@@ -143,20 +173,20 @@ describe('Header', () => {
     });
 
     it('renders newsletter banner when visible', () => {
-      render(<Header />);
+      render(<SiteHeader />);
       
       expect(screen.getByText(/Sign up to our community newsletter/)).toBeInTheDocument();
     });
 
     it('renders search button on desktop', () => {
-      render(<Header />);
+      render(<SiteHeader />);
       
       const searchButton = screen.getByLabelText('Search');
       expect(searchButton).toBeInTheDocument();
     });
 
     it('renders mobile search bar', () => {
-      render(<Header />);
+      render(<SiteHeader />);
       
       const mobileSearchInputs = screen.getAllByPlaceholderText('Search products...');
       expect(mobileSearchInputs.length).toBeGreaterThan(0);
@@ -166,7 +196,7 @@ describe('Header', () => {
   describe('Newsletter Banner', () => {
     it('dismisses newsletter banner when close button clicked', async () => {
       const user = userEvent.setup();
-      render(<Header />);
+      render(<SiteHeader />);
       
       const closeButton = screen.getByLabelText('Closes the newsletter signup banner');
       await user.click(closeButton);
@@ -179,7 +209,7 @@ describe('Header', () => {
   describe('Mobile Menu', () => {
     it('opens mobile menu when menu button clicked', async () => {
       const user = userEvent.setup();
-      render(<Header />);
+      render(<SiteHeader />);
       
       const menuButton = screen.getByLabelText('Opens the main navigation menu on mobile devices');
       await user.click(menuButton);
@@ -190,7 +220,7 @@ describe('Header', () => {
 
     it('closes mobile menu when backdrop clicked', async () => {
       const user = userEvent.setup();
-      render(<Header />);
+      render(<SiteHeader />);
       
       // Open menu first
       const menuButton = screen.getByLabelText('Opens the main navigation menu on mobile devices');
@@ -206,7 +236,7 @@ describe('Header', () => {
 
     it('toggles aria-pressed state on menu button', async () => {
       const user = userEvent.setup();
-      render(<Header />);
+      render(<SiteHeader />);
       
       const menuButton = screen.getByLabelText('Opens the main navigation menu on mobile devices');
       expect(menuButton).toHaveAttribute('aria-pressed', 'false');
@@ -219,7 +249,7 @@ describe('Header', () => {
   describe('Search Functionality', () => {
     it('toggles desktop search visibility', async () => {
       const user = userEvent.setup();
-      render(<Header />);
+      render(<SiteHeader />);
       
       const searchButton = screen.getByLabelText('Search');
       await user.click(searchButton);
@@ -231,7 +261,7 @@ describe('Header', () => {
 
     it('performs desktop search on form submit', async () => {
       const user = userEvent.setup();
-      render(<Header />);
+      render(<SiteHeader />);
       
       // Open search
       const searchButton = screen.getByLabelText('Search');
@@ -251,7 +281,7 @@ describe('Header', () => {
 
     it('performs mobile search on form submit', async () => {
       const user = userEvent.setup();
-      render(<Header />);
+      render(<SiteHeader />);
       
       // Find mobile search input (one without autoFocus)
       const searchInputs = screen.getAllByTestId('search-input');
@@ -268,7 +298,7 @@ describe('Header', () => {
 
     it('closes desktop search with ESC button', async () => {
       const user = userEvent.setup();
-      render(<Header />);
+      render(<SiteHeader />);
       
       // Open search
       const searchButton = screen.getByLabelText('Search');
@@ -284,7 +314,7 @@ describe('Header', () => {
 
     it('does not search with empty query', async () => {
       const user = userEvent.setup();
-      render(<Header />);
+      render(<SiteHeader />);
       
       const searchInputs = screen.getAllByTestId('search-input');
       const mobileSearchInput = searchInputs.find(input => !input.hasAttribute('autoFocus'));
@@ -303,7 +333,7 @@ describe('Header', () => {
         user: { id: 'user-123' },
       });
       
-      render(<Header />);
+      render(<SiteHeader />);
       
       const wishlistLinks = screen.getAllByLabelText(/Wishlist/);
       expect(wishlistLinks.length).toBeGreaterThan(0);
@@ -315,7 +345,7 @@ describe('Header', () => {
         user: null,
       });
       
-      render(<Header />);
+      render(<SiteHeader />);
       
       expect(screen.queryByLabelText(/Wishlist/)).not.toBeInTheDocument();
     });
@@ -327,7 +357,7 @@ describe('Header', () => {
       });
       (useWishlistCount as jest.Mock).mockReturnValue(5);
       
-      render(<Header />);
+      render(<SiteHeader />);
       
       expect(screen.getAllByText('5')).toHaveLength(2); // Mobile and desktop
     });
@@ -339,7 +369,7 @@ describe('Header', () => {
       });
       (useWishlistCount as jest.Mock).mockReturnValue(10);
       
-      render(<Header />);
+      render(<SiteHeader />);
       
       expect(screen.getByText('9+')).toBeInTheDocument();
     });
@@ -351,7 +381,7 @@ describe('Header', () => {
       });
       (useWishlistCount as jest.Mock).mockReturnValue(100);
       
-      render(<Header />);
+      render(<SiteHeader />);
       
       expect(screen.getByText('99+')).toBeInTheDocument();
     });
@@ -364,7 +394,7 @@ describe('Header', () => {
         user: null,
       });
       
-      render(<Header />);
+      render(<SiteHeader />);
       
       expect(screen.getByTestId('sign-in-button')).toBeInTheDocument();
       expect(screen.getByLabelText('Sign in')).toBeInTheDocument();
@@ -376,7 +406,7 @@ describe('Header', () => {
         user: { id: 'user-123' },
       });
       
-      render(<Header />);
+      render(<SiteHeader />);
       
       expect(screen.getByTestId('user-button')).toBeInTheDocument();
       expect(screen.getByTestId('user-button')).toHaveAttribute('data-after-sign-out-url', '/');
@@ -385,7 +415,7 @@ describe('Header', () => {
 
   describe('Scroll Behavior', () => {
     it('adds shadow when scrolled', async () => {
-      render(<Header />);
+      render(<SiteHeader />);
       
       const header = screen.getByLabelText('Main site header');
       expect(header.className).not.toContain('shadow-sm');
@@ -402,7 +432,7 @@ describe('Header', () => {
 
   describe('Accessibility', () => {
     it('has proper landmark roles', () => {
-      render(<Header />);
+      render(<SiteHeader />);
       
       expect(screen.getByLabelText('Newsletter signup banner')).toHaveAttribute('role', 'banner');
       expect(screen.getByLabelText('Main site header')).toHaveAttribute('role', 'banner');
@@ -411,7 +441,7 @@ describe('Header', () => {
 
     it('has proper ARIA attributes on mobile menu', async () => {
       const user = userEvent.setup();
-      render(<Header />);
+      render(<SiteHeader />);
       
       const menuButton = screen.getByLabelText('Opens the main navigation menu on mobile devices');
       await user.click(menuButton);
@@ -422,7 +452,7 @@ describe('Header', () => {
     });
 
     it('has accessible labels on all interactive elements', () => {
-      render(<Header />);
+      render(<SiteHeader />);
       
       expect(screen.getByLabelText('STRIKE home')).toBeInTheDocument();
       expect(screen.getByLabelText('Search')).toBeInTheDocument();
@@ -431,7 +461,7 @@ describe('Header', () => {
 
     it('announces state changes to screen readers', async () => {
       const user = userEvent.setup();
-      render(<Header />);
+      render(<SiteHeader />);
       
       // Test menu open/close announcements
       const menuButton = screen.getByLabelText('Opens the main navigation menu on mobile devices');
@@ -445,7 +475,7 @@ describe('Header', () => {
 
   describe('Mini Cart Integration', () => {
     it('renders mini cart with custom trigger', () => {
-      render(<Header />);
+      render(<SiteHeader />);
       
       expect(screen.getByTestId('mini-cart')).toBeInTheDocument();
       expect(screen.getByLabelText('Shopping cart')).toBeInTheDocument();
@@ -459,13 +489,13 @@ describe('Header', () => {
         user: undefined,
       });
       
-      expect(() => render(<Header />)).not.toThrow();
+      expect(() => render(<SiteHeader />)).not.toThrow();
     });
 
     it('handles scroll event cleanup on unmount', () => {
       const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
       
-      const { unmount } = render(<Header />);
+      const { unmount } = render(<SiteHeader />);
       unmount();
       
       expect(removeEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function));

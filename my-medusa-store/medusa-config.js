@@ -1,4 +1,4 @@
-const { loadEnv, defineConfig } = require("@medusajs/framework/utils")
+const { loadEnv, defineConfig, Modules } = require("@medusajs/framework/utils")
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd())
 
@@ -10,9 +10,10 @@ module.exports = defineConfig({
     http: {
       host: "0.0.0.0",
       port: parseInt(process.env.PORT || "9000"),
-      storeCors: process.env.STORE_CORS || "*",
-      adminCors: process.env.ADMIN_CORS || "*",
-      authCors: process.env.AUTH_CORS || "*",
+      // SECURITY FIX: Don't use wildcard CORS in production
+      storeCors: process.env.STORE_CORS || "http://localhost:3000,http://localhost:3001",
+      adminCors: process.env.ADMIN_CORS || "http://localhost:3000,http://localhost:3001",
+      authCors: process.env.AUTH_CORS || "http://localhost:3000,http://localhost:3001",
       jwtSecret: process.env.JWT_SECRET || "supersecret_jwt_token",
       cookieSecret: process.env.COOKIE_SECRET || "supersecret_cookie_secret",
     },
@@ -22,30 +23,36 @@ module.exports = defineConfig({
     path: "/app",
     backendUrl: process.env.MEDUSA_BACKEND_URL,
   },
-  modules: [
-    ...(process.env.REDIS_URL ? [
-      {
-        resolve: "@medusajs/medusa/cache-redis",
-        options: { 
-          redisUrl: process.env.REDIS_URL 
-        }
-      },
-      {
-        resolve: "@medusajs/medusa/event-bus-redis", 
-        options: { 
-          redisUrl: process.env.REDIS_URL 
-        }
-      },
-      {
-        resolve: "@medusajs/medusa/workflow-engine-redis",
-        options: { 
-          redis: { 
-            url: process.env.REDIS_URL 
-          } 
-        }
-      }
-    ] : []),
-    {
+  modules: {
+    // Core e-commerce modules (CRITICAL FIX: These were missing)
+    [Modules.PRODUCT]: {
+      resolve: "@medusajs/medusa/product",
+    },
+    [Modules.PRICING]: {
+      resolve: "@medusajs/medusa/pricing",
+    },
+    [Modules.INVENTORY]: {
+      resolve: "@medusajs/medusa/inventory",
+    },
+    [Modules.STOCK_LOCATION]: {
+      resolve: "@medusajs/medusa/stock-location",
+    },
+    [Modules.CART]: {
+      resolve: "@medusajs/medusa/cart",
+    },
+    [Modules.ORDER]: {
+      resolve: "@medusajs/medusa/order",
+    },
+    [Modules.CUSTOMER]: {
+      resolve: "@medusajs/medusa/customer",
+    },
+    [Modules.REGION]: {
+      resolve: "@medusajs/medusa/region",
+    },
+    [Modules.STORE]: {
+      resolve: "@medusajs/medusa/store",
+    },
+    [Modules.PAYMENT]: {
       resolve: "@medusajs/medusa/payment",
       options: {
         providers: [
@@ -59,6 +66,25 @@ module.exports = defineConfig({
           },
         ],
       },
-    }
-  ]
+    },
+    // Infrastructure modules
+    [Modules.CACHE]: process.env.REDIS_URL ? {
+      resolve: "@medusajs/cache-redis",
+      options: { redisUrl: process.env.REDIS_URL }
+    } : {
+      resolve: "@medusajs/cache-inmemory"
+    },
+    [Modules.EVENT_BUS]: process.env.REDIS_URL ? {
+      resolve: "@medusajs/event-bus-redis",
+      options: { redisUrl: process.env.REDIS_URL }
+    } : {
+      resolve: "@medusajs/event-bus-local"
+    },
+    [Modules.WORKFLOW_ENGINE]: process.env.REDIS_URL ? {
+      resolve: "@medusajs/workflow-engine-redis",
+      options: { redis: { url: process.env.REDIS_URL } }
+    } : {
+      resolve: "@medusajs/workflow-engine-inmemory"
+    },
+  }
 })

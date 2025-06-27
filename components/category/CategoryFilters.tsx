@@ -8,7 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SizeGuideModal } from '../size-guide-modal';
 import { useCategory } from '@/contexts/CategoryContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from '@/lib/dynamic-imports/framer-motion';
 import { Badge } from '@/components/ui/badge';
 
 const AVAILABLE_COLORS = [

@@ -5,6 +5,12 @@ export const useUser = () => ({
   isLoaded: true
 });
 
+export const useSession = () => ({
+  session: null,
+  isLoaded: true,
+  isSignedIn: false
+});
+
 export const useClerk = () => ({
   signOut: () => Promise.resolve(),
   openUserProfile: () => {},
@@ -20,6 +26,7 @@ export const ClerkProvider = ({ children, ...props }: any) => children;
 
 export default {
   useUser,
+  useSession,
   useClerk,
   SignInButton,
   UserButton,

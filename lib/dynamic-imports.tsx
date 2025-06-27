@@ -13,7 +13,7 @@ import dynamic from 'next/dynamic';
 export const DynamicLineChart = dynamic(
   () => import('recharts').then(mod => ({ default: mod.LineChart })),
   {
-    ssr: false,
+    
     loading: () => <div className="h-[300px] animate-pulse bg-muted rounded" />,
   }
 );
@@ -21,7 +21,7 @@ export const DynamicLineChart = dynamic(
 export const DynamicBarChart = dynamic(
   () => import('recharts').then(mod => ({ default: mod.BarChart })),
   {
-    ssr: false,
+    
     loading: () => <div className="h-[300px] animate-pulse bg-muted rounded" />,
   }
 );
@@ -29,7 +29,7 @@ export const DynamicBarChart = dynamic(
 export const DynamicPieChart = dynamic(
   () => import('recharts').then(mod => ({ default: mod.PieChart })),
   {
-    ssr: false,
+    
     loading: () => <div className="h-[300px] animate-pulse bg-muted rounded" />,
   }
 );
@@ -42,7 +42,7 @@ export const DynamicPieChart = dynamic(
 export const DynamicStudio = dynamic(
   () => import('sanity').then(mod => ({ default: mod.Studio })),
   {
-    ssr: false,
+    
     loading: () => (
       <div className="flex items-center justify-center h-screen">
         <div className="flex flex-col items-center gap-4">
@@ -62,7 +62,7 @@ export const DynamicStudio = dynamic(
 export const DynamicCarousel = dynamic(
   () => import('@/components/ui/carousel').then(mod => ({ default: mod.Carousel })),
   {
-    ssr: false,
+    
     loading: () => <div className="h-[400px] animate-pulse bg-muted rounded" />,
   }
 );
@@ -71,7 +71,7 @@ export const DynamicCarousel = dynamic(
 export const DynamicDatePicker = dynamic(
   () => import('@/components/ui/date-picker').then(mod => ({ default: mod.DatePicker })),
   {
-    ssr: false,
+    
     loading: () => <div className="h-10 w-[280px] animate-pulse bg-muted rounded" />,
   }
 );
@@ -94,7 +94,7 @@ export const DynamicDatePicker = dynamic(
  * const AdminDashboard = dynamic(
  *   () => import('@/components/admin/AdminDashboard'),
  *   {
- *     ssr: false,
+ *     
  *     loading: () => <AdminDashboardSkeleton />,
  *   }
  * );
@@ -104,7 +104,7 @@ export const DynamicDatePicker = dynamic(
  * Best practices:
  * 1. Use dynamic imports for components > 50KB
  * 2. Always provide a loading state
- * 3. Set ssr: false for client-only components
+ * 3. Set  for client-only components
  * 4. Group related dynamic imports together
  * 5. Preload critical dynamic components with next/dynamic's preload
  */

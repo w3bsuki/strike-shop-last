@@ -2,6 +2,24 @@
  * Performance monitoring utilities for Strike Shop
  */
 
+// Type definitions for performance entries
+interface LayoutShiftEntry extends PerformanceEntry {
+  value: number;
+  hadRecentInput: boolean;
+}
+
+interface FirstInputEntry extends PerformanceEntry {
+  processingStart: number;
+}
+
+interface LargestContentfulPaintEntry extends PerformanceEntry {
+  startTime: number;
+}
+
+interface ResourceTimingEntry extends PerformanceResourceTiming {
+  transferSize?: number;
+}
+
 // Performance metrics storage
 const metrics = new Map<string, number[]>();
 
@@ -124,8 +142,9 @@ export const initPerformanceMonitoring = () => {
     try {
       const clsObserver = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          if (!(entry as any).hadRecentInput) {
-            clsValue += (entry as any).value;
+          const layoutShiftEntry = entry as LayoutShiftEntry;
+          if (!layoutShiftEntry.hadRecentInput) {
+            clsValue += layoutShiftEntry.value;
             clsEntries.push(entry);
           }
         }
@@ -140,7 +159,8 @@ export const initPerformanceMonitoring = () => {
     try {
       const fidObserver = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          fidValue = (entry as any).processingStart - entry.startTime;
+          const firstInputEntry = entry as FirstInputEntry;
+          fidValue = firstInputEntry.processingStart - entry.startTime;
           webVitalsData.fid = fidValue;
         }
       });
@@ -154,7 +174,7 @@ export const initPerformanceMonitoring = () => {
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         if (entries.length > 0) {
-          const lastEntry = entries[entries.length - 1] as any;
+          const lastEntry = entries[entries.length - 1] as LargestContentfulPaintEntry;
           webVitalsData.lcp = lastEntry.startTime;
         }
       });
@@ -251,7 +271,8 @@ export const getResourceMetrics = (): ResourceMetrics => {
 
   resources.forEach((resource) => {
     const duration = resource.responseEnd - resource.startTime;
-    const transferSize = (resource as any).transferSize || 0;
+    const resourceTiming = resource as ResourceTimingEntry;
+    const transferSize = resourceTiming.transferSize || 0;
     
     totalSize += transferSize;
     

@@ -23,6 +23,7 @@ export interface HomePageProduct {
   description?: string;
   sizes?: string[];
   sku?: SKU;
+  variantId?: string; // Default variant ID for quick add to cart
   variants?: Array<{
     id: VariantId;
     title: string;

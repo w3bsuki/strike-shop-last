@@ -13,13 +13,8 @@
 
 import { useCallback, useState, useMemo } from 'react';
 import { ServiceLocator } from '@/infrastructure';
-import type { ProductId } from '@/shared/domain';
-import type { 
-  IProductCardData, 
-  IWishlistActions, 
-  IQuickViewActions, 
-  IAnalyticsActions 
-} from '@/components/product/ProductCard.refactored';
+import type { BaseProduct } from '@/components/product/types';
+import { ProductId } from '@/shared/domain/value-objects/id';
 
 // Hook configuration interface
 interface UseProductCardConfig {
@@ -28,11 +23,29 @@ interface UseProductCardConfig {
   optimisticUpdates?: boolean;
 }
 
+// Define simple action interfaces
+interface WishlistActions {
+  addToWishlist: (productId: string) => Promise<void>;
+  removeFromWishlist: (productId: string) => Promise<void>;
+  isInWishlist: (productId: string) => boolean;
+}
+
+interface QuickViewActions {
+  openQuickView: (product: BaseProduct) => void;
+  closeQuickView: () => void;
+}
+
+interface AnalyticsActions {
+  trackProductView: (productId: string) => void;
+  trackWishlistToggle: (productId: string, action: 'add' | 'remove') => void;
+  trackQuickView: (productId: string) => void;
+}
+
 // Hook return type
 interface UseProductCardReturn {
-  wishlistActions: IWishlistActions;
-  quickViewActions: IQuickViewActions;
-  analyticsActions: IAnalyticsActions;
+  wishlistActions: WishlistActions;
+  quickViewActions: QuickViewActions;
+  analyticsActions: AnalyticsActions;
   isLoading: boolean;
   error: string | null;
 }
@@ -79,10 +92,10 @@ export function useProductCard(config: UseProductCardConfig = {}): UseProductCar
   }, [enableHapticFeedback]);
 
   // Wishlist Actions Implementation
-  const wishlistActions: IWishlistActions = useMemo(() => ({
-    isWishlisted: (productId: ProductId): boolean => {
+  const wishlistActions: WishlistActions = useMemo(() => ({
+    isInWishlist: (productId: string): boolean => {
       // Check optimistic state first, then actual state
-      if (optimisticWishlist.has(productId.value)) {
+      if (optimisticWishlist.has(productId)) {
         return true;
       }
       
@@ -91,14 +104,14 @@ export function useProductCard(config: UseProductCardConfig = {}): UseProductCar
       return false;
     },
 
-    addToWishlist: async (productId: ProductId): Promise<void> => {
+    addToWishlist: async (productId: string): Promise<void> => {
       setIsLoading(true);
       setError(null);
 
       try {
         // Optimistic update
         if (optimisticUpdates) {
-          setOptimisticWishlist(prev => new Set(prev).add(productId.value));
+          setOptimisticWishlist(prev => new Set(prev).add(productId));
           triggerHapticFeedback([100, 50, 100]); // Double vibration for add
         }
 
@@ -119,7 +132,7 @@ export function useProductCard(config: UseProductCardConfig = {}): UseProductCar
         if (optimisticUpdates) {
           setOptimisticWishlist(prev => {
             const newSet = new Set(prev);
-            newSet.delete(productId.value);
+            newSet.delete(productId);
             return newSet;
           });
         }
@@ -131,7 +144,7 @@ export function useProductCard(config: UseProductCardConfig = {}): UseProductCar
       }
     },
 
-    removeFromWishlist: async (productId: ProductId): Promise<void> => {
+    removeFromWishlist: async (productId: string): Promise<void> => {
       setIsLoading(true);
       setError(null);
 
@@ -140,7 +153,7 @@ export function useProductCard(config: UseProductCardConfig = {}): UseProductCar
         if (optimisticUpdates) {
           setOptimisticWishlist(prev => {
             const newSet = new Set(prev);
-            newSet.delete(productId.value);
+            newSet.delete(productId);
             return newSet;
           });
           triggerHapticFeedback(50); // Single vibration for remove
@@ -161,7 +174,7 @@ export function useProductCard(config: UseProductCardConfig = {}): UseProductCar
       } catch (error) {
         // Revert optimistic update on error
         if (optimisticUpdates) {
-          setOptimisticWishlist(prev => new Set(prev).add(productId.value));
+          setOptimisticWishlist(prev => new Set(prev).add(productId));
         }
         
         handleError(error, 'Failed to remove product from wishlist');
@@ -173,81 +186,80 @@ export function useProductCard(config: UseProductCardConfig = {}): UseProductCar
   }), [optimisticWishlist, optimisticUpdates, triggerHapticFeedback, handleError]);
 
   // Quick View Actions Implementation
-  const quickViewActions: IQuickViewActions = useMemo(() => ({
-    openQuickView: async (productId: ProductId): Promise<void> => {
-      setIsLoading(true);
-      setError(null);
-
+  const quickViewActions: QuickViewActions = useMemo(() => ({
+    openQuickView: (product: BaseProduct): void => {
       try {
         // In a real implementation, this would:
         // 1. Fetch product details if not already loaded
         // 2. Open quick view modal/drawer
         // 3. Prefetch related products
         
-        // Simulate loading product data
-        await new Promise(resolve => setTimeout(resolve, 200));
-
         // Example: Dispatch event to open quick view modal
         window.dispatchEvent(new CustomEvent('open-quick-view', {
-          detail: { productId: productId.value }
+          detail: { product }
         }));
 
       } catch (error) {
         handleError(error, 'Failed to open quick view');
-        throw error;
-      } finally {
-        setIsLoading(false);
+      }
+    },
+    
+    closeQuickView: (): void => {
+      try {
+        window.dispatchEvent(new CustomEvent('close-quick-view'));
+      } catch (error) {
+        handleError(error, 'Failed to close quick view');
       }
     },
   }), [handleError]);
 
   // Analytics Actions Implementation
-  const analyticsActions: IAnalyticsActions = useMemo(() => ({
-    trackProductView: (productId: ProductId): void => {
+  const analyticsActions: AnalyticsActions = useMemo(() => ({
+    trackProductView: (productId: string): void => {
       if (!enableAnalytics) return;
 
       try {
         // In a real implementation, this would send analytics events
         // analytics.track('Product Viewed', {
-        //   productId: productId.value,
+        //   productId: productId,
         //   timestamp: new Date().toISOString(),
         //   source: 'product-card',
         // });
 
-        console.log('Analytics: Product viewed', productId.value);
+        console.log('Analytics: Product viewed', productId);
       } catch (error) {
         console.warn('Analytics tracking failed:', error);
       }
     },
 
-    trackWishlistToggle: (productId: ProductId, action: 'add' | 'remove'): void => {
+    trackWishlistToggle: (productId: string, action: 'add' | 'remove'): void => {
       if (!enableAnalytics) return;
 
       try {
         // analytics.track('Wishlist Updated', {
-        //   productId: productId.value,
+        //   productId: productId,
         //   action,
         //   timestamp: new Date().toISOString(),
         //   source: 'product-card',
         // });
 
-        console.log('Analytics: Wishlist toggled', productId.value, action);
+        console.log('Analytics: Wishlist toggled', productId, action);
       } catch (error) {
         console.warn('Analytics tracking failed:', error);
       }
     },
 
-    trackQuickView: (productId: ProductId): void => {
+    trackQuickView: (productId: string): void => {
       if (!enableAnalytics) return;
 
       try {
         // analytics.track('Quick View Opened', {
-        //   productId: productId.value,
+        //   productId: productId,
         //   timestamp: new Date().toISOString(),
         //   source: 'product-card',
         // });
 
-        console.log('Analytics: Quick view opened', productId.value);
+        console.log('Analytics: Quick view opened', productId);
       } catch (error) {
         console.warn('Analytics tracking failed:', error);
       }
@@ -267,7 +279,7 @@ export function useProductCard(config: UseProductCardConfig = {}): UseProductCar
  * Product Data Transformer Hook
  * Transforms domain entities to component-friendly data structures
  */
-export function useProductCardData(domainProduct: any): IProductCardData {
+export function useProductCardData(domainProduct: any): BaseProduct {
   return useMemo(() => {
     if (!domainProduct) {
       throw new Error('Product data is required');
@@ -278,20 +290,19 @@ export function useProductCardData(domainProduct: any): IProductCardData {
 
     return {
       id: domainProduct.id,
-      title: domainProduct.title,
-      handle: domainProduct.handle,
-      featuredImage: featuredImage ? {
-        url: featuredImage.url,
-        alt: featuredImage.alt,
-      } : undefined,
-      priceRange: priceRange ? {
-        min: priceRange.min,
-        max: priceRange.max,
-      } : undefined,
+      name: domainProduct.title || domainProduct.name,
+      price: priceRange?.min?.toString() || '0',
+      originalPrice: priceRange?.max?.toString(),
+      image: featuredImage?.url || '',
+      images: [featuredImage?.url].filter(Boolean),
       isNew: domainProduct.isNew || false,
-      isOnSale: domainProduct.variants?.some((v: any) => v.compareAtPrice !== null) || false,
-      isOutOfStock: !domainProduct.isAvailable?.() || false,
-      variantCount: domainProduct.variants?.length || 0,
+      soldOut: !domainProduct.isAvailable?.() || false,
+      slug: domainProduct.handle || domainProduct.slug,
+      colors: domainProduct.variants?.length || 0,
+      description: domainProduct.description,
+      sizes: domainProduct.variants?.map((v: any) => v.title) || [],
+      sku: domainProduct.sku,
+      variants: domainProduct.variants,
     };
   }, [domainProduct]);
 }
@@ -304,7 +315,7 @@ export function useBatchProductOperations() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const addMultipleToWishlist = useCallback(async (productIds: ProductId[]): Promise<void> => {
+  const addMultipleToWishlist = useCallback(async (productIds: string[]): Promise<void> => {
     setIsLoading(true);
     setErrors({});
 
@@ -319,7 +330,7 @@ export function useBatchProductOperations() {
     const newErrors: Record<string, string> = {};
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
-        newErrors[productIds[index]?.value || ''] = 'Failed to add to wishlist';
+        newErrors[productIds[index] || ''] = 'Failed to add to wishlist';
       }
     });
 
@@ -327,14 +338,14 @@ export function useBatchProductOperations() {
     setIsLoading(false);
   }, []);
 
-  const prefetchProductData = useCallback(async (productIds: ProductId[]): Promise<void> => {
+  const prefetchProductData = useCallback(async (productIds: string[]): Promise<void> => {
     // Prefetch product data for better UX
     try {
       const productService = ServiceLocator.productService;
       await Promise.all(
         productIds.map(id => 
           // In a real implementation, this would prefetch product data
-          productService.getProductAnalytics?.(id)
+          productService.getProductAnalytics?.(ProductId.create(id))
         )
       );
     } catch (error) {

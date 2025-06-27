@@ -140,11 +140,18 @@ async function checkStripe(): Promise<HealthCheckResponse['checks']['stripe']> {
     const isValid = process.env.STRIPE_SECRET_KEY.startsWith('sk_');
     const latency = Date.now() - start;
     
-    return {
-      status: isValid ? 'ok' : 'error',
-      latency,
-      error: isValid ? undefined : 'Invalid API key format',
-    };
+    if (isValid) {
+      return {
+        status: 'ok' as const,
+        latency,
+      };
+    } else {
+      return {
+        status: 'error' as const,
+        latency,
+        error: 'Invalid API key format',
+      };
+    }
   } catch (error) {
     return {
       status: 'error',
@@ -201,11 +208,11 @@ export async function GET() {
   ]);
   
   const checks = {
-    database,
-    medusa,
-    sanity,
-    stripe,
-    redis,
+    ...(database && { database }),
+    ...(medusa && { medusa }),
+    ...(sanity && { sanity }),
+    ...(stripe && { stripe }),
+    ...(redis && { redis }),
   };
   
   // Determine overall status

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useIsWishlisted, useWishlistActions } from "@/lib/stores";
 import { useQuickView } from "@/contexts/QuickViewContext";
 import { useAria } from "@/components/accessibility/aria-helpers";
+import { useCart } from "@/hooks/use-cart";
 import type { WishlistItem } from "@/lib/wishlist-store";
 
 export interface ProductActionsProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -16,6 +17,7 @@ export interface ProductActionsProps extends React.HTMLAttributes<HTMLDivElement
     price: string;
     image: string;
     slug: string;
+    variantId?: string;
   };
   layout?: "horizontal" | "vertical" | "overlay";
   showQuickView?: boolean;
@@ -39,6 +41,7 @@ const ProductActions = React.forwardRef<HTMLDivElement, ProductActionsProps>(
     const { addToWishlist, removeFromWishlist } = useWishlistActions();
     const { openQuickView } = useQuickView();
     const { announceToScreenReader } = useAria();
+    const { addItem, isAddingItem } = useCart();
 
     const wishlistItem: WishlistItem = React.useMemo(() => ({
       id: product.id,
@@ -75,9 +78,22 @@ const ProductActions = React.forwardRef<HTMLDivElement, ProductActionsProps>(
     const handleAddToCart = React.useCallback((e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      // TODO: Implement add to cart functionality
-      announceToScreenReader(`${product.name} added to cart`, 'polite');
-    }, [product, announceToScreenReader]);
+      
+      // Use a default variant if none provided (for simple products)
+      const variantId = product.variantId || `${product.id}_default`;
+      
+      try {
+        addItem({
+          productId: product.id,
+          variantId: variantId,
+          quantity: 1
+        });
+        announceToScreenReader(`${product.name} added to cart`, 'polite');
+      } catch (error) {
+        console.error('Failed to add item to cart:', error);
+        announceToScreenReader(`Failed to add ${product.name} to cart`, 'assertive');
+      }
+    }, [product, addItem, announceToScreenReader]);
 
     const buttonSize = size === "sm" ? "icon-sm" : size === "lg" ? "icon-lg" : "icon";
     const iconSize = size === "sm" ? "h-3 w-3" : size === "lg" ? "h-5 w-5" : "h-4 w-4";
@@ -132,10 +148,11 @@ const ProductActions = React.forwardRef<HTMLDivElement, ProductActionsProps>(
             variant="ghost"
             size={buttonSize}
             onClick={handleAddToCart}
-            className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+            disabled={isAddingItem}
+            className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm disabled:opacity-50"
             aria-label={`Add ${product.name} to cart`}
           >
-            <ShoppingBag className={iconSize} />
+            <ShoppingBag className={cn(iconSize, isAddingItem && "animate-pulse")} />
           </Button>
         )}
       </div>

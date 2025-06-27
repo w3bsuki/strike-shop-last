@@ -1,7 +1,16 @@
+import { Suspense } from 'react';
 import { MedusaProductService } from '@/lib/medusa-service';
 import type { HomePageCategory, HomePageProduct } from '@/types/home-page';
 import { createCategoryId, createImageURL, createSlug, createProductId } from '@/types';
 import HomePageClient from '@/components/home-page-client';
+import { SiteHeader } from '@/components/navigation';
+import Footer from '@/components/footer';
+import { QuickViewProvider } from '@/contexts/QuickViewContext';
+import dynamic from 'next/dynamic';
+import { 
+  ProductScrollSkeleton, 
+  CategoryScrollSkeleton,
+} from '@/components/ui/loading-states';
 
 // PERFORMANCE: Optimized data fetching with aggressive caching
 async function getHomePageData() {
@@ -87,7 +96,9 @@ async function getHomePageData() {
       description?: string;
       thumbnail?: string;
       images?: Array<{ url?: string }>;
-      variants?: Array<{ id: string }>;
+      variants?: Array<{ id: string; prices?: Array<{ amount: number; currency_code: string }>; calculated_price?: { calculated_amount: number; currency_code: string } }>;
+      metadata?: Record<string, any>;
+      categories?: Array<{ name: string }>;
     }): HomePageProduct => {
       const lowestPrice = MedusaProductService.getLowestPrice(prod as any);
       
@@ -118,28 +129,61 @@ async function getHomePageData() {
         finalPrice = MedusaProductService.formatPrice(fallbackAmount, 'eur');
       }
       
+      // Get variant ID for add to cart functionality
+      const variantId = prod.variants?.[0]?.id || `variant_${prod.id}_default`;
+      
+      // Check if product is new (metadata or created date)
+      const isNew = prod.metadata?.isNew === true || false;
+      
+      // Get color count from variants or metadata
+      const colorCount = prod.metadata?.colors || prod.variants?.length || 1;
+      
       return {
         id: createProductId(prod.id),
         name: prod.title || '',
         price: finalPrice,
         image: createImageURL(prod.thumbnail || prod.images?.[0]?.url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=400&fit=crop&crop=center'),
         slug: createSlug(prod.handle || ''),
-        isNew: true,
-        colors: 1,
+        isNew: isNew,
+        colors: colorCount,
         description: prod.description || '',
         sku: undefined,
         variants: [],
+        variantId: variantId, // Add variant ID for cart functionality
       };
     };
 
     const products = medusaProducts.products.map((prod: any) => convertProduct(prod));
     
+    // Categorize products based on their actual categories or metadata
+    const newArrivals = products.filter((p: any) => p.isNew).slice(0, 6);
+    const saleItems = products.filter((p: any) => p.originalPrice).slice(0, 4);
+    
+    // Filter by category names if available
+    const sneakers = products.filter((p: any) => {
+      const prod = medusaProducts.products.find((mp: any) => mp.id === p.id.replace('product_', ''));
+      return prod?.categories?.some((c: any) => 
+        c.name?.toLowerCase().includes('sneaker') || 
+        c.name?.toLowerCase().includes('shoe') ||
+        c.handle?.toLowerCase().includes('footwear')
+      ) || prod?.title?.toLowerCase().includes('sneaker');
+    }).slice(0, 4);
+    
+    const kidsItems = products.filter((p: any) => {
+      const prod = medusaProducts.products.find((mp: any) => mp.id === p.id.replace('product_', ''));
+      return prod?.categories?.some((c: any) => 
+        c.name?.toLowerCase().includes('kid') || 
+        c.handle?.toLowerCase().includes('kid')
+      ) || prod?.title?.toLowerCase().includes('kid');
+    }).slice(0, 4);
+    
+    // Fill in with regular products if we don't have enough categorized items
     return {
       categories,
-      newArrivals: products.slice(0, 6),
-      saleItems: products.slice(0, 4),
-      sneakers: products.slice(0, 4),
-      kidsItems: products.slice(0, 4),
+      newArrivals: newArrivals.length >= 6 ? newArrivals : [...newArrivals, ...products.slice(0, 6 - newArrivals.length)],
+      saleItems: saleItems.length >= 4 ? saleItems : [...saleItems, ...products.slice(0, 4 - saleItems.length)],
+      sneakers: sneakers.length >= 4 ? sneakers : [...sneakers, ...products.slice(0, 4 - sneakers.length)],
+      kidsItems: kidsItems.length >= 4 ? kidsItems : [...kidsItems, ...products.slice(0, 4 - kidsItems.length)],
     };
   } catch (error) {
     console.error('Homepage data fetch error:', error);
@@ -154,10 +198,9 @@ async function getHomePageData() {
   }
 }
 
-// ADVANCED CACHING: ISR with perfect cache invalidation
-export const revalidate = 3600; // Revalidate every hour
-export const dynamicParams = true;
-// export const dynamic = 'force-static'; // Static generation for maximum performance
+// NEXT.JS 14 CACHING: Use ISR with clear boundaries
+// ISR: Revalidate every hour (3600 seconds)
+export const revalidate = 3600;
 
 // METADATA: Dynamic metadata for better SEO
 export async function generateMetadata() {
@@ -172,7 +215,52 @@ export async function generateMetadata() {
   };
 }
 
+// Dynamic import for modals
+const QuickViewModal = dynamic(() => 
+  import('@/components/QuickViewModal').then(mod => ({ default: mod.QuickViewModal })), {
+  loading: () => null
+});
+
+const MobileNav = dynamic(() => 
+  import('@/components/mobile/navigation').then(mod => ({ default: mod.MobileNav })), {
+  loading: () => null
+});
+
+// Server Component that streams data
 export default async function HomePage() {
-  const data = await getHomePageData();
+  // Start fetching data immediately
+  const dataPromise = getHomePageData();
+  
+  return (
+    <QuickViewProvider>
+      <main className="bg-white">
+        <SiteHeader />
+        
+        {/* Stream the main content */}
+        <Suspense 
+          fallback={
+            <div className="min-h-screen">
+              <div style={{ minHeight: '60vh' }} className="bg-gray-100 animate-pulse" />
+              <CategoryScrollSkeleton />
+              <ProductScrollSkeleton />
+            </div>
+          }
+        >
+          <StreamedContent dataPromise={dataPromise} />
+        </Suspense>
+        
+        <Footer />
+        <MobileNav variant="default" showLabels={true} />
+      </main>
+      
+      {/* Quick View Modal */}
+      <QuickViewModal />
+    </QuickViewProvider>
+  );
+}
+
+// Async component that waits for data
+async function StreamedContent({ dataPromise }: { dataPromise: Promise<any> }) {
+  const data = await dataPromise;
   return <HomePageClient {...data} />;
 }

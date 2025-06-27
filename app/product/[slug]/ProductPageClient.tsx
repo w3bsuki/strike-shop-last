@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SiteHeader } from '@/components/navigation';
-import Footer from '@/components/footer';
 import Image from 'next/image';
 import { Minus, Plus, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,305 +12,289 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import ProductReviews from '@/components/product-reviews';
-import { urlFor, type SanityProduct } from '@/lib/sanity';
 import { SizeGuideModal } from '@/components/size-guide-modal';
-import { useWishlistStore, type WishlistItem } from '@/lib/wishlist-store';
+import { useWishlist, useWishlistActions, useCartActions } from '@/lib/stores';
 import { generateProductJsonLd } from '@/lib/seo';
 import Script from 'next/script';
+import Footer from '@/components/footer';
 
 interface ProductPageProps {
-  productData: SanityProduct | null;
-  slug: string;
+  product: any; // Medusa product type
 }
 
-export default function ProductPageClient({
-  productData,
-  slug,
-}: ProductPageProps) {
+export default function ProductPageClient({ product }: ProductPageProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { addToWishlist, removeFromWishlist, isInWishlist, wishlist } =
-    useWishlistStore();
+  const wishlist = useWishlist();
+  const { addItem: addToWishlist, removeItem: removeFromWishlist } = useWishlistActions();
+  const { addItem: addToCart } = useCartActions();
   const [isProductPageItemWishlisted, setIsProductPageItemWishlisted] =
     useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   useEffect(() => {
-    if (productData && isInWishlist) {
-      // Ensure isInWishlist is defined
-      setIsProductPageItemWishlisted(isInWishlist(productData._id));
+    if (product && wishlist.items) {
+      setIsProductPageItemWishlisted(wishlist.items.some(item => item.id === product.id));
     }
-  }, [productData, isInWishlist, wishlist]); // Add wishlist to dependency array
+  }, [product, wishlist.items]);
 
-  if (!productData) {
-    // Handle product not found, e.g., return notFound() from next/navigation
+  if (!product) {
     return <div>Product not found</div>;
   }
 
-  // Map Sanity data to the structure your component expects
-  const product = {
-    id: productData._id,
-    name: productData.title,
-    price: `£${productData.price.toFixed(2)}`,
-    originalPrice: productData.compareAtPrice
-      ? `£${productData.compareAtPrice.toFixed(2)}`
-      : undefined,
-    discount:
-      productData.compareAtPrice &&
-      productData.price < productData.compareAtPrice
-        ? `-${Math.round(((productData.compareAtPrice - productData.price) / productData.compareAtPrice) * 100)}%`
-        : undefined,
-    sku: productData.sku || 'N/A',
-    shortDescription: productData.description || 'No description available.',
-    details:
-      (productData as SanityProduct & { details?: Array<{ title?: string; content?: string }> }).details?.map((d) => ({
-        title: d.title || '',
-        content: d.content || '',
-      })) || [],
-    sizes: productData.variants?.map((v) => v.title) || ['S', 'M', 'L', 'XL'],
-    images: productData.images?.map((img) =>
-      img ? urlFor(img).url() : '/placeholder.svg?height=800&width=600'
-    ) || ['/placeholder.svg?height=800&width=600'],
-  };
+  const images = product.images || [];
+  const currentImage = images[currentImageIndex];
 
-  const handleProductPageWishlistToggle = () => {
-    if (!productData || !addToWishlist || !removeFromWishlist || !isInWishlist)
-      return;
-
-    const wishlistItem: WishlistItem = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.images[0] || '',
-      slug: slug,
-    };
-    if (isInWishlist(product.id)) {
+  const toggleWishlist = () => {
+    if (isProductPageItemWishlisted) {
       removeFromWishlist(product.id);
     } else {
-      addToWishlist(wishlistItem);
+      addToWishlist({
+        id: product.id,
+        name: product.title,
+        price: product.variants?.[0]?.prices?.[0]?.amount || 0,
+        image: product.thumbnail || '',
+        quantity: 1,
+      });
     }
-    setIsProductPageItemWishlisted(!isProductPageItemWishlisted); // Update local state
   };
 
-  const relatedProducts = [
-    {
-      id: 'rp1',
-      name: 'GRAPHIC PRINT HOODIE',
-      price: '£450',
-      image: '/placeholder.svg?height=400&width=300',
-      isNew: true,
-      slug: 'graphic-print-hoodie',
-    },
-    {
-      id: 'rp2',
-      name: 'TAILORED WOOL TROUSERS',
-      price: '£520',
-      image: '/placeholder.svg?height=400&width=300',
-      slug: 'tailored-wool-trousers',
-    },
-    {
-      id: 'rp3',
-      name: 'LEATHER ANKLE BOOTS',
-      price: '£680',
-      image: '/placeholder.svg?height=400&width=300',
-      slug: 'leather-ankle-boots',
-    },
-    {
-      id: 'rp4',
-      name: 'LOGO EMBROIDERED CAP',
-      price: '£190',
-      image: '/placeholder.svg?height=400&width=300',
-      slug: 'logo-embroidered-cap',
-    },
-  ];
+  const incrementQuantity = () => setQuantity((prev) => prev + 1);
+  const decrementQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://strike-shop.com';
-  const productJsonLd = productData
-    ? generateProductJsonLd(productData as any, `${baseUrl}/product/${slug}`)
-    : null;
+  const handleAddToCart = async () => {
+    if (sizes.length > 0 && !selectedSize) return;
+    
+    setIsAddingToCart(true);
+    try {
+      // Find the variant based on selected size
+      const variant = selectedSize 
+        ? product.variants?.find((v: any) => 
+            v.options?.some((opt: any) => opt.value === selectedSize)
+          ) || product.variants?.[0]
+        : product.variants?.[0];
+
+      if (!variant) {
+        throw new Error('No variant available');
+      }
+
+      await addToCart({
+        variantId: variant.id,
+        quantity: quantity
+      });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
+  const sizes = product.options?.find((opt: any) => opt.title.toLowerCase() === 'size')?.values || [];
+
+  const productJsonLd = {
+    title: product.title,
+    description: product.description || '',
+    image: product.thumbnail || images[0]?.url || '',
+    price: product.variants?.[0]?.prices?.[0]?.amount || 0,
+    currency: 'GBP',
+    availability: 'in stock',
+    brand: 'STRIKE™',
+  };
 
   return (
-    <main className="bg-white">
-      {productJsonLd && (
-        <Script
-          id="product-jsonld"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: productJsonLd }}
-        />
-      )}
-      <SiteHeader />
-      <div className="section-padding">
-        <div className="strike-container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-            {/* Product Images */}
-            <div className="relative">
-              <div className="sticky top-24">
-                {/* Sticky image container */}
-                <div className="relative aspect-[3/4] mb-3 border border-subtle">
+    <>
+      <Script
+        id="product-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(generateStructuredData(productJsonLd)),
+        }}
+      />
+      
+      <div className="min-h-screen bg-white">
+        <main className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            {/* Image Gallery */}
+            <div>
+              <div className="relative mb-4 aspect-square overflow-hidden bg-gray-100">
+                {currentImage ? (
                   <Image
-                    src={
-                      product.images[currentImageIndex] || '/placeholder.svg'
-                    }
-                    alt={`${product.name} - View ${currentImageIndex + 1}`}
+                    src={currentImage.url}
+                    alt={product.title}
                     fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    priority
                     className="object-cover"
+                    priority
                   />
-                </div>
-                <div className="grid grid-cols-5 gap-2">
-                  {product.images.map((img, index) => (
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-400">
+                    No image available
+                  </div>
+                )}
+              </div>
+              {images && images.length > 1 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {images.map((image: any, index: number) => (
                     <button
                       key={index}
-                      className={`relative aspect-square border ${currentImageIndex === index ? 'border-black' : 'border-subtle'}`}
                       onClick={() => setCurrentImageIndex(index)}
+                      className={`relative aspect-square overflow-hidden bg-gray-100 ${
+                        currentImageIndex === index
+                          ? 'ring-2 ring-black'
+                          : ''
+                      }`}
                     >
                       <Image
-                        src={img || '/placeholder.svg'}
-                        alt={`Thumbnail ${index + 1}`}
+                        src={image.url}
+                        alt={`${product.title} ${index + 1}`}
                         fill
-                        sizes="20vw"
                         className="object-cover"
                       />
                     </button>
                   ))}
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* Product Details */}
-            <div className="lg:pt-0">
-              {/* Removed sticky from details, image is sticky now */}
-              <div className="space-y-3 mb-6">
-                {product.discount && (
-                  <span className="bg-red-600 text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-                    {product.discount}
-                  </span>
-                )}
-                <h1 className="text-xl md:text-2xl font-bold uppercase tracking-wider">
-                  {product.name}
-                </h1>
-                <div className="flex items-baseline space-x-2">
-                  <span className="text-lg md:text-xl font-bold">
-                    {product.price}
-                  </span>
-                  {product.originalPrice && (
-                    <span className="text-sm text-[var(--subtle-text-color)] line-through">
-                      {product.originalPrice}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-[var(--subtle-text-color)] font-mono">
-                  SKU: {product.sku}
-                </p>
-                <p className="text-sm text-gray-700 pt-2">
-                  {product.shortDescription}
+            {/* Product Info */}
+            <div>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold mb-2">{product.title}</h1>
+                <p className="text-2xl font-medium">
+                  £{((product.variants?.[0]?.prices?.[0]?.amount || 0) / 100).toFixed(2)}
                 </p>
               </div>
-              <div className="space-y-6 mb-8">
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-xs font-bold uppercase tracking-wider font-['Typewriter']">
-                      SIZE
-                    </h3>
-                    <SizeGuideModal>
-                      <button className="text-[10px] underline hover:no-underline text-[var(--subtle-text-color)] font-['Typewriter']">
-                        SIZE GUIDE
-                      </button>
-                    </SizeGuideModal>
+
+              {/* Size Selection */}
+              {sizes.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium">Size</label>
+                    <SizeGuideModal />
                   </div>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                    {product.sizes?.map((size) => (
+                  <div className="grid grid-cols-5 gap-2">
+                    {sizes.map((size: any) => (
                       <button
-                        key={size}
-                        className={`border p-2.5 text-xs font-medium transition-colors rounded-none min-h-[44px] touch-manipulation
-                                    ${selectedSize === size ? 'bg-black text-white border-black' : 'border-subtle hover:border-black'}`}
-                        onClick={() => setSelectedSize(size)}
+                        key={size.value}
+                        onClick={() => setSelectedSize(size.value)}
+                        className={`py-3 border transition-colors ${
+                          selectedSize === size.value
+                            ? 'border-black bg-black text-white'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
                       >
-                        {size}
+                        {size.value}
                       </button>
                     ))}
                   </div>
                 </div>
+              )}
 
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider mb-2">
-                    QUANTITY
-                  </h3>
-                  <div className="flex items-center space-x-3">
-                    <button
-                      className="border border-subtle hover:border-black disabled:opacity-50 h-11 w-11 flex items-center justify-center touch-manipulation"
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      disabled={quantity <= 1}
-                      aria-label="Decrease quantity"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-                    <span className="text-sm font-medium w-8 text-center">
-                      {quantity}
-                    </span>
-                    <button
-                      className="border border-subtle hover:border-black h-11 w-11 flex items-center justify-center touch-manipulation"
-                      onClick={() => setQuantity((q) => q + 1)}
-                      aria-label="Increase quantity"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
+              {/* Quantity */}
+              <div className="mb-6">
+                <label className="text-sm font-medium mb-2 block">
+                  Quantity
+                </label>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={decrementQuantity}
+                    className="w-10 h-10 flex items-center justify-center border border-gray-300 hover:border-gray-400 transition-colors"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="w-12 text-center">{quantity}</span>
+                  <button
+                    onClick={incrementQuantity}
+                    className="w-10 h-10 flex items-center justify-center border border-gray-300 hover:border-gray-400 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-              <div className="space-y-3 mb-8">
+
+              {/* Add to Cart & Wishlist */}
+              <div className="flex gap-4 mb-8">
                 <Button
-                  className="button-primary w-full !py-3"
-                  disabled={!selectedSize}
+                  className="flex-1 bg-black hover:bg-gray-800 text-white py-6"
+                  disabled={(sizes.length > 0 && !selectedSize) || isAddingToCart}
+                  onClick={handleAddToCart}
                 >
-                  {selectedSize ? 'ADD TO BAG' : 'SELECT A SIZE'}
+                  {isAddingToCart ? 'Adding...' : 'Add to Cart'}
                 </Button>
                 <Button
-                  onClick={handleProductPageWishlistToggle}
-                  className="button-secondary w-full !py-3 flex items-center justify-center"
+                  variant="outline"
+                  size="icon"
+                  className="w-14 h-14"
+                  onClick={toggleWishlist}
                 >
                   <Heart
-                    className={`h-4 w-4 mr-2 transition-colors ${isProductPageItemWishlisted ? 'fill-red-500 text-red-500' : 'text-current'}`}
+                    className={`w-5 h-5 ${
+                      isProductPageItemWishlisted ? 'fill-current' : ''
+                    }`}
                   />
-                  {isProductPageItemWishlisted
-                    ? 'REMOVE FROM WISHLIST'
-                    : 'ADD TO WISHLIST'}
                 </Button>
               </div>
-              <Accordion
-                type="single"
-                collapsible
-                className="w-full"
-                defaultValue="item-0"
-              >
-                {product.details.map((item, index) => (
-                  <AccordionItem
-                    key={index}
-                    value={`item-${index}`}
-                    className="border-b border-subtle"
-                  >
-                    <AccordionTrigger className="py-3 text-xs font-bold uppercase tracking-wider hover:no-underline">
-                      {item.title}
-                    </AccordionTrigger>
-                    <AccordionContent className="pt-1 pb-3 text-xs text-gray-700 leading-relaxed">
-                      <p>
-                        {item.content ||
-                          product.shortDescription ||
-                          'No detailed description.'}
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
+
+              {/* Product Details */}
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="description">
+                  <AccordionTrigger>Description</AccordionTrigger>
+                  <AccordionContent>
+                    <p className="text-gray-600">
+                      {product.description || 'No description available.'}
+                    </p>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="shipping">
+                  <AccordionTrigger>Shipping & Returns</AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="space-y-2 text-sm text-gray-600">
+                      <li>• Free shipping on orders over £100</li>
+                      <li>• Standard delivery: 3-5 business days</li>
+                      <li>• Express delivery: 1-2 business days</li>
+                      <li>• Free returns within 30 days</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
               </Accordion>
             </div>
           </div>
-        </div>
-      </div>
 
-      <ProductReviews productId={slug} />
-      <ProductScroll title="YOU MAY ALSO LIKE" products={relatedProducts} />
-      <Footer />
-    </main>
+          {/* Reviews Section */}
+          <ProductReviews productId={product.id} />
+
+          {/* Related Products */}
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold mb-8">You May Also Like</h2>
+            {/* TODO: Fetch related products based on collection_id */}
+            <ProductScroll 
+              title="Related Products" 
+              products={[]} 
+              viewAllLink={product.collection_id ? `/category/${product.collection_id}` : undefined}
+            />
+          </section>
+        </main>
+      </div>
+    </>
   );
+}
+
+function generateStructuredData(data: any) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: data.title,
+    description: data.description,
+    image: data.image,
+    offers: {
+      '@type': 'Offer',
+      price: (data.price / 100).toFixed(2),
+      priceCurrency: data.currency,
+      availability: `https://schema.org/InStock`,
+      seller: {
+        '@type': 'Organization',
+        name: data.brand,
+      },
+    },
+  };
 }

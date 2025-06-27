@@ -45,9 +45,33 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
+  /** Whether to render as a child component (using Radix Slot) */
   asChild?: boolean;
 }
 
+/**
+ * Button Component
+ * 
+ * A versatile button component with multiple variants and sizes.
+ * Supports Strike Shop's custom design system with typewriter font and touch-friendly sizes.
+ * 
+ * @component
+ * @example
+ * // Default button
+ * <Button>Click me</Button>
+ * 
+ * @example
+ * // Strike-themed button
+ * <Button variant="strike" size="strike">
+ *   Add to Cart
+ * </Button>
+ * 
+ * @example
+ * // Icon button
+ * <Button variant="ghost" size="icon">
+ *   <Heart className="h-4 w-4" />
+ * </Button>
+ */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';

@@ -165,6 +165,8 @@ export class BrowserCache {
   private prefix = 'strike_cache_';
   
   set(key: string, data: any, ttlMs: number = 30 * 60 * 1000): void {
+    if (typeof window === 'undefined') return;
+    
     try {
       const item = {
         data,
@@ -182,6 +184,8 @@ export class BrowserCache {
   }
   
   get<T>(key: string): T | null {
+    if (typeof window === 'undefined') return null;
+    
     try {
       const item = localStorage.getItem(this.prefix + key);
       if (!item) return null;

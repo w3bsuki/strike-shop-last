@@ -1,7 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { ResponsiveContainer, Tooltip, Legend, type LegendProps } from 'recharts';
+import { ResponsiveContainer, Tooltip, Legend } from '@/lib/dynamic-imports/recharts';
+import type { LegendProps } from 'recharts';
 
 import { cn } from '@/lib/utils';
 

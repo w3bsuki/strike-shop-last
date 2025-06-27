@@ -1,6 +1,6 @@
 'use client';
 
-import { ClerkProvider } from '@/lib/clerk-mock';
+import { SupabaseAuthProvider } from '@/lib/supabase/auth-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import type React from 'react';
@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === 'development') {
       default: mod.ReactQueryDevtools
     })),
     { 
-      ssr: false,
+      
       loading: () => null 
     }
   );
@@ -54,16 +54,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   if (!isClient) {
     return (
-      <ClerkProvider>
+      <SupabaseAuthProvider>
         <QueryClientProvider client={queryClient}>
           {children}
         </QueryClientProvider>
-      </ClerkProvider>
+      </SupabaseAuthProvider>
     );
   }
 
   return (
-    <ClerkProvider>
+    <SupabaseAuthProvider>
       <QueryClientProvider client={queryClient}>
         <ColorContrastProvider>
           <AriaProvider>
@@ -76,6 +76,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </ColorContrastProvider>
         {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
-    </ClerkProvider>
+    </SupabaseAuthProvider>
   );
 }

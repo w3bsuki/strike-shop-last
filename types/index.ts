@@ -40,7 +40,6 @@ export {
 // Business domain types
 export * from './store';
 export * from './medusa';
-export * from './sanity';
 export * from './integrated';
 export * from './home-page';
 export * from './medusa-api';
@@ -53,8 +52,8 @@ export type { Metadata } from 'next';
 
 // Common type aliases for consistency
 export type AnyObject = Record<string, unknown>;
-export type AnyFunction = (...args: any[]) => any;
-export type AnyAsyncFunction = (...args: any[]) => Promise<any>;
+export type AnyFunction = (...args: unknown[]) => unknown;
+export type AnyAsyncFunction = (...args: unknown[]) => Promise<unknown>;
 export type AnyArray = unknown[];
 export type EmptyObject = Record<string, never>;
 

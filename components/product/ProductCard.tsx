@@ -1,67 +1,136 @@
 'use client';
 
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import Link from 'next/link';
+import { Heart, Eye, ShoppingBag } from 'lucide-react';
 import { ProductImage } from '@/components/ui/optimized-image';
-import { Heart, Eye } from 'lucide-react';
 import { useIsWishlisted, useWishlistActions } from '@/lib/stores';
 import type { WishlistItem } from '@/lib/wishlist-store';
 import { useQuickView } from '@/contexts/QuickViewContext';
-import { usePrefetch } from '@/hooks/use-prefetch';
 import { useAria, AccessibleButton } from '@/components/accessibility/aria-helpers';
+import { useCart } from '@/hooks/use-cart';
+import type { IntegratedProduct } from '@/types/integrated';
+import { toast } from '@/hooks/use-toast';
+
+/**
+ * ProductCard Component
+ * 
+ * A performant, accessible product card component for e-commerce displays.
+ * Features wishlist functionality, quick view, and proper accessibility.
+ * 
+ * @component
+ * @example
+ * // Simple product format
+ * <ProductCard
+ *   product={{
+ *     id: "123",
+ *     name: "Product Name",
+ *     price: "$99.99",
+ *     image: "/product.jpg",
+ *     slug: "product-slug"
+ *   }}
+ * />
+ * 
+ * @example
+ * // Integrated product format
+ * <ProductCard
+ *   product={integratedProductObject}
+ *   priority={true}
+ * />
+ */
+
+interface SimpleProduct {
+  id: string;
+  name: string;
+  price: string;
+  originalPrice?: string;
+  discount?: string;
+  image: string;
+  slug: string;
+  isNew?: boolean;
+  soldOut?: boolean;
+  colors?: number;
+}
 
 interface ProductCardProps {
-  product: {
-    id: string;
-    name: string;
-    price: string;
-    originalPrice?: string;
-    discount?: string;
-    image: string;
-    slug: string;
-    isNew?: boolean;
-    soldOut?: boolean;
-    colors?: number;
-  };
+  /** Product data - supports both simple and integrated formats */
+  product: SimpleProduct | IntegratedProduct;
+  /** Optional CSS class names */
   className?: string;
+  /** Whether to prioritize image loading */
   priority?: boolean;
 }
 
 /**
- * EXTREME PERFORMANCE: Unified Product Card Component
- * Memoized with optimal re-render prevention for FAST AS FUCK performance
+ * Type guard to check if product is in integrated format
  */
-const ProductCardComponent = ({
-  product,
-  className = '',
-  priority = false,
+function isIntegratedProduct(product: SimpleProduct | IntegratedProduct): product is IntegratedProduct {
+  return 'content' in product && 'pricing' in product && 'badges' in product;
+}
+
+/**
+ * Normalize product data from different formats into a simple format
+ */
+function normalizeProduct(product: SimpleProduct | IntegratedProduct): SimpleProduct {
+  if (!isIntegratedProduct(product)) {
+    return product;
+  }
+
+  const { content, pricing, badges } = product;
+  const mainImage = content.images?.[0];
+  
+  return {
+    id: product.id,
+    name: content.name,
+    price: pricing.displayPrice,
+    originalPrice: pricing.displaySalePrice,
+    discount: badges.isSale && pricing.discount 
+      ? `-${pricing.discount.percentage}%` 
+      : undefined,
+    image: typeof mainImage === 'string'
+      ? mainImage
+      : mainImage?.asset && 'url' in mainImage.asset
+        ? mainImage.asset.url
+        : '/placeholder.svg',
+    slug: product.slug,
+    isNew: badges.isNew,
+    soldOut: badges.isSoldOut,
+    colors: content.categories?.length || undefined,
+  };
+}
+
+export const ProductCard = React.memo(({ 
+  product: rawProduct, 
+  className = '', 
+  priority = false 
 }: ProductCardProps) => {
+  // Normalize product data
+  const product = normalizeProduct(rawProduct);
+  
+  // Hooks
   const isWishlisted = useIsWishlisted(product.id);
   const { addToWishlist, removeFromWishlist } = useWishlistActions();
   const { openQuickView } = useQuickView();
   const { announceToScreenReader } = useAria();
+  const { addItem, isAddingItem } = useCart();
 
-  // PERFORMANCE: Memoize wishlist item to prevent recreation
-  const wishlistItem: WishlistItem = useMemo(() => ({
+  // Wishlist item for add operation
+  const wishlistItem: WishlistItem = {
     id: product.id,
     name: product.name,
     price: product.price,
     image: product.image,
     slug: product.slug,
-  }), [product.id, product.name, product.price, product.image, product.slug]);
+  };
 
-  // PERFORMANCE: Memoize event handlers to prevent re-renders
-  const handleWishlistToggle = useCallback((e: React.MouseEvent) => {
+  // Event handlers
+  const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Enhanced haptic feedback pattern
+    // Haptic feedback
     if (navigator.vibrate) {
-      if (isWishlisted) {
-        navigator.vibrate(50); // Single vibration for remove
-      } else {
-        navigator.vibrate([100, 50, 100]); // Double vibration for add
-      }
+      navigator.vibrate(isWishlisted ? 50 : [100, 50, 100]);
     }
 
     if (isWishlisted) {
@@ -71,46 +140,71 @@ const ProductCardComponent = ({
       addToWishlist(wishlistItem);
       announceToScreenReader(`${product.name} added to wishlist`, 'polite');
     }
-  }, [isWishlisted, product.id, product.name, removeFromWishlist, addToWishlist, wishlistItem, announceToScreenReader]);
+  };
 
-  const handleQuickView = useCallback((e: React.MouseEvent) => {
+  const handleQuickView = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     openQuickView(product);
     announceToScreenReader(`Quick view opened for ${product.name}`, 'polite');
-  }, [openQuickView, product, announceToScreenReader]);
+  };
 
-  // PERFORMANCE: Memoize image source
-  const imageSrc = useMemo(() => product.image || '/placeholder.svg', [product.image]);
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Check if product has a variantId (from product data) or fetch it
+    let variantId = 'variantId' in product && product.variantId 
+      ? product.variantId 
+      : null;
+    
+    try {
+      // If we don't have a variant ID, we need to fetch the product details
+      if (!variantId) {
+        // For real Medusa products, we should have the variant ID
+        // If not, we can't add to cart
+        announceToScreenReader(`Unable to add ${product.name} to cart - variant information missing`, 'assertive');
+        toast({
+          title: 'Error',
+          description: 'Unable to add item to cart. Please try from the product page.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      // Real product - call the actual addItem function
+      await addItem({
+        productId: product.id,
+        variantId: variantId,
+        quantity: 1
+      });
+      announceToScreenReader(`${product.name} added to cart`, 'polite');
+      toast({
+        title: 'Added to cart',
+        description: `${product.name} has been added to your cart.`,
+      });
+    } catch (error) {
+      console.error('Failed to add item to cart:', error);
+      announceToScreenReader(`Failed to add ${product.name} to cart`, 'assertive');
+      toast({
+        title: 'Error',
+        description: 'Failed to add item to cart. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
 
-  // Generate comprehensive product description for screen readers
-  const productDescription = useMemo(() => {
-    const parts = [product.name];
-    
-    if (product.discount) {
-      parts.push(`on sale with ${product.discount} discount`);
-    }
-    
-    if (product.isNew) {
-      parts.push('new arrival');
-    }
-    
-    if (product.soldOut) {
-      parts.push('currently sold out');
-    }
-    
-    if (product.originalPrice) {
-      parts.push(`was ${product.originalPrice}, now ${product.price}`);
-    } else {
-      parts.push(`priced at ${product.price}`);
-    }
-    
-    if (product.colors) {
-      parts.push(`available in ${product.colors} colors`);
-    }
-    
-    return parts.join(', ');
-  }, [product]);
+  // Generate product description for screen readers
+  const productDescription = [
+    product.name,
+    product.discount && `on sale with ${product.discount} discount`,
+    product.isNew && 'new arrival',
+    product.soldOut && 'currently sold out',
+    product.originalPrice 
+      ? `was ${product.originalPrice}, now ${product.price}`
+      : `priced at ${product.price}`,
+    product.colors && `available in ${product.colors} colors`,
+  ].filter(Boolean).join(', ');
 
   return (
     <article 
@@ -124,19 +218,17 @@ const ProductCardComponent = ({
         {productDescription}
       </div>
 
-      <div 
-        className="product-card-image-wrapper relative bg-gray-100" 
-        style={{ aspectRatio: '3/4' }}
-      >
+      {/* Image container with Tailwind aspect ratio */}
+      <div className="product-card-image-wrapper relative bg-gray-100 aspect-[3/4] overflow-hidden rounded-lg">
         <ProductImage
-          src={imageSrc}
+          src={product.image || '/placeholder.svg'}
           alt={`${product.name}${product.soldOut ? ' - sold out' : ''}`}
-          className="product-card-image absolute inset-0 w-full h-full object-cover"
+          className="product-card-image absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           priority={priority}
           sizes="(max-width: 640px) 176px, (max-width: 768px) 192px, (max-width: 1024px) 208px, 240px"
         />
 
-        {/* Badges with proper semantic meaning */}
+        {/* Badges */}
         {product.discount && (
           <div 
             className="product-card-discount" 
@@ -165,21 +257,36 @@ const ProductCardComponent = ({
           </div>
         )}
 
-        {/* Quick View Button - Enhanced for accessibility */}
-        <AccessibleButton
-          className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm p-3 shadow-sm hover:bg-white hover:shadow-md transition-all z-20 lg:opacity-0 lg:group-hover:opacity-100 touch-manipulation min-h-[44px] min-w-[44px]"
-          onClick={handleQuickView}
-          variant="ghost"
-          description={`Opens a quick preview of ${product.name} in a modal dialog`}
-        >
-          <Eye className="h-4 w-4 text-black" aria-hidden="true" />
-          <span className="sr-only">Quick view {product.name}</span>
-        </AccessibleButton>
+        {/* Action Buttons - Bottom Center */}
+        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-3 opacity-100 transition-all duration-300 z-20">
+          {/* Quick View Button */}
+          <AccessibleButton
+            className="h-11 w-11 flex items-center justify-center bg-black/80 hover:bg-black text-white backdrop-blur-sm border-0 transition-all duration-200 hover:scale-110 active:scale-95 min-h-[44px] min-w-[44px]"
+            onClick={handleQuickView}
+            variant="ghost"
+            description={`Opens a quick preview of ${product.name} in a modal dialog`}
+          >
+            <Eye className="h-4 w-4" aria-hidden="true" />
+            <span className="sr-only">Quick view {product.name}</span>
+          </AccessibleButton>
 
-        {/* Wishlist Button - Enhanced for accessibility */}
+          {/* Add to Cart Button */}
+          <AccessibleButton
+            className="h-11 w-11 flex items-center justify-center bg-black/80 hover:bg-black text-white backdrop-blur-sm border-0 transition-all duration-200 hover:scale-110 active:scale-95 min-h-[44px] min-w-[44px] disabled:opacity-50"
+            onClick={handleAddToCart}
+            disabled={isAddingItem || product.soldOut}
+            variant="ghost"
+            description={`Add ${product.name} to your shopping cart`}
+          >
+            <ShoppingBag className={`h-4 w-4 ${isAddingItem ? 'animate-pulse' : ''}`} aria-hidden="true" />
+            <span className="sr-only">Add {product.name} to cart</span>
+          </AccessibleButton>
+        </div>
+
+        {/* Wishlist Button - Top Right */}
         <AccessibleButton
-          className={`absolute top-2 right-2 h-11 w-11 flex items-center justify-center bg-white/90 backdrop-blur-sm hover:bg-white touch-manipulation z-30 transition-all duration-200 hover:scale-110 active:scale-95 min-h-[44px] min-w-[44px] ${
-            isWishlisted ? 'text-red-500 shadow-sm' : 'text-black'
+          className={`absolute top-2 right-2 h-11 w-11 flex items-center justify-center bg-white/80 hover:bg-white/90 backdrop-blur-sm border-0 touch-manipulation z-30 transition-all duration-200 hover:scale-110 active:scale-95 min-h-[44px] min-w-[44px] rounded-full ${
+            isWishlisted ? 'text-red-500' : 'text-black'
           }`}
           onClick={handleWishlistToggle}
           pressed={isWishlisted}
@@ -198,6 +305,7 @@ const ProductCardComponent = ({
         </AccessibleButton>
       </div>
 
+      {/* Product info */}
       <div className="product-card-content" style={{ minHeight: '4.5rem' }}>
         <Link 
           href={`/product/${product.slug}`} 
@@ -231,20 +339,6 @@ const ProductCardComponent = ({
       </div>
     </article>
   );
-};
-
-// CRITICAL: Deep memoization with custom comparison for extreme performance
-export const ProductCard = React.memo(ProductCardComponent, (prevProps, nextProps) => {
-  // Only re-render if essential product data changes
-  return (
-    prevProps.product.id === nextProps.product.id &&
-    prevProps.product.name === nextProps.product.name &&
-    prevProps.product.price === nextProps.product.price &&
-    prevProps.product.image === nextProps.product.image &&
-    prevProps.product.isNew === nextProps.product.isNew &&
-    prevProps.product.soldOut === nextProps.product.soldOut &&
-    prevProps.product.discount === nextProps.product.discount &&
-    prevProps.priority === nextProps.priority &&
-    prevProps.className === nextProps.className
-  );
 });
+
+ProductCard.displayName = 'ProductCard';

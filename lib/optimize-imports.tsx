@@ -39,7 +39,7 @@ export function clientOnlyComponent<T extends ComponentType<any>>(
 ) {
   return lazyComponent(importFn, {
     ...options,
-    ssr: false,
+    
   });
 }
 

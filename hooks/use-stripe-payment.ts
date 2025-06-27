@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useCart } from './use-cart';
-import { useUser } from '@/lib/clerk-mock';
+import { useUser } from '@/lib/supabase/hooks';
 
 interface CreatePaymentIntentData {
   amount: number;

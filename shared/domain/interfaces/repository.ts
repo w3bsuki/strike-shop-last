@@ -217,21 +217,21 @@ export interface RepositoryFactory {
    * Create repository instance
    */
   create<TEntity, TId>(
-    entityType: new (...args: any[]) => TEntity
+    entityType: new (...args: unknown[]) => TEntity
   ): Repository<TEntity, TId>;
 
   /**
    * Get existing repository instance
    */
   get<TEntity, TId>(
-    entityType: new (...args: any[]) => TEntity
+    entityType: new (...args: unknown[]) => TEntity
   ): Repository<TEntity, TId>;
 
   /**
    * Register repository implementation
    */
   register<TEntity, TId>(
-    entityType: new (...args: any[]) => TEntity,
+    entityType: new (...args: unknown[]) => TEntity,
     repository: Repository<TEntity, TId>
   ): void;
 }

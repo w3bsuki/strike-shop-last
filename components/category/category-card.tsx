@@ -7,14 +7,23 @@ import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { categoryAspectRatios, type CategoryAspectRatio } from "@/config/categories";
 
-// Map aspect ratio names to their actual ratio values for CSS style attribute
-const aspectRatioValues = {
-  square: "1/1",
-  portrait: "4/5",
-  landscape: "4/3",
-  wide: "16/9",
-  golden: "1.618/1",
-} as const;
+/**
+ * CategoryCard Component
+ * 
+ * A visually appealing category card with hover effects and flexible layouts.
+ * Supports various aspect ratios, overlays, and content positioning options.
+ * 
+ * @component
+ * @example
+ * <CategoryCard
+ *   name="Summer Collection"
+ *   image="/summer.jpg"
+ *   href="/categories/summer"
+ *   count={42}
+ *   aspectRatio="portrait"
+ *   overlay="gradient"
+ * />
+ */
 
 const categoryCardVariants = cva(
   "group relative block overflow-hidden bg-gray-100 transition-all duration-300",
@@ -99,7 +108,6 @@ const CategoryCard = React.forwardRef<HTMLAnchorElement, CategoryCardProps>(
       >
         <div 
           className={cn("relative w-full bg-gray-100", categoryAspectRatios[aspectRatio])}
-          style={{ aspectRatio: aspectRatioValues[aspectRatio] }}
         >
           {/* Image */}
           <Image

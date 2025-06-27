@@ -5,6 +5,9 @@ import { createPaymentIntent } from '@/lib/stripe-server';
 import { withAPISecurity, APISecurityMiddleware } from '@/lib/api-security';
 import { InputValidator } from '@/lib/security-fortress';
 import { z } from 'zod';
+import { PaymentValidator } from '@/lib/security/payment-validator';
+import { FraudDetectionService } from '@/lib/security/fraud-detection';
+import { PaymentMonitoringService } from '@/lib/security/payment-monitoring';
 
 // 🛡️ FORTRESS-LEVEL PAYMENT SECURITY VALIDATION
 const createPaymentIntentSchema = z.object({
@@ -117,37 +120,101 @@ const securePostHandler = async (request: NextRequest) => {
 
     const { amount, currency, items, shipping } = validatedData;
 
-    // 🚨 FRAUD DETECTION - Basic checks
-    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-    const calculatedAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    // 🛡️ COMPREHENSIVE PAYMENT VALIDATION
+    const userEmail = (await auth()).sessionClaims?.email || '';
+    const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '';
+    const userAgent = request.headers.get('user-agent') || '';
     
-    // Verify amount matches item totals (within 1% tolerance for taxes/fees)
-    if (Math.abs(amount - calculatedAmount) > calculatedAmount * 0.01) {
-      console.warn(`🚨 FRAUD ALERT: Amount mismatch for user ${userId}`, {
-        providedAmount: amount,
-        calculatedAmount,
-        items,
-        timestamp: new Date().toISOString()
+    const validationResult = await PaymentValidator.validatePayment({
+      amount,
+      currency,
+      items: items as any, // Type assertion needed due to exactOptionalPropertyTypes
+      userId,
+      userEmail,
+      ...(shipping?.address.country && { 
+        shippingCountry: shipping.address.country,
+        billingCountry: shipping.address.country, // Using shipping as billing for now
+      }),
+      ipAddress: clientIp,
+      userAgent,
+    });
+
+    // Check validation result
+    if (!validationResult.isValid) {
+      await PaymentMonitoringService.logEvent({
+        id: `validation_fail_${Date.now()}`,
+        type: 'fraud_alert',
+        timestamp: new Date().toISOString(),
+        userId,
+        amount,
+        currency,
+        metadata: {
+          errors: validationResult.errors,
+          riskScore: validationResult.riskScore,
+        },
       });
-      
+
       return APISecurityMiddleware.createErrorResponse(
         400,
-        'AMOUNT_MISMATCH',
-        'Payment amount does not match item totals'
+        'VALIDATION_FAILED',
+        'Payment validation failed',
+        validationResult.errors
       );
     }
 
-    // Check for suspicious order patterns
-    if (totalItems > 20 || amount > 50000) { // £500+ orders need extra verification
-      console.warn(`🔍 HIGH-VALUE ORDER: User ${userId} attempting £${amount/100} order`, {
-        itemCount: totalItems,
+    // 🚨 FRAUD DETECTION
+    const fraudCheckResult = await FraudDetectionService.checkTransaction({
+      userId,
+      email: userEmail,
+      amount,
+      currency,
+      ipAddress: clientIp,
+      userAgent,
+      ...(shipping && {
+        shippingAddress: {
+          country: shipping.address.country,
+          city: shipping.address.city,
+          postalCode: shipping.address.postal_code,
+        }
+      }),
+      items,
+    });
+
+    // Handle fraud check results
+    if (!fraudCheckResult.allow) {
+      await PaymentMonitoringService.logEvent({
+        id: `fraud_block_${Date.now()}`,
+        type: 'fraud_alert',
+        timestamp: new Date().toISOString(),
+        userId,
         amount,
-        items: items.map(i => ({ id: i.id, quantity: i.quantity, price: i.price })),
+        currency,
+        riskScore: fraudCheckResult.riskScore,
+        metadata: {
+          reasons: fraudCheckResult.reasons,
+          action: fraudCheckResult.suggestedAction,
+        },
+      });
+
+      return APISecurityMiddleware.createErrorResponse(
+        403,
+        'PAYMENT_BLOCKED',
+        'Payment blocked due to security concerns'
+      );
+    }
+
+    // Log warnings if any
+    if (validationResult.warnings.length > 0 || fraudCheckResult.reasons.length > 0) {
+      console.warn(`⚠️ PAYMENT WARNINGS for user ${userId}`, {
+        validationWarnings: validationResult.warnings,
+        fraudReasons: fraudCheckResult.reasons,
+        riskScore: fraudCheckResult.riskScore,
         timestamp: new Date().toISOString()
       });
     }
 
     // 🔐 SECURE METADATA CREATION
+    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
     const metadata: Record<string, string> = {
       userId,
       itemCount: items.length.toString(),
@@ -175,30 +242,60 @@ const securePostHandler = async (request: NextRequest) => {
       metadata.shipping_address = JSON.stringify(shipping.address);
     }
 
-    // 💳 CREATE PAYMENT INTENT WITH SECURITY FEATURES
+    // 💳 CREATE PAYMENT INTENT WITH ENHANCED SECURITY
     const paymentIntent = await createPaymentIntent({
       amount,
       currency,
-      metadata,
+      metadata: {
+        ...metadata,
+        riskScore: fraudCheckResult.riskScore.toString(),
+        requires3DS: (validationResult.requires3DS || fraudCheckResult.suggestedAction === 'challenge').toString(),
+        requiresReview: fraudCheckResult.requiresManualReview.toString(),
+      },
+      customerEmail: userEmail,
+      description: `Order for ${items.length} items - Risk Score: ${fraudCheckResult.riskScore}`,
     });
 
-    // 📝 SECURITY AUDIT LOG
-    console.log(`💳 PAYMENT INTENT CREATED: ${paymentIntent.id}`, {
+    // 📝 PAYMENT MONITORING
+    await PaymentMonitoringService.logEvent({
+      id: paymentIntent.id,
+      type: 'payment_intent.created',
+      timestamp: new Date().toISOString(),
       userId,
       amount: paymentIntent.amount,
       currency: paymentIntent.currency,
-      itemCount: items.length,
+      riskScore: fraudCheckResult.riskScore,
+      metadata: {
+        itemCount: items.length,
+        requires3DS: validationResult.requires3DS || fraudCheckResult.suggestedAction === 'challenge',
+        requiresReview: fraudCheckResult.requiresManualReview,
+        validationWarnings: validationResult.warnings.length,
+        fraudReasons: fraudCheckResult.reasons.length,
+      },
+    });
+
+    console.log(`💳 SECURE PAYMENT INTENT CREATED: ${paymentIntent.id}`, {
+      userId,
+      amount: paymentIntent.amount,
+      currency: paymentIntent.currency,
+      riskScore: fraudCheckResult.riskScore,
+      requires3DS: validationResult.requires3DS,
       timestamp: new Date().toISOString()
     });
 
-    // 🎯 SECURE RESPONSE
+    // 🎯 SECURE RESPONSE WITH SECURITY INDICATORS
     return APISecurityMiddleware.createSuccessResponse({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
       amount: paymentIntent.amount,
       currency: paymentIntent.currency,
       status: paymentIntent.status,
-    }, 'Payment intent created successfully');
+      // Include security flags for client-side handling
+      security: {
+        requires3DS: validationResult.requires3DS || fraudCheckResult.suggestedAction === 'challenge',
+        riskLevel: fraudCheckResult.riskScore > 70 ? 'high' : fraudCheckResult.riskScore > 40 ? 'medium' : 'low',
+      },
+    }, 'Secure payment intent created successfully');
 
   } catch (error) {
     // 🚨 COMPREHENSIVE ERROR HANDLING

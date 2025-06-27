@@ -37,12 +37,12 @@ export class MedusaProductService {
    */
   static async getCategories(): Promise<MedusaProductCategory[]> {
     const cacheKey = 'categories:all';
-    const cached = this.cache.get(cacheKey);
+    const cached = this.cache.get(cacheKey) as MedusaProductCategory[] | null;
     if (cached) return cached;
 
     // Check for pending request
     if (pendingRequests.has(cacheKey)) {
-      return pendingRequests.get(cacheKey);
+      return pendingRequests.get(cacheKey) as Promise<MedusaProductCategory[]>;
     }
 
     const promise = this._fetchCategories(cacheKey);
@@ -56,8 +56,11 @@ export class MedusaProductService {
     }
   }
 
-  private static async _fetchCategories(cacheKey: string) {
+  private static async _fetchCategories(cacheKey: string): Promise<MedusaProductCategory[]> {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/product-categories`,
         {
@@ -65,8 +68,12 @@ export class MedusaProductService {
             'x-publishable-api-key':
               process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
           },
+          signal: controller.signal,
+          cache: 'no-store',
         }
       );
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -77,7 +84,7 @@ export class MedusaProductService {
       this.cache.set(cacheKey, categories);
       return categories;
     } catch (error) {
-
+      console.error('Error fetching categories:', error);
       return [];
     }
   }
@@ -92,9 +99,10 @@ export class MedusaProductService {
     collection_id?: string[];
     tags?: string[];
     sales_channel_id?: string[];
+    handle?: string;
   }): Promise<{ products: MedusaProduct[]; count: number }> {
     const cacheKey = `products:${JSON.stringify(params || {})}`;
-    const cached = this.cache.get(cacheKey);
+    const cached = this.cache.get(cacheKey) as { products: MedusaProduct[]; count: number } | null;
     if (cached) return cached;
 
     try {
@@ -104,6 +112,9 @@ export class MedusaProductService {
       url.searchParams.set('offset', String(params?.offset || 0));
       url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
       
+      if (params?.handle) {
+        url.searchParams.set('handle', params.handle);
+      }
       if (params?.category_id?.length) {
         params.category_id.forEach(id => url.searchParams.append('category_id', id));
       }
@@ -114,12 +125,19 @@ export class MedusaProductService {
         params.tags.forEach(tag => url.searchParams.append('tags', tag));
       }
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(url.toString(), {
         headers: {
           'x-publishable-api-key':
             process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
         },
+        signal: controller.signal,
+        cache: 'no-store',
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -130,7 +148,7 @@ export class MedusaProductService {
       this.cache.set(cacheKey, result);
       return result;
     } catch (error) {
-
+      console.error('Error fetching products:', error);
       return { products: [], count: 0 };
     }
   }
@@ -353,7 +371,7 @@ export class MedusaProductService {
 
       const data = await response.json();
       // Filter out the current product
-      const products = (data.products || []).filter((p: any) => p.id !== productId).slice(0, limit);
+      const products = (data.products || []).filter((p: MedusaProduct) => p.id !== productId).slice(0, limit);
       this.cache.set(cacheKey, products);
       return products;
     } catch (error) {

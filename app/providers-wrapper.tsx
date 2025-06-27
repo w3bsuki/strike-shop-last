@@ -1,7 +1,17 @@
 'use client';
 
-import { Providers } from '@/components/providers';
+import { ClientProviders, AccessibilityProviders } from './providers-client';
+import { ServerProviders } from './providers-server';
 
+// Optimized provider structure that minimizes client boundary
 export function ProvidersWrapper({ children }: { children: React.ReactNode }) {
-  return <Providers>{children}</Providers>;
+  return (
+    <ServerProviders>
+      <ClientProviders>
+        <AccessibilityProviders>
+          {children}
+        </AccessibilityProviders>
+      </ClientProviders>
+    </ServerProviders>
+  );
 }

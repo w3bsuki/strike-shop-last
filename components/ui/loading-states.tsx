@@ -4,16 +4,18 @@ import { cn } from '@/lib/utils';
 
 /**
  * Product Card Skeleton
+ * 
+ * Loading skeleton that matches the exact dimensions of ProductCard
  */
 export function ProductCardSkeleton({ className }: { className?: string }) {
   return (
     <div className={cn('space-y-0', className)}>
       {/* Image skeleton with exact aspect ratio */}
-      <div className="relative bg-gray-100" style={{ aspectRatio: '3/4' }}>
+      <div className="relative bg-gray-100 aspect-[3/4]">
         <Skeleton className="absolute inset-0" />
       </div>
       {/* Content skeleton with exact min-height */}
-      <div className="space-y-2 p-3" style={{ minHeight: '4.5rem' }}>
+      <div className="space-y-2 p-3 min-h-[4.5rem]">
         <Skeleton className="h-3 w-3/4" />
         <Skeleton className="h-4 w-1/2" />
       </div>
@@ -85,12 +87,14 @@ export function ProductDetailsSkeleton() {
 
 /**
  * Cart Item Skeleton
+ * 
+ * Loading skeleton for cart items with proper aspect ratio
  */
 export function CartItemSkeleton() {
   return (
     <div className="flex gap-4 p-4">
       {/* Cart item image with 3/4 aspect ratio */}
-      <div className="shrink-0 relative bg-gray-100" style={{ width: '96px', aspectRatio: '3/4' }}>
+      <div className="shrink-0 relative bg-gray-100 w-24 aspect-[3/4]">
         <Skeleton className="absolute inset-0" />
       </div>
       <div className="flex-1 space-y-2">
@@ -104,12 +108,14 @@ export function CartItemSkeleton() {
 
 /**
  * Category Card Skeleton
+ * 
+ * Loading skeleton for category cards
  */
 export function CategoryCardSkeleton() {
   return (
     <div className="space-y-0">
       {/* Category image skeleton with 4/5 aspect ratio */}
-      <div className="relative bg-gray-100" style={{ aspectRatio: '4/5' }}>
+      <div className="relative bg-gray-100 aspect-[4/5]">
         <Skeleton className="absolute inset-0" />
       </div>
     </div>

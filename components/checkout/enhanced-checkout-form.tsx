@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard, Smartphone, Globe } from 'lucide-react';
 import { getStripe, stripeConfig } from '@/lib/stripe-client';
 import { useCart } from '@/hooks/use-cart';
-import { useUser } from '@/lib/clerk-mock';
+import { useUser } from '@/lib/supabase/hooks';
 import { toast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 
@@ -44,7 +44,7 @@ function CheckoutForm({ clientSecret, onPaymentSuccess, onPaymentError }: Checko
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/order-confirmation`,
-          receipt_email: user?.emailAddresses[0]?.emailAddress,
+          receipt_email: user?.email,
         },
         redirect: 'if_required',
       });

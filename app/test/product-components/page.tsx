@@ -2,6 +2,7 @@
 
 import { ProductSection, ProductHeader, ProductGrid, ProductScroll, ProductCard, ProductBadge, ProductPrice, ProductActions, ProductShowcase } from "@/components/product";
 import { ProductCardEnhanced } from "@/components/product/product-card-enhanced";
+import { QuickViewProvider } from "@/contexts/QuickViewContext";
 
 // Demo product data
 const demoProduct = {
@@ -30,7 +31,8 @@ const productList = Array.from({ length: 8 }, (_, i) => ({
 
 export default function ProductComponentsDemo() {
   return (
-    <main className="min-h-screen bg-white p-8">
+    <QuickViewProvider>
+      <main className="min-h-screen bg-white p-8">
       <div className="max-w-7xl mx-auto space-y-16">
         <header className="text-center">
           <h1 className="text-4xl font-bold mb-4">Product Components Showcase</h1>
@@ -191,5 +193,6 @@ export default function ProductComponentsDemo() {
         </section>
       </div>
     </main>
+    </QuickViewProvider>
   );
 }

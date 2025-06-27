@@ -64,7 +64,7 @@ export default function TestMobileNavPage() {
         <div className="mt-8 p-4 bg-white rounded shadow">
           <h2 className="font-bold mb-2">Implementation Details:</h2>
           <ul className="space-y-1 text-sm">
-            <li>✅ Hide-on-scroll: Hides when scrolling down > 100px, shows when scrolling up</li>
+            <li>✅ Hide-on-scroll: Hides when scrolling down &gt; 100px, shows when scrolling up</li>
             <li>✅ Throttled scroll handler (100ms)</li>
             <li>✅ Smooth transitions (300ms)</li>
             <li>✅ Safe area padding using env(safe-area-inset-*)</li>

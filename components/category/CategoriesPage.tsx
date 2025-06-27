@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/dynamic-imports/framer-motion';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { CategoryGrid, CategoryMasonry } from './CategoryGrid';

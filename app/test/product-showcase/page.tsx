@@ -1,5 +1,6 @@
 import { ProductShowcase } from "@/components/product/product-showcase";
 import { ProductSection, ProductHeader, ProductGrid, ProductScroll, ProductCard } from "@/components/product";
+import { QuickViewProvider } from "@/contexts/QuickViewContext";
 
 // Mock product data for testing
 const mockProducts = Array.from({ length: 12 }, (_, i) => ({
@@ -17,9 +18,10 @@ const mockProducts = Array.from({ length: 12 }, (_, i) => ({
 
 export default function ProductShowcasePage() {
   return (
-    <main className="min-h-screen bg-white">
-      <div className="py-8">
-        <h1 className="text-4xl font-bold text-center mb-12">Product Showcase Components</h1>
+    <QuickViewProvider>
+      <main className="min-h-screen bg-white">
+        <div className="py-8">
+          <h1 className="text-4xl font-bold text-center mb-12">Product Showcase Components</h1>
 
         {/* Showcase 1: Scroll Layout with Sale Badge */}
         <ProductShowcase
@@ -96,5 +98,6 @@ export default function ProductShowcasePage() {
         />
       </div>
     </main>
+    </QuickViewProvider>
   );
 }

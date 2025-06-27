@@ -14,26 +14,65 @@ export async function createPaymentIntent({
   amount,
   currency = 'gbp',
   metadata = {},
+  customerEmail,
+  description,
 }: {
   amount: number;
   currency?: string;
   metadata?: Record<string, string>;
+  customerEmail?: string;
+  description?: string;
 }) {
   try {
+    const amountInCents = Math.round(amount * 100); // Convert to pence/cents
+    
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Convert to pence/cents
+      amount: amountInCents,
       currency,
-      metadata,
+      metadata: {
+        ...metadata,
+        // Add security tracking
+        created_at: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'production',
+      },
       automatic_payment_methods: {
         enabled: true,
       },
       // Enable Klarna and other BNPL options
       payment_method_types: ['card', 'klarna'],
+      
+      // 🔐 3D SECURE ENFORCEMENT
+      payment_method_options: {
+        card: {
+          // Require 3DS for high-value transactions (£100+)
+          request_three_d_secure: amountInCents >= 10000 ? 'required' : 'automatic',
+          // Capture method - manual for fraud review on high amounts
+          capture_method: amountInCents >= 50000 ? 'manual' : 'automatic',
+        },
+      },
+      
+      // 🔴 FRAUD DETECTION - Stripe Radar settings
+      radar_options: {
+        // Skip rules for test mode only
+        skip_rules: process.env.NODE_ENV === 'development' ? ['all'] : [],
+      },
+      
+      // Additional fraud prevention
+      receipt_email: customerEmail,
+      description: description || `Payment for order ${metadata.order_id || 'N/A'}`,
+      
+      // Statement descriptor for clear billing
+      statement_descriptor_suffix: 'STRIKESHOP',
     });
 
     return paymentIntent;
   } catch (error) {
-
+    console.error('🚨 Payment Intent Creation Failed:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      amount,
+      currency,
+      timestamp: new Date().toISOString(),
+    });
     throw error;
   }
 }

@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import type { IntegratedProduct } from '@/types/integrated';
-import type { SanityProduct } from '@/types/sanity';
-import { urlForImage } from '@/lib/sanity';
 
 export interface SEOData {
   title: string;
@@ -298,59 +296,22 @@ export const categorySEO = {
 
 // Product-specific metadata generation
 export function generateProductMetadata(
-  product: SanityProduct | IntegratedProduct,
+  product: IntegratedProduct,
   url: string
 ): Metadata {
-  const isSanityProduct = '_type' in product && product._type === 'product';
-
   const productData: SEOData = {
-    title: isSanityProduct
-      ? (product as SanityProduct).metadata?.title ||
-        (product as any).title ||
-        (product as SanityProduct).name
-      : (product as IntegratedProduct).metadata?.title ||
-        (product as IntegratedProduct).content.name,
-    description: isSanityProduct
-      ? (product as SanityProduct).metadata?.description ||
-        (product as SanityProduct).description ||
-        ''
-      : (product as IntegratedProduct).metadata?.description ||
-        (product as IntegratedProduct).content.description ||
-        '',
-    keywords: isSanityProduct
-      ? (product as SanityProduct).metadata?.keywords || []
-      : (product as IntegratedProduct).metadata?.keywords ||
-        (product as IntegratedProduct).content.tags ||
-        [],
-    image: isSanityProduct
-      ? (product as SanityProduct).images?.[0]
-        ? urlForImage((product as SanityProduct).images![0]).url()
-        : '/images/placeholder.jpg'
-      : (product as IntegratedProduct).content.images?.[0]
-        ? urlForImage((product as IntegratedProduct).content.images![0]).url()
-        : '/images/placeholder.jpg',
+    title: product.metadata?.title || product.content.name,
+    description: product.metadata?.description || product.content.description || '',
+    keywords: product.metadata?.keywords || product.content.tags || [],
+    image: product.content.images?.[0]?.url || '/images/placeholder.jpg',
     url,
     type: 'product',
-    price: isSanityProduct
-      ? (product as any).price?.toString() // Some Sanity products may have price
-      : (product as IntegratedProduct).pricing.basePrice.toString(),
+    price: product.pricing.basePrice.toString(),
     currency: 'GBP',
-    availability: isSanityProduct
-      ? 'in stock'
-      : (product as IntegratedProduct).commerce.inventory.available
-        ? 'in stock'
-        : 'out of stock',
-    brand: isSanityProduct
-      ? (product as SanityProduct).brand || 'STRIKE™'
-      : (product as IntegratedProduct).content.brand || 'STRIKE™',
-    category: isSanityProduct
-      ? ((product as SanityProduct).categories?.[0] as any)?.name || undefined
-      : (product as IntegratedProduct).content.categories?.[0]?.name ||
-        undefined,
-    sku: isSanityProduct
-      ? (product as SanityProduct).sku
-      : (product as IntegratedProduct).commerce.variants?.[0]?.sku ||
-        (product as IntegratedProduct).sku,
+    availability: product.commerce.inventory.available ? 'in stock' : 'out of stock',
+    brand: product.content.brand || 'STRIKE™',
+    category: product.content.categories?.[0]?.name || undefined,
+    sku: product.commerce.variants?.[0]?.sku || product.sku,
   };
 
   return generateMetadata(productData);
@@ -380,52 +341,21 @@ export function generateCategoryMetadata(
 
 // Generate Product JSON-LD structured data
 export function generateProductJsonLd(
-  product: SanityProduct | IntegratedProduct,
+  product: IntegratedProduct,
   url: string
 ): string {
   const structuredData = generateStructuredData({
-    title:
-      '_type' in product && product._type === 'product'
-        ? (product as any).title || (product as SanityProduct).name
-        : (product as IntegratedProduct).content.name,
-    description:
-      '_type' in product && product._type === 'product'
-        ? (product as SanityProduct).description || ''
-        : (product as IntegratedProduct).content.description || '',
-    image:
-      '_type' in product && product._type === 'product'
-        ? (product as SanityProduct).images?.[0]
-          ? urlForImage((product as SanityProduct).images![0]).url()
-          : undefined
-        : (product as IntegratedProduct).content.images?.[0]
-          ? urlForImage((product as IntegratedProduct).content.images![0]).url()
-          : undefined,
+    title: product.content.name,
+    description: product.content.description || '',
+    image: product.content.images?.[0]?.url,
     url,
     type: 'product',
-    price:
-      '_type' in product && product._type === 'product'
-        ? (product as any).price?.toString()
-        : (product as IntegratedProduct).pricing.basePrice.toString(),
+    price: product.pricing.basePrice.toString(),
     currency: 'GBP',
-    availability:
-      '_type' in product && product._type === 'product'
-        ? 'in stock'
-        : (product as IntegratedProduct).commerce.inventory.available
-          ? 'in stock'
-          : 'out of stock',
-    brand:
-      '_type' in product && product._type === 'product'
-        ? (product as SanityProduct).brand || 'STRIKE™'
-        : (product as IntegratedProduct).content.brand || 'STRIKE™',
-    category:
-      '_type' in product && product._type === 'product'
-        ? ((product as SanityProduct).categories?.[0] as any)?.name
-        : (product as IntegratedProduct).content.categories?.[0]?.name,
-    sku:
-      '_type' in product && product._type === 'product'
-        ? (product as SanityProduct).sku
-        : (product as IntegratedProduct).commerce.variants?.[0]?.sku ||
-          (product as IntegratedProduct).sku,
+    availability: product.commerce.inventory.available ? 'in stock' : 'out of stock',
+    brand: product.content.brand || 'STRIKE™',
+    category: product.content.categories?.[0]?.name,
+    sku: product.commerce.variants?.[0]?.sku || product.sku,
   });
 
   return JSON.stringify(structuredData);

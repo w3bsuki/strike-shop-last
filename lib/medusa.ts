@@ -39,6 +39,27 @@ interface MedusaSDKWithCart {
   };
 }
 
+// Helper to safely handle SDK responses
+async function handleSDKResponse<T>(promise: Promise<T>): Promise<T> {
+  try {
+    const result = await promise;
+    // Handle potential streaming response issues
+    if (result && typeof result === 'object' && 'body' in result) {
+      // If it's a Response-like object, try to parse it
+      try {
+        const data = await (result as any).json();
+        return data;
+      } catch {
+        return result;
+      }
+    }
+    return result;
+  } catch (error) {
+    console.error('SDK Response Error:', error);
+    throw error;
+  }
+}
+
 // Modern Medusa SDK client (v2.x)
 export const medusaSDK = new Medusa({
   baseUrl: MEDUSA_BACKEND_URL,
@@ -47,8 +68,69 @@ export const medusaSDK = new Medusa({
   // Note: maxRetries and timeout might need to be configured differently in v2
 });
 
-// Export the SDK client as medusaClient for backward compatibility
-export const medusaClient = medusaSDK;
+// Create a compatibility layer for the old medusaClient API
+export const medusaClient = {
+  ...medusaSDK,
+  carts: {
+    retrieve: async (cartId: string) => {
+      try {
+        const cart = await handleSDKResponse(
+          (medusaSDK as unknown as MedusaSDKWithCart).store.cart.retrieve(cartId)
+        );
+        return { cart };
+      } catch (error) {
+        console.error('Cart retrieve error:', error);
+        throw error;
+      }
+    },
+    create: async (data: { region_id: string }) => {
+      try {
+        const cart = await handleSDKResponse(
+          (medusaSDK as unknown as MedusaSDKWithCart).store.cart.create(data)
+        );
+        return { cart };
+      } catch (error) {
+        console.error('Cart create error:', error);
+        throw error;
+      }
+    },
+    lineItems: {
+      create: async (cartId: string, data: { variant_id: string; quantity: number }) => {
+        try {
+          const cart = await handleSDKResponse(
+            (medusaSDK as unknown as MedusaSDKWithCart).store.cart.addLineItem(cartId, data)
+          );
+          return { cart };
+        } catch (error) {
+          console.error('Add line item error:', error);
+          throw error;
+        }
+      },
+      update: async (cartId: string, lineItemId: string, data: { quantity: number }) => {
+        try {
+          const cart = await handleSDKResponse(
+            (medusaSDK as unknown as MedusaSDKWithCart).store.cart.updateLineItem(cartId, lineItemId, data)
+          );
+          return { cart };
+        } catch (error) {
+          console.error('Update line item error:', error);
+          throw error;
+        }
+      },
+      delete: async (cartId: string, lineItemId: string) => {
+        try {
+          const cart = await handleSDKResponse(
+            (medusaSDK as unknown as MedusaSDKWithCart).store.cart.deleteLineItem(cartId, lineItemId)
+          );
+          return { cart };
+        } catch (error) {
+          console.error('Delete line item error:', error);
+          throw error;
+        }
+      },
+    },
+  },
+};
 
 // Connection pool configuration
 interface ConnectionPoolConfig {

@@ -1,19 +1,22 @@
+/* Import Strike Shop Design System */
+@import '../styles/design-system.css';
+
+/* Import optimized fonts if they exist */
+@import '../styles/optimized-fonts.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Import Strike Shop Design System */
-@import '../styles/design-system.css';
-
-/* ==========================================================================
-   Font Definitions
-   ========================================================================== */
+/* Fallback font definitions with enhanced loading */
 @font-face {
   font-family: 'Typewriter';
   src: url('/fonts/CourierPrime-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
+  /* Subset for faster initial load */
+  unicode-range: U+0020-007F, U+00A0-00FF, U+0100-017F, U+2010-2027, U+2030-205E;
 }
 
 @font-face {
@@ -22,6 +25,24 @@
   font-weight: bold;
   font-style: normal;
   font-display: swap;
+  /* Subset for faster initial load */
+  unicode-range: U+0020-007F, U+00A0-00FF, U+0100-017F, U+2010-2027, U+2030-205E;
+}
+
+/* Font loading states for smooth transitions */
+.fonts-loading {
+  /* Use system fonts while custom fonts load */
+  --font-stack: 'Courier New', 'Courier', ui-monospace, monospace;
+}
+
+.fonts-loaded {
+  /* Use custom fonts once loaded */
+  --font-stack: 'Typewriter', 'Courier Prime', 'Courier New', ui-monospace, monospace;
+}
+
+/* Apply font stack dynamically */
+body {
+  font-family: var(--font-stack, 'Courier New', ui-monospace, monospace);
 }
 
 :root {
@@ -217,7 +238,7 @@
 .rounded-2xl { border-radius: 0 !important; }
 .rounded-3xl { border-radius: 0 !important; }
 .rounded-full { border-radius: 0 !important; }
-.rounded-t-[10px] { border-radius: 0 !important; }
+.rounded-t-\[10px\] { border-radius: 0 !important; }
 .rounded-t-lg { border-radius: 0 !important; }
 .rounded-t-md { border-radius: 0 !important; }
 .rounded-tl-lg { border-radius: 0 !important; }
@@ -253,7 +274,7 @@ nav, .nav-link {
 body {
   color: hsl(var(--foreground));
   background: hsl(var(--background));
-  font-family: 'Typewriter', 'Courier Prime', ui-monospace, monospace;
+  font-family: var(--font-stack, 'Courier New', ui-monospace, monospace);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 0.875rem;

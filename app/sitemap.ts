@@ -1,5 +1,4 @@
 import type { MetadataRoute } from 'next';
-import { client } from '@/lib/sanity';
 import { MedusaProductService } from '@/lib/medusa-service';
 
 // PERFORMANCE: Cache sitemap for 1 hour
@@ -101,21 +100,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: 'weekly' as const,
         priority: 0.7,
       }));
-    } else {
-      // Fallback to Sanity if Medusa has no products
-      const sanityProducts = await client.fetch(`
-        *[_type == "product"]{
-          "slug": slug.current,
-          _updatedAt
-        }
-      `);
-
-      productPages = sanityProducts.map((product: { slug: string; _updatedAt: string }) => ({
-        url: `${baseUrl}/product/${product.slug}`,
-        lastModified: new Date(product._updatedAt),
-        changeFrequency: 'weekly' as const,
-        priority: 0.7,
-      }));
     }
   } catch (_error) {
     // Error fetching data - continue without it
@@ -132,21 +116,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       categoryPages = medusaCategories.map((category) => ({
         url: `${baseUrl}/${category.handle}`,
         lastModified: new Date(category.updated_at || category.created_at),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-      }));
-    } else {
-      // Fallback to Sanity categories
-      const sanityCategories = await client.fetch(`
-        *[_type == "category"]{
-          "slug": slug.current,
-          _updatedAt
-        }
-      `);
-
-      categoryPages = sanityCategories.map((category: { slug: string; _updatedAt: string }) => ({
-        url: `${baseUrl}/${category.slug}`,
-        lastModified: new Date(category._updatedAt),
         changeFrequency: 'weekly' as const,
         priority: 0.8,
       }));

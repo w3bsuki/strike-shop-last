@@ -29,7 +29,7 @@ const QuickViewModalModular = dynamic(
         </div>
       </div>
     ),
-    ssr: false,
+    
   }
 );
 

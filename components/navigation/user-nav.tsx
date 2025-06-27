@@ -4,7 +4,7 @@ import * as React from "react";
 import { User, Heart, ShoppingBag, LogOut, Settings, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { SignInButton, UserButton, useUser, useClerk } from "@/lib/clerk-mock";
+import { SignInButton, UserButton, useUser, useClerk } from "@/lib/supabase/hooks";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useWishlistCount } from "@/lib/stores";
@@ -75,7 +75,7 @@ export function UserNav({ className, showLabels = false, showCart = false }: Use
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">{user?.fullName}</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  {user?.primaryEmailAddress?.emailAddress}
+                  {user?.email}
                 </p>
               </div>
             </DropdownMenuLabel>
@@ -109,7 +109,7 @@ export function UserNav({ className, showLabels = false, showCart = false }: Use
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <SignInButton mode="modal">
+        <SignInButton mode="modal" asChild>
           <Button variant="ghost" size="icon" className="min-h-[48px] min-w-[48px]">
             <User className="h-6 w-6" />
             <span className="sr-only">Sign in</span>

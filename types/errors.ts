@@ -176,21 +176,14 @@ export const createNotFoundError = (
   resourceId?: string,
   message = 'Resource not found'
 ): NotFoundError => {
-  const error: NotFoundError = {
+  return {
     type: 'not_found',
     code: 'RESOURCE_NOT_FOUND',
     message,
     timestamp: new Date().toISOString(),
+    ...(resource !== undefined && { resource }),
+    ...(resourceId !== undefined && { resourceId }),
   };
-  
-  if (resource !== undefined) {
-    (error as any).resource = resource;
-  }
-  if (resourceId !== undefined) {
-    (error as any).resourceId = resourceId;
-  }
-  
-  return error;
 };
 
 export const createPaymentError = (
@@ -199,21 +192,14 @@ export const createPaymentError = (
   paymentMethod?: string,
   paymentId?: string
 ): PaymentError => {
-  const error: PaymentError = {
+  return {
     type: 'payment',
     code,
     message,
     timestamp: new Date().toISOString(),
+    ...(paymentMethod !== undefined && { paymentMethod }),
+    ...(paymentId !== undefined && { paymentId }),
   };
-  
-  if (paymentMethod !== undefined) {
-    (error as any).paymentMethod = paymentMethod;
-  }
-  if (paymentId !== undefined) {
-    (error as any).paymentId = paymentId;
-  }
-  
-  return error;
 };
 
 export const createInventoryError = (
@@ -224,27 +210,16 @@ export const createInventoryError = (
   availableQuantity?: number,
   requestedQuantity?: number
 ): InventoryError => {
-  const error: InventoryError = {
+  return {
     type: 'inventory',
     code,
     message,
     timestamp: new Date().toISOString(),
+    ...(productId !== undefined && { productId }),
+    ...(variantId !== undefined && { variantId }),
+    ...(availableQuantity !== undefined && { availableQuantity }),
+    ...(requestedQuantity !== undefined && { requestedQuantity }),
   };
-  
-  if (productId !== undefined) {
-    (error as any).productId = productId;
-  }
-  if (variantId !== undefined) {
-    (error as any).variantId = variantId;
-  }
-  if (availableQuantity !== undefined) {
-    (error as any).availableQuantity = availableQuantity;
-  }
-  if (requestedQuantity !== undefined) {
-    (error as any).requestedQuantity = requestedQuantity;
-  }
-  
-  return error;
 };
 
 // Error type guards

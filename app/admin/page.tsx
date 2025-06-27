@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 
 // BUNDLE OPTIMIZATION: Admin components are heavy - lazy load to reduce initial bundle
 const AdminDashboard = dynamic(
-  () => import('@/components/admin/AdminDashboard'),
+  () => import('@/components/admin/AdminDashboardOptimized'),
   {
     loading: () => (
       <div className="flex items-center justify-center min-h-screen">
@@ -16,8 +16,7 @@ const AdminDashboard = dynamic(
           </div>
         </div>
       </div>
-    ),
-    ssr: false, // Admin doesn't need SSR for security
+    )
   }
 );
 

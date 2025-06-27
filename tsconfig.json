@@ -36,7 +36,7 @@
     
     // Additional Type Checking 
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": false,
+    "exactOptionalPropertyTypes": true,
     "noPropertyAccessFromIndexSignature": false,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,

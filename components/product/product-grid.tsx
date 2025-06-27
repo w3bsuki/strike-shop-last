@@ -33,6 +33,21 @@ export interface ProductGridProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof productGridVariants> {}
 
+/**
+ * ProductGrid Component
+ * 
+ * A responsive grid layout component for displaying product cards.
+ * Automatically adjusts columns based on screen size with customizable gaps.
+ * 
+ * @component
+ * @example
+ * <ProductGrid cols={4} gap="default">
+ *   <ProductCard product={product1} />
+ *   <ProductCard product={product2} />
+ *   <ProductCard product={product3} />
+ *   <ProductCard product={product4} />
+ * </ProductGrid>
+ */
 const ProductGrid = React.forwardRef<HTMLDivElement, ProductGridProps>(
   ({ className, cols, gap, children, ...props }, ref) => {
     return (

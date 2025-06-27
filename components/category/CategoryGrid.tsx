@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { CategoryCard, CategoryCardSkeleton } from './CategoryCard';
-import { motion } from 'framer-motion';
+import { motion } from '@/lib/dynamic-imports/framer-motion';
 
 interface Category {
   id: string;

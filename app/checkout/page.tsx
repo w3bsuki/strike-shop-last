@@ -33,7 +33,7 @@ const EnhancedCheckoutForm = dynamic(
         </div>
       </div>
     ),
-    ssr: false // Payment forms don't need SSR
+// Payment forms don't need SSR - handled by client components
   }
 );
 

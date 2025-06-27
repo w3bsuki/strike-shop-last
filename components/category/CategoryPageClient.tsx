@@ -1,13 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { CategoryHeader } from './CategoryHeader';
-import { CategoryFilters } from './CategoryFilters';
-import { CategoryProducts, CategoryProductsSkeleton } from './CategoryProducts';
+import { CategoryProductsSkeleton } from './CategoryProducts';
 import { CategoryProvider, useCategory } from '@/contexts/CategoryContext';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+// Dynamic imports for heavy components
+const CategoryFilters = dynamic(() => import('./CategoryFilters').then(mod => ({ default: mod.CategoryFilters })), {
+  
+  loading: () => <div className="animate-pulse h-96 bg-gray-100 rounded" />
+});
+
+const CategoryProducts = dynamic(() => import('./CategoryProducts').then(mod => ({ default: mod.CategoryProducts })), {
+  
+  loading: () => <CategoryProductsSkeleton />
+});
+
+// Lazy load framer-motion components
+const motion = dynamic(() => import('framer-motion').then(mod => ({ default: mod.motion })), {
+  
+}) as any;
+
+const AnimatePresence = dynamic(() => import('framer-motion').then(mod => ({ default: mod.AnimatePresence })), {
+  
+});
 
 interface Product {
   id: string;
@@ -70,27 +89,17 @@ function CategoryPageContent() {
           {/* Desktop Filter Sidebar */}
           <aside className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
             <div className="sticky top-24">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="bg-white border border-gray-200 p-6"
-              >
+              <div className="bg-white border border-gray-200 p-6">
                 <h2 className="text-sm font-bold uppercase tracking-wider mb-6 font-typewriter">
                   Filter & Refine
                 </h2>
                 <CategoryFilters />
-              </motion.div>
+              </div>
             </div>
           </aside>
 
           {/* Products Grid */}
-          <motion.main 
-            className="flex-1 min-w-0"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
+          <main className="flex-1 min-w-0">
             {isLoading ? (
               <CategoryProductsSkeleton />
             ) : (
@@ -99,30 +108,23 @@ function CategoryPageContent() {
                 clearFilters={clearFilters}
               />
             )}
-          </motion.main>
+          </main>
         </div>
       </div>
 
       {/* Scroll to Top Button */}
-      <AnimatePresence>
-        {showScrollTop && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed bottom-6 right-6 z-40"
+      {showScrollTop && (
+        <div className="fixed bottom-6 right-6 z-40 transition-all duration-300 ease-in-out transform scale-100 opacity-100">
+          <Button
+            onClick={scrollToTop}
+            size="icon"
+            className="h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-shadow"
+            aria-label="Scroll to top"
           >
-            <Button
-              onClick={scrollToTop}
-              size="icon"
-              className="h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-shadow"
-              aria-label="Scroll to top"
-            >
-              <ArrowUp className="h-5 w-5" />
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <ArrowUp className="h-5 w-5" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

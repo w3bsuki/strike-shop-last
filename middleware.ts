@@ -1,101 +1,117 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
-import { securityMiddleware, CryptoUtils } from './lib/security-fortress';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { updateSession } from '@/lib/supabase/middleware';
 
-// Define routes that require authentication
-const isProtectedRoute = createRouteMatcher(['/account(.*)', '/admin(.*)']);
-const isAPIRoute = createRouteMatcher(['/api(.*)']);
-const isPaymentRoute = createRouteMatcher(['/api/payments(.*)']);
-const isAuthRoute = createRouteMatcher(['/api/auth(.*)', '/sign-in', '/sign-up']);
+// Security headers to apply to all responses
+const securityHeaders = {
+  'X-DNS-Prefetch-Control': 'on',
+  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  'X-XSS-Protection': '1; mode=block',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()'
+};
 
-// 🛡️ FORTRESS-LEVEL SECURITY MIDDLEWARE
+// Routes that require authentication
+const protectedRoutes = [
+  '/account',
+  '/orders',
+  '/wishlist',
+  '/checkout/payment',
+];
 
-export default clerkMiddleware((auth, req) => {
-  // For development, skip security checks
-  if (process.env.NODE_ENV === 'development') {
-    if (isProtectedRoute(req)) {
-      try {
-        auth().protect();
-      } catch (error) {
-        return NextResponse.redirect(new URL('/sign-in', req.url));
-      }
-    }
-    return NextResponse.next();
+// Routes that are always public
+const publicRoutes = [
+  '/',
+  '/sign-in',
+  '/sign-up',
+  '/auth/callback',
+  '/products',
+  '/product',
+  '/category',
+  '/categories',
+  '/search',
+  '/cart',
+  '/checkout',
+  '/about',
+  '/contact',
+  '/privacy',
+  '/terms',
+  '/faq',
+  '/help',
+];
+
+export async function middleware(request: NextRequest) {
+  // Update session
+  const response = await updateSession(request);
+  
+  // Apply security headers
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
+
+  const path = request.nextUrl.pathname;
+
+  // Skip authentication for static assets
+  const isStaticAsset = path.startsWith('/_next/') || 
+                       path.startsWith('/static/') ||
+                       path.startsWith('/fonts/') ||
+                       path.startsWith('/images/') ||
+                       path.startsWith('/icons/') ||
+                       path.includes('__nextjs') ||
+                       path.includes('.') && (
+                         path.endsWith('.js') ||
+                         path.endsWith('.css') ||
+                         path.endsWith('.png') ||
+                         path.endsWith('.jpg') ||
+                         path.endsWith('.jpeg') ||
+                         path.endsWith('.gif') ||
+                         path.endsWith('.svg') ||
+                         path.endsWith('.ico') ||
+                         path.endsWith('.woff') ||
+                         path.endsWith('.woff2') ||
+                         path.endsWith('.ttf') ||
+                         path.endsWith('.otf')
+                       );
+
+  if (isStaticAsset) {
+    return response;
   }
 
-  // 🚨 IMMEDIATE SECURITY VALIDATION
-  const securityCheck = securityMiddleware.validateRequest(req);
-  
-  if (securityCheck.shouldBlock) {
-    console.error(`🚨 SECURITY BREACH BLOCKED: ${securityCheck.errors.join(', ')}`, {
-      ip: req.headers.get('x-forwarded-for') || req.ip,
-      path: req.nextUrl.pathname,
-      userAgent: req.headers.get('user-agent'),
-      timestamp: new Date().toISOString()
-    });
+  // Check if route requires authentication
+  const isProtectedRoute = protectedRoutes.some(route => 
+    path.startsWith(route)
+  );
+
+  if (isProtectedRoute) {
+    // Check if user is authenticated by looking for session cookie
+    const hasSession = request.cookies.has('sb-access-token') || 
+                      request.cookies.has('sb-refresh-token');
     
-    return securityMiddleware.createSecurityResponse(
-      403,
-      'Request blocked by security system',
-      securityCheck.errors.join(', ')
-    );
-  }
-
-  // 🛡️ RATE LIMITING BY ENDPOINT TYPE
-  let rateLimitPassed = true;
-  
-  if (isPaymentRoute(req)) {
-    rateLimitPassed = securityMiddleware.checkRateLimit(req, 'PAYMENTS');
-  } else if (isAuthRoute(req)) {
-    rateLimitPassed = securityMiddleware.checkRateLimit(req, 'AUTH');
-  } else if (isAPIRoute(req)) {
-    rateLimitPassed = securityMiddleware.checkRateLimit(req, 'API');
-  }
-  
-  if (!rateLimitPassed) {
-    console.warn(`🚦 RATE LIMIT EXCEEDED: ${req.nextUrl.pathname}`, {
-      ip: req.headers.get('x-forwarded-for') || req.ip,
-      timestamp: new Date().toISOString()
-    });
-    
-    return securityMiddleware.createSecurityResponse(
-      429,
-      'Rate limit exceeded. Please try again later.',
-      'Too many requests from your IP address'
-    );
-  }
-
-  // 🔐 CLERK AUTHENTICATION PROTECTION
-  if (isProtectedRoute(req)) {
-    try {
-      auth().protect();
-    } catch (error) {
-      console.warn(`🔒 AUTHENTICATION FAILED: ${req.nextUrl.pathname}`, {
-        ip: req.headers.get('x-forwarded-for') || req.ip,
-        error: error instanceof Error ? error.message : 'Unknown auth error',
-        timestamp: new Date().toISOString()
-      });
-      
-      return securityMiddleware.createSecurityResponse(
-        401,
-        'Authentication required',
-        'Please sign in to access this resource'
-      );
+    if (!hasSession) {
+      // Redirect to sign-in page
+      const signInUrl = new URL('/sign-in', request.url);
+      signInUrl.searchParams.set('redirect_url', path);
+      return NextResponse.redirect(signInUrl);
     }
   }
 
-  // 🛡️ APPLY FORTRESS-LEVEL SECURITY HEADERS
-  const response = NextResponse.next();
-  const nonce = CryptoUtils.generateNonce();
-  
-  return securityMiddleware.applySecurityHeaders(response, nonce);
-});
+  return response;
+}
 
+// Configure which routes the middleware should run on
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     * - api routes that shouldn't be protected
+     * - static assets
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.[\\w]+$).*)',
   ],
 };

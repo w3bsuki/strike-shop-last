@@ -2,7 +2,6 @@
 
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { SiteHeader } from '@/components/navigation';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { QuickViewProvider } from '@/contexts/QuickViewContext';
 import { 
@@ -19,93 +18,93 @@ import Link from 'next/link';
 
 const ProductShowcase = dynamic(() => 
   import('@/components/product/product-showcase').then(mod => ({ default: mod.ProductShowcase })), {
-  ssr: false,
+  
   loading: () => <div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>
 });
 
 // Promo components
 const PromoSection = dynamic(() => 
   import('@/components/promo').then(mod => ({ default: mod.PromoSection })), {
-  ssr: false,
+  
   loading: () => <div style={{ minHeight: '120px' }} className="bg-gray-100 animate-pulse" />
 });
 
 const PromoContent = dynamic(() => 
   import('@/components/promo').then(mod => ({ default: mod.PromoContent })), {
-  ssr: false,
+  
   loading: () => null
 });
 
 const PromoTitle = dynamic(() => 
   import('@/components/promo').then(mod => ({ default: mod.PromoTitle })), {
-  ssr: false,
+  
   loading: () => null
 });
 
 const PromoDescription = dynamic(() => 
   import('@/components/promo').then(mod => ({ default: mod.PromoDescription })), {
-  ssr: false,
+  
   loading: () => null
 });
 
 const PromoBadge = dynamic(() => 
   import('@/components/promo').then(mod => ({ default: mod.PromoBadge })), {
-  ssr: false,
+  
   loading: () => null
 });
 
 const PromoActions = dynamic(() => 
   import('@/components/promo').then(mod => ({ default: mod.PromoActions })), {
-  ssr: false,
+  
   loading: () => null
 });
 
 const PromoBackground = dynamic(() => 
   import('@/components/promo').then(mod => ({ default: mod.PromoBackground })), {
-  ssr: false,
+  
   loading: () => null
 });
 
 // Community section using same pattern as products
 const CommunityShowcase = dynamic(() => 
   import('@/components/community/community-showcase').then(mod => ({ default: mod.CommunityShowcase })), {
-  ssr: false,
+  
   loading: () => <div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>
 });
 
 const QuickViewModal = dynamic(() => 
   import('@/components/QuickViewModal').then(mod => ({ default: mod.QuickViewModal })), {
-  ssr: false,
+  
   loading: () => null
 });
 
 const Footer = dynamic(() => import('@/components/footer'), {
-  ssr: false,
+  
   loading: () => <div style={{ minHeight: '256px' }} className="bg-muted animate-pulse" />
 });
 
 // Updated to use new modular mobile navigation
 const MobileNav = dynamic(() => import('@/components/mobile/navigation').then(mod => ({ default: mod.MobileNav })), {
-  ssr: false,
+  
   loading: () => null
 });
 
 // Divider components
 const DividerSection = dynamic(() => 
   import('@/components/divider').then(mod => ({ default: mod.DividerSection })), {
-  ssr: false,
+  
   loading: () => null
 });
 
 const DividerLine = dynamic(() => 
   import('@/components/divider').then(mod => ({ default: mod.DividerLine })), {
-  ssr: false,
+  
   loading: () => null
 });
 
 const DividerText = dynamic(() => 
   import('@/components/divider').then(mod => ({ default: mod.DividerText })), {
-  ssr: false,
+  
   loading: () => null
 });
 
@@ -121,7 +120,6 @@ export default function HomePageClient({
   return (
     <QuickViewProvider>
       <main className="bg-white">
-        <SiteHeader />
 
         <Hero size="lg">
           <HeroImage 
