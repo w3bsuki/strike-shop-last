@@ -63,7 +63,6 @@ export { Alert, AlertTitle, AlertDescription } from './alert';
 export { Toast, ToastAction, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from './toast';
 export { useToast, toast } from './use-toast';
 export { Toaster } from './toaster';
-export { Sonner } from './sonner';
 export { Progress } from './progress';
 
 // Data display components

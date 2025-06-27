@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { MedusaProductService } from '@/lib/medusa-service';
+import { MedusaProductService } from '@/lib/medusa-service-refactored';
 
 // PERFORMANCE: Cache sitemap for 1 hour
 export const revalidate = 3600;

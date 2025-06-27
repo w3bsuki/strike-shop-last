@@ -9,8 +9,6 @@ export function validateEnvironmentVariables() {
     'NEXT_PUBLIC_SANITY_PROJECT_ID',
     'NEXT_PUBLIC_SANITY_DATASET',
     'NEXT_PUBLIC_MEDUSA_BACKEND_URL',
-    'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
-    'CLERK_SECRET_KEY',
   ];
 
   const missing = requiredEnvVars.filter((varName) => !process.env[varName]);
@@ -27,23 +25,10 @@ export function validateEnvironmentVariables() {
 
 export function validateApiKeyFormats() {
   const {
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
-    CLERK_SECRET_KEY,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     STRIPE_SECRET_KEY,
   } = process.env;
 
-  // Validate Clerk keys
-  if (
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-    !NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith('pk_')
-  ) {
-
-  }
-
-  if (CLERK_SECRET_KEY && !CLERK_SECRET_KEY.startsWith('sk_')) {
-
-  }
 
   // Validate Stripe keys
   if (
@@ -60,8 +45,6 @@ export function validateApiKeyFormats() {
   // Check for exposed test keys in production
   if (process.env.NODE_ENV === 'production') {
     const testKeys = [
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.includes('test'),
-      CLERK_SECRET_KEY?.includes('test'),
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.includes('test'),
       STRIPE_SECRET_KEY?.includes('test'),
     ].filter(Boolean);
@@ -81,7 +64,6 @@ export const CSP_DIRECTIVES = {
     "'unsafe-eval'", // Required for some React dev tools
     'https://js.stripe.com',
     'https://challenges.cloudflare.com',
-    'https://clerk.*.dev',
   ],
   'style-src': [
     "'self'",
@@ -94,7 +76,6 @@ export const CSP_DIRECTIVES = {
     "'self'",
     'https://api.stripe.com',
     'https://uploads.stripe.com',
-    'https://clerk.*.dev',
     'https://*.sanity.io',
     'https://*.railway.app',
     'wss:',

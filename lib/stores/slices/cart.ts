@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand';
 import type { StoreState, CartSlice, CartActions } from '../types';
 import type { CartItem } from '../../cart-store';
-import { medusaClient } from '../../medusa';
+import { medusaClient } from '../../medusa-service-refactored';
 import { cartEventEmitter } from '../../events';
 import { toast } from '@/hooks/use-toast';
 

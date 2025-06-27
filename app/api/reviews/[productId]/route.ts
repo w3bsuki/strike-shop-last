@@ -39,9 +39,9 @@ const mockReviews = {
 
 export async function GET(
   _request: Request,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
-  const { productId } = params;
+  const { productId } = await params;
   const reviews =
     mockReviews[productId as keyof typeof mockReviews] ||
     mockReviews['default-product'];

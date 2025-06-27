@@ -5,7 +5,6 @@ import type {
   WishlistActions,
   WishlistItem,
 } from '../types';
-import { toast } from 'sonner';
 
 export const createWishlistSlice: StateCreator<
   StoreState,
@@ -25,7 +24,6 @@ export const createWishlistSlice: StateCreator<
 
         // Check if item already exists
         if (wishlist.items.some((w) => w.id === item.id)) {
-          toast.info('Item is already in your wishlist');
           return;
         }
 
@@ -36,7 +34,6 @@ export const createWishlistSlice: StateCreator<
             items: [...state.wishlist.items, item],
           },
         }));
-        toast.success(`${item.name} added to wishlist`);
       },
 
       // Remove item from wishlist
@@ -52,7 +49,6 @@ export const createWishlistSlice: StateCreator<
         }));
 
         if (item) {
-          toast.success(`${item.name} removed from wishlist`);
         }
       },
 
@@ -70,7 +66,6 @@ export const createWishlistSlice: StateCreator<
             items: [],
           },
         }));
-        toast.success('Wishlist cleared');
       },
 
       // Get wishlist count

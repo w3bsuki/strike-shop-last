@@ -42,7 +42,8 @@ function validateWebhookSecurity(signature: string, _body: string): boolean {
 
 export async function POST(req: Request) {
   const body = await req.text();
-  const signature = headers().get('stripe-signature') || '';
+  const headersList = await headers();
+  const signature = headersList.get('stripe-signature') || '';
   
   // Add request ID for tracking
   const requestId = crypto.randomUUID();

@@ -4,8 +4,8 @@
  */
 
 import { sanityClient as client, urlForImage } from '@/lib/sanity';
-import { medusaClient } from '@/lib/medusa';
-import { MedusaProductService } from '@/lib/medusa-service';
+import { medusaClient } from '@/lib/medusa-service-refactored';
+import { MedusaProductService } from '@/lib/medusa-service-refactored';
 import { ProductFactory } from '@/lib/factories/ProductFactory';
 import { ProductQueryBuilder, type ProductQuery } from '@/lib/builders';
 import type { SanityProduct, SanityCategory } from '@/types/sanity';

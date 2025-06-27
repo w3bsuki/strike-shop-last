@@ -6,7 +6,7 @@
 
 import type { NextRequest} from 'next/server';
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { createClient } from '@/lib/supabase/server'
 import { InputValidator, CryptoUtils } from './security-fortress'
 import { validateCSRF } from './csrf-protection'
 import rateLimit from 'express-rate-limit'
@@ -320,8 +320,9 @@ export function withAPISecurity(
       // Authentication validation
       if (options.requireAuth && !APISecurityMiddleware.isPublicEndpoint(request.nextUrl.pathname)) {
         try {
-          const { userId } = auth()
-          if (!userId) {
+          const supabase = createClient()
+          const { data: { user } } = await supabase.auth.getUser()
+          if (!user) {
             return APISecurityMiddleware.createErrorResponse(
               401,
               'UNAUTHORIZED',

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '@/lib/stores';
-import { medusaClient } from '@/lib/medusa';
+import { medusaClient } from '@/lib/medusa-service-refactored';
 import { queryKeys } from '@/lib/query-client';
 import { toast } from '@/hooks/use-toast';
 import type { CartItem } from '@/types/store';

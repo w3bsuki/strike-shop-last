@@ -140,7 +140,9 @@ export const rateLimit = (
 
   return async (req: NextRequest) => {
     const identifier =
-      req.ip || req.headers.get('x-forwarded-for') || 'anonymous';
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+      req.headers.get('x-real-ip') || 
+      'anonymous';
     const now = Date.now();
 
     // Get or create request count

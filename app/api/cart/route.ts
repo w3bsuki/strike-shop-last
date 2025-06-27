@@ -1,23 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { medusaClient } from '@/lib/medusa';
 
 // Helper to get or create cart
 async function getOrCreateCart(cartId?: string | null) {
   try {
+    const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
+    if (!backendUrl) {
+      throw new Error('Backend URL not configured');
+    }
+
     // If cartId exists, try to retrieve it
     if (cartId) {
       try {
-        const { cart } = await medusaClient.carts.retrieve(cartId);
-        if (cart) return cart;
+        const response = await fetch(`${backendUrl}/store/carts/${cartId}`, {
+          headers: {
+            'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+          },
+        });
+        if (response.ok) {
+          const { cart } = await response.json();
+          return cart;
+        }
       } catch (error) {
         console.log('Cart not found, creating new one');
       }
     }
 
     // Create new cart
-    const { cart } = await medusaClient.carts.create({
-      region_id: process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || 'reg_01J0PY5V5W92D5H5YZH52XNNPQ',
+    const createResponse = await fetch(`${backendUrl}/store/carts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+      },
+      body: JSON.stringify({
+        region_id: process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || 'reg_01J0PY5V5W92D5H5YZH52XNNPQ',
+      }),
     });
+
+    if (!createResponse.ok) {
+      throw new Error('Failed to create cart');
+    }
+
+    const { cart } = await createResponse.json();
     
     return cart;
   } catch (error) {

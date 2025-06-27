@@ -6,19 +6,19 @@
 export function FontPreload() {
   return (
     <>
-      {/* Preload optimized WOFF2 fonts for best performance */}
+      {/* Preload TTF fonts that are actually used */}
       <link
         rel="preload"
-        href="/fonts/optimized/CourierPrime-Regular.woff2"
+        href="/fonts/CourierPrime-Regular.ttf"
         as="font"
-        type="font/woff2"
+        type="font/ttf"
         crossOrigin="anonymous"
       />
       <link
         rel="preload"
-        href="/fonts/optimized/CourierPrime-Bold.woff2"
+        href="/fonts/CourierPrime-Bold.ttf"
         as="font"
-        type="font/woff2"
+        type="font/ttf"
         crossOrigin="anonymous"
       />
       

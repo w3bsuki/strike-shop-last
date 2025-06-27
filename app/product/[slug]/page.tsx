@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { MedusaProductService } from '@/lib/medusa-service';
+import { MedusaProductService } from '@/lib/medusa-service-refactored';
 import { SiteHeader } from '@/components/navigation';
 import Footer from '@/components/footer';
 import dynamic from 'next/dynamic';
@@ -27,9 +27,9 @@ const ProductPageClient = dynamic(
 );
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // Generate static params for popular products
@@ -49,7 +49,8 @@ export async function generateStaticParams() {
 // Generate metadata for SEO
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   try {
-    const product = await MedusaProductService.getProduct(params.slug);
+    const { slug } = await params;
+    const product = await MedusaProductService.getProduct(slug);
     
     if (!product) {
       return {
@@ -62,7 +63,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       description: product.description || `Shop ${product.title} from STRIKE™ luxury streetwear collection.`,
       openGraph: {
         title: product.title,
-        description: product.description,
+        description: product.description || undefined,
         images: product.thumbnail ? [product.thumbnail] : [],
       },
     };
@@ -103,7 +104,9 @@ async function ProductData({ slug }: { slug: string }) {
   }
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { slug } = await params;
+  
   return (
     <main className="bg-white">
       <SiteHeader />
@@ -124,7 +127,7 @@ export default function ProductPage({ params }: ProductPageProps) {
           </div>
         }
       >
-        <ProductData slug={params.slug} />
+        <ProductData slug={slug} />
       </Suspense>
       
       <Footer />

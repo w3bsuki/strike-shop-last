@@ -2,8 +2,7 @@ import dynamic from 'next/dynamic';
 import { SiteHeader } from '@/components/navigation';
 import Footer from '@/components/footer';
 import { QuickViewProvider } from '@/contexts/QuickViewContext';
-import { MedusaProductService } from '@/lib/medusa-service';
-import { createProductId, createSlug, createImageURL } from '@/types';
+import { MedusaProductService } from '@/lib/medusa-service-refactored';
 
 // Dynamic imports for heavy components
 const CategoryPageClient = dynamic(() => import('@/components/category-page-client'), {
@@ -30,9 +29,9 @@ import { generateCategoryMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     category: string;
-  };
+  }>;
 }
 
 // Define available categories

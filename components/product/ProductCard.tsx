@@ -258,7 +258,7 @@ export const ProductCard = React.memo(({
         )}
 
         {/* Action Buttons - Bottom Center */}
-        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-3 opacity-100 transition-all duration-300 z-20">
+        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 z-20">
           {/* Quick View Button */}
           <AccessibleButton
             className="h-11 w-11 flex items-center justify-center bg-black/80 hover:bg-black text-white backdrop-blur-sm border-0 transition-all duration-200 hover:scale-110 active:scale-95 min-h-[44px] min-w-[44px]"

@@ -18,8 +18,6 @@ const REQUIRED_VARS = {
     'NEXT_PUBLIC_MEDUSA_REGION_ID',
     'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',
     'STRIPE_SECRET_KEY',
-    'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
-    'CLERK_SECRET_KEY',
   ],
   production: [
     'JWT_SECRET',
@@ -44,8 +42,6 @@ const VALIDATION_RULES = {
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: { prefix: 'pk_', type: 'public_key' },
   STRIPE_SECRET_KEY: { prefix: 'sk_', type: 'secret_key' },
   STRIPE_WEBHOOK_SECRET: { prefix: 'whsec_', type: 'webhook_secret' },
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: { prefix: 'pk_', type: 'public_key' },
-  CLERK_SECRET_KEY: { prefix: 'sk_', type: 'secret_key' },
   NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: { prefix: 'pk_', type: 'public_key' },
   NEXT_PUBLIC_MEDUSA_REGION_ID: { prefix: 'reg_', type: 'region_id' },
   DATABASE_URL: { pattern: /^postgres(ql)?:\/\//, type: 'database_url' },

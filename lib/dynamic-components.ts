@@ -107,21 +107,6 @@ export const Studio = dynamic(
   { ssr: false, loading: () => null }
 );
 
-// Clerk components (~100KB)
-export const SignIn = dynamic(
-  () => import('@clerk/nextjs').then(mod => ({ default: mod.SignIn })),
-  { ssr: false, loading: DefaultLoading }
-);
-
-export const SignUp = dynamic(
-  () => import('@clerk/nextjs').then(mod => ({ default: mod.SignUp })),
-  { ssr: false, loading: DefaultLoading }
-);
-
-export const UserButton = dynamic(
-  () => import('@clerk/nextjs').then(mod => ({ default: mod.UserButton })),
-  { ssr: false, loading: DefaultLoading }
-);
 
 // Heavy UI components
 export const CommandDialog = dynamic(

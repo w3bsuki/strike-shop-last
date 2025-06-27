@@ -4,7 +4,9 @@ import * as React from "react";
 import { User, Heart, ShoppingBag, LogOut, Settings, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { SignInButton, UserButton, useUser, useClerk } from "@/lib/supabase/hooks";
+import { useUser } from "@/lib/supabase/hooks";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useWishlistCount } from "@/lib/stores";
@@ -18,9 +20,17 @@ interface UserNavProps {
 }
 
 export function UserNav({ className, showLabels = false, showCart = false }: UserNavProps) {
-  const { isSignedIn, user } = useUser();
-  const { signOut } = useClerk();
+  const { user } = useUser();
+  const router = useRouter();
   const wishlistCount = useWishlistCount();
+  const isSignedIn = !!user;
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/');
+    router.refresh();
+  };
 
   // Mobile mode - only show cart
   if (showCart) {
@@ -62,9 +72,9 @@ export function UserNav({ className, showLabels = false, showCart = false }: Use
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative min-h-[48px] min-w-[48px]">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.imageUrl} alt={user?.fullName || "User"} />
+                <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name || "User"} />
                 <AvatarFallback>
-                  {user?.firstName?.[0] || "U"}
+                  {user?.user_metadata?.full_name?.[0] || user?.email?.[0] || "U"}
                 </AvatarFallback>
               </Avatar>
               <span className="sr-only">User account menu</span>
@@ -73,7 +83,7 @@ export function UserNav({ className, showLabels = false, showCart = false }: Use
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.fullName}</p>
+                <p className="text-sm font-medium leading-none">{user?.user_metadata?.full_name || 'User'}</p>
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.email}
                 </p>
@@ -101,7 +111,7 @@ export function UserNav({ className, showLabels = false, showCart = false }: Use
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer text-red-600 focus:text-red-600"
-              onClick={() => signOut()}
+              onClick={handleSignOut}
             >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Sign out</span>
@@ -109,12 +119,12 @@ export function UserNav({ className, showLabels = false, showCart = false }: Use
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <SignInButton mode="modal" asChild>
+        <Link href="/sign-in">
           <Button variant="ghost" size="icon" className="min-h-[48px] min-w-[48px]">
             <User className="h-6 w-6" />
             <span className="sr-only">Sign in</span>
           </Button>
-        </SignInButton>
+        </Link>
       )}
 
       {/* Shopping Cart */}

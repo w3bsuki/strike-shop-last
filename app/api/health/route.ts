@@ -185,7 +185,7 @@ async function checkRedis(): Promise<HealthCheckResponse['checks']['redis']> {
 }
 
 export async function GET() {
-  const headersList = headers();
+  const headersList = await headers();
   const authHeader = headersList.get('authorization');
   
   // Basic auth check for health endpoint in production

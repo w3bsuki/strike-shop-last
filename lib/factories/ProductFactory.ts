@@ -14,7 +14,7 @@ import type { MedusaProduct, MedusaProductVariant } from '@/types/medusa';
 import type { CartItem } from '@/lib/cart-store';
 import type { WishlistItem } from '@/lib/wishlist-store';
 import { urlForImage } from '@/lib/sanity';
-import { MedusaProductService } from '@/lib/medusa-service';
+import { MedusaProductService } from '@/lib/medusa-service-refactored';
 
 /**
  * Context for product creation with necessary data

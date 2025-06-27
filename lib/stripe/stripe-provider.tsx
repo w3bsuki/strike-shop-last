@@ -1,7 +1,7 @@
 'use client'
 
 import { Elements } from '@stripe/react-stripe-js'
-import { stripePromise, STRIPE_CONFIG } from './config'
+import { getStripe, stripeConfig } from '@/lib/stripe-client'
 
 interface StripeProviderProps {
   children: React.ReactNode
@@ -9,10 +9,11 @@ interface StripeProviderProps {
 }
 
 export function StripeProvider({ children, clientSecret }: StripeProviderProps) {
+  const stripePromise = getStripe();
   const options = clientSecret
     ? {
         clientSecret,
-        appearance: STRIPE_CONFIG.appearance,
+        appearance: stripeConfig.appearance,
       }
     : undefined
 

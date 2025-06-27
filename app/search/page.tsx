@@ -21,15 +21,16 @@ function SearchPageComponent({ initialQuery }: { initialQuery: string }) {
 }
 
 interface SearchPageProps {
-  searchParams: {
+  searchParams: Promise<{
     q?: string;
     category?: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
-  const query = searchParams.q || '';
-  const category = searchParams.category || '';
+  const resolvedSearchParams = await searchParams;
+  const query = resolvedSearchParams.q || '';
+  const category = resolvedSearchParams.category || '';
   
   let title = 'Search Products - STRIKE™';
   let description = 'Search our premium streetwear collection and find exactly what you\'re looking for.';
@@ -55,8 +56,9 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
   };
 }
 
-export default function SearchPage({ searchParams }: SearchPageProps) {
-  const initialQuery = searchParams.q || '';
+export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const initialQuery = resolvedSearchParams.q || '';
   
   return (
     <main className="bg-white min-h-screen">

@@ -40,13 +40,6 @@ const envSchema = z.object({
   NEXT_PUBLIC_SANITY_API_VERSION: z.string(),
   SANITY_API_TOKEN: z.string().optional(),
   
-  // Clerk Authentication
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().startsWith('pk_'),
-  CLERK_SECRET_KEY: z.string().startsWith('sk_'),
-  NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().default('/sign-in'),
-  NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string().default('/sign-up'),
-  NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: z.string().default('/account'),
-  NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: z.string().default('/account'),
   
   // Database
   DATABASE_URL: z.string().url().optional(),
@@ -178,7 +171,6 @@ class SecureConfigService {
       SESSION_SECRET,
       ENCRYPTION_KEY,
       STRIPE_SECRET_KEY,
-      CLERK_SECRET_KEY,
       SANITY_API_TOKEN,
       SENTRY_AUTH_TOKEN,
       RESEND_API_KEY,

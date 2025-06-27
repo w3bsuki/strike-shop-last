@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '@/lib/stores';
 import { queryKeys } from '@/lib/query-client';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 import type { WishlistItem } from '@/types/store';
 
 /**
@@ -18,6 +18,7 @@ export function useAddToWishlist() {
   const queryClient = useQueryClient();
   const wishlistActions = useStore((state) => state.actions.wishlist);
   const wishlist = useStore((state) => state.wishlist);
+  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async (item: WishlistItem) => {
@@ -63,13 +64,23 @@ export function useAddToWishlist() {
       }
       
       if (err.message === 'Item already in wishlist') {
-        toast.info('Item is already in your wishlist');
+        toast({
+          title: 'Already in wishlist',
+          description: 'Item is already in your wishlist',
+        });
       } else {
-        toast.error('Failed to add to wishlist');
+        toast({
+          title: 'Error',
+          description: 'Failed to add to wishlist',
+          variant: 'destructive',
+        });
       }
     },
     onSuccess: (data, variables) => {
-      toast.success(`${variables.name} added to wishlist`);
+      toast({
+        title: 'Added to wishlist',
+        description: `${variables.name} added to wishlist`,
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.wishlist });
     },
   });
@@ -79,6 +90,7 @@ export function useRemoveFromWishlist() {
   const queryClient = useQueryClient();
   const wishlistActions = useStore((state) => state.actions.wishlist);
   const wishlist = useStore((state) => state.wishlist);
+  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async (productId: string) => {
@@ -114,11 +126,18 @@ export function useRemoveFromWishlist() {
         }));
       }
       
-      toast.error('Failed to remove from wishlist');
+      toast({
+        title: 'Error',
+        description: 'Failed to remove from wishlist',
+        variant: 'destructive',
+      });
     },
     onSuccess: (data, productId, context) => {
       if (context?.removedItem) {
-        toast.success(`${context.removedItem.name} removed from wishlist`);
+        toast({
+          title: 'Removed from wishlist',
+          description: `${context.removedItem.name} removed from wishlist`,
+        });
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.wishlist });
     },
@@ -129,6 +148,7 @@ export function useClearWishlist() {
   const queryClient = useQueryClient();
   const wishlistActions = useStore((state) => state.actions.wishlist);
   const wishlist = useStore((state) => state.wishlist);
+  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async () => {
@@ -163,10 +183,17 @@ export function useClearWishlist() {
         }));
       }
       
-      toast.error('Failed to clear wishlist');
+      toast({
+        title: 'Error',
+        description: 'Failed to clear wishlist',
+        variant: 'destructive',
+      });
     },
     onSuccess: () => {
-      toast.success('Wishlist cleared');
+      toast({
+        title: 'Wishlist cleared',
+        description: 'All items removed from wishlist',
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.wishlist });
     },
   });

@@ -69,7 +69,7 @@ const securePostHandler = async (request: NextRequest) => {
     // Check admin privileges if override requested
     let adminUserId: string | undefined;
     if (adminOverride) {
-      const isAdmin = sessionClaims?.metadata?.role === 'admin';
+      const isAdmin = (sessionClaims as any)?.metadata?.role === 'admin';
       if (!isAdmin) {
         logSecurityEvent('Unauthorized admin refund attempt', {
           userId,

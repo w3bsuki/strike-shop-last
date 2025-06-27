@@ -1,4 +1,4 @@
-import { MedusaProductService } from '@/lib/medusa-service';
+import { MedusaProductService } from '@/lib/medusa-service-refactored';
 
 export async function GET() {
   try {

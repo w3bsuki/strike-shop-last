@@ -61,6 +61,10 @@ export function ProductQuickView({
     return (
       <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DrawerContent className="h-[85vh] flex flex-col bg-white">
+          <VisuallyHidden>
+            <DialogTitle>Product Quick View - {product?.name || 'Loading'}</DialogTitle>
+            <DialogDescription>View product details and add to cart</DialogDescription>
+          </VisuallyHidden>
           {/* Drawer Handle */}
           <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-gray-300 mt-3" />
 

@@ -1,11 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { useEffect, useState, use } from 'react';
 import { ProductQuickView } from '@/components/product/quick-view';
-import { MedusaProductService } from '@/lib/medusa-service';
+import { MedusaProductService } from '@/lib/medusa-service-refactored';
 
 interface ProductModalProps {
   params: Promise<{
@@ -17,7 +17,6 @@ export default function ProductModal({ params }: ProductModalProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
   const [product, setProduct] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
   
   // Use React.use() to unwrap the params promise
   const resolvedParams = use(params);
@@ -25,25 +24,29 @@ export default function ProductModal({ params }: ProductModalProps) {
   useEffect(() => {
     async function fetchProduct() {
       try {
-        setIsLoading(true);
         // Try to fetch real product from Medusa
-        const products = await MedusaProductService.getProducts({ handle: resolvedParams.slug });
+        const products = await MedusaProductService.getProducts({ limit: 100 });
         
         if (products.products && products.products.length > 0) {
           const medusaProduct = products.products[0];
           
+          if (!medusaProduct) {
+            throw new Error('Product not found');
+          }
+          
           // Transform Medusa product to expected format
+          const lowestPrice = MedusaProductService.getLowestPrice(medusaProduct);
           const transformedProduct = {
             id: medusaProduct.id,
             name: medusaProduct.title || resolvedParams.slug.split('-').map(word => word.toUpperCase()).join(' '),
             price: MedusaProductService.formatPrice(
-              MedusaProductService.getLowestPrice(medusaProduct)?.amount || 0,
-              MedusaProductService.getLowestPrice(medusaProduct)?.currency || 'GBP'
+              lowestPrice?.amount || 0,
+              lowestPrice?.currency || 'GBP'
             ),
             originalPrice: medusaProduct.metadata?.originalPrice ? 
               MedusaProductService.formatPrice(
                 parseInt(medusaProduct.metadata.originalPrice as string),
-                MedusaProductService.getLowestPrice(medusaProduct)?.currency || 'GBP'
+                lowestPrice?.currency || 'GBP'
               ) : undefined,
             discount: medusaProduct.metadata?.discount as string || undefined,
             image: medusaProduct.thumbnail || medusaProduct.images?.[0]?.url || '/placeholder.svg?height=800&width=600',
@@ -129,7 +132,6 @@ export default function ProductModal({ params }: ProductModalProps) {
         };
         setProduct(mockProduct);
       } finally {
-        setIsLoading(false);
       }
     }
     
@@ -159,6 +161,7 @@ export default function ProductModal({ params }: ProductModalProps) {
       <DialogContent className="max-w-6xl w-full h-[85vh] min-h-[600px] p-0 gap-0 overflow-hidden">
         <VisuallyHidden>
           <DialogTitle>Product Quick View</DialogTitle>
+          <DialogDescription>View product details and add to cart</DialogDescription>
         </VisuallyHidden>
         <ProductQuickView product={product} isOpen={true} onClose={handleClose} />
       </DialogContent>

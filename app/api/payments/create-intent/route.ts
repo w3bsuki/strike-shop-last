@@ -1,7 +1,7 @@
 import type { NextRequest} from 'next/server';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { medusaClient } from '@/lib/medusa';
+import { medusaClient } from '@/lib/medusa-service-refactored';
 import { validateCSRF } from '@/lib/csrf-protection';
 import { logSecurityEvent, sanitizeLogData } from '@/lib/security-config';
 
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       logSecurityEvent('CSRF validation failed', {
         path: req.nextUrl.pathname,
         error: error instanceof Error ? error.message : 'Unknown error',
-        ip: req.ip || req.headers.get('x-forwarded-for'),
+        ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'anonymous',
       });
       return NextResponse.json(
         { error: 'Security validation failed' },
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Rate limiting
-    const clientIP = req.ip || req.headers.get('x-forwarded-for') || 'unknown';
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'unknown';
     if (!checkRateLimit(clientIP)) {
       logSecurityEvent('Payment rate limit exceeded', { ip: clientIP });
       return NextResponse.json(
@@ -165,7 +165,7 @@ export async function POST(req: NextRequest) {
 
     logSecurityEvent('Payment intent creation failed', {
       error: sanitizeLogData(errorMessage),
-      ip: req.ip || req.headers.get('x-forwarded-for'),
+      ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'anonymous',
     });
 
     return NextResponse.json(

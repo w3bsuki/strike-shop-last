@@ -66,9 +66,6 @@ export const ReactQueryDevtools = process.env.NODE_ENV === 'development'
   ? require('@tanstack/react-query-devtools').ReactQueryDevtools
   : () => null;
 
-// Clerk - Specific imports only
-export { useUser, useAuth, SignIn, SignUp, UserButton } from '@clerk/nextjs';
-export type { User as ClerkUser } from '@clerk/nextjs';
 
 // Stripe - Tree-shaken imports
 export { loadStripe } from '@stripe/stripe-js';
@@ -89,4 +86,3 @@ export const getIcon = (iconName: string) => {
 export type { NextPage } from 'next';
 export type { Metadata } from 'next';
 export type { IntegratedProduct } from '@/types/integrated';
-export type { User } from '@clerk/nextjs/server';

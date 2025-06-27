@@ -10,8 +10,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Lock, CreditCard, ShieldCheck } from 'lucide-react';
-import { stripePromise, stripeAppearance } from '@/lib/stripe';
-import { medusaClient } from '@/lib/medusa';
+import { getStripe, stripeConfig } from '@/lib/stripe-client';
+import { medusaClient } from '@/lib/medusa-service-refactored';
 import { useCartStore } from '@/lib/cart-store';
 import { toast } from '@/hooks/use-toast';
 
@@ -61,31 +61,37 @@ function PaymentForm({ cartId, onSuccess }: StripePaymentFormProps) {
         }
 
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Payment successful - complete the order with Medusa
+        // Payment successful - complete the order with our API
         try {
-          const completeResponse =
-            await medusaClient.store.cart.complete(cartId);
-          // Handle the response structure for Medusa v2
-          const type = completeResponse.type;
-          const data =
-            'order' in completeResponse
-              ? completeResponse.order
-              : completeResponse.cart;
+          const completeResponse = await fetch('/api/orders/complete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              payment_intent_id: paymentIntent.id,
+              cart_id: cartId,
+            }),
+          });
 
-          if (type === 'order') {
+          if (!completeResponse.ok) {
+            throw new Error('Failed to complete order');
+          }
+
+          const { order_id } = await completeResponse.json();
+
+          if (order_id) {
             // Clear the cart
             clearCart();
 
             // Show success message
-            const orderId =
-              (data as any)?.display_id || (data as any)?.id || 'N/A';
             toast({
               title: 'Order confirmed!',
-              description: `Your order #${orderId} has been placed successfully.`,
+              description: `Your order #${order_id} has been placed successfully.`,
             });
 
-            // Call success callback
-            onSuccess(data);
+            // Call success callback with order data
+            onSuccess({ id: order_id });
           }
         } catch (error) {
 
@@ -226,6 +232,7 @@ export default function StripePaymentForm({
     );
   }
 
+  const stripePromise = getStripe();
   if (!stripePromise) {
     return (
       <Alert variant="destructive">
@@ -241,7 +248,7 @@ export default function StripePaymentForm({
       stripe={stripePromise}
       options={{
         clientSecret,
-        appearance: stripeAppearance,
+        appearance: stripeConfig.appearance,
       }}
     >
       <PaymentForm cartId={cartId} onSuccess={onSuccess} />

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Minus, Plus, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import ProductScroll from '@/components/product-scroll';
+import { ProductScroll } from '@/components/product/product-scroll';
 import {
   Accordion,
   AccordionContent,
@@ -14,9 +14,7 @@ import {
 import ProductReviews from '@/components/product-reviews';
 import { SizeGuideModal } from '@/components/size-guide-modal';
 import { useWishlist, useWishlistActions, useCartActions } from '@/lib/stores';
-import { generateProductJsonLd } from '@/lib/seo';
 import Script from 'next/script';
-import Footer from '@/components/footer';
 
 interface ProductPageProps {
   product: any; // Medusa product type
@@ -27,7 +25,7 @@ export default function ProductPageClient({ product }: ProductPageProps) {
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const wishlist = useWishlist();
-  const { addItem: addToWishlist, removeItem: removeFromWishlist } = useWishlistActions();
+  const { addToWishlist, removeFromWishlist } = useWishlistActions();
   const { addItem: addToCart } = useCartActions();
   const [isProductPageItemWishlisted, setIsProductPageItemWishlisted] =
     useState(false);
@@ -53,9 +51,9 @@ export default function ProductPageClient({ product }: ProductPageProps) {
       addToWishlist({
         id: product.id,
         name: product.title,
-        price: product.variants?.[0]?.prices?.[0]?.amount || 0,
+        price: product.variants?.[0]?.prices?.[0]?.amount?.toString() || '0',
         image: product.thumbnail || '',
-        quantity: 1,
+        slug: product.handle || '',
       });
     }
   };
@@ -79,10 +77,7 @@ export default function ProductPageClient({ product }: ProductPageProps) {
         throw new Error('No variant available');
       }
 
-      await addToCart({
-        variantId: variant.id,
-        quantity: quantity
-      });
+      await addToCart(product.id, variant.id, quantity);
     } catch (error) {
       console.error('Error adding to cart:', error);
     } finally {

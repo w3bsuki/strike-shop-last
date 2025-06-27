@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from '@/lib/web-vitals-mock';
+import { onCLS, onFID, onFCP, onLCP, onTTFB } from 'web-vitals';
 
-// Mock Metric type for build
+// Metric type from web-vitals
 interface Metric {
   name: string;
   value: number;
@@ -68,11 +68,11 @@ export function WebVitalsTracker() {
 
     // CRITICAL: Track all Core Web Vitals
     try {
-      getCLS(sendToAnalytics);
-      getFID(sendToAnalytics);
-      getFCP(sendToAnalytics);
-      getLCP(sendToAnalytics);
-      getTTFB(sendToAnalytics);
+      onCLS(sendToAnalytics);
+      onFID(sendToAnalytics);
+      onFCP(sendToAnalytics);
+      onLCP(sendToAnalytics);
+      onTTFB(sendToAnalytics);
     } catch (error) {
       console.warn('Web Vitals tracking failed:', error);
     }

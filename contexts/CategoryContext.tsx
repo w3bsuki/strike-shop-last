@@ -1,26 +1,9 @@
 'use client';
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useMemo,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useState, useMemo, useEffect, ReactNode } from 'react';
+import type { IntegratedProduct } from '@/types/integrated';
 
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-  originalPrice?: string;
-  discount?: string;
-  image: string;
-  isNew: boolean;
-  slug: string;
-  colors?: number;
-}
-
-interface FilterState {
+interface CategoryFilters {
   searchQuery: string;
   selectedColors: string[];
   selectedSizes: string[];
@@ -29,142 +12,173 @@ interface FilterState {
   sortBy: string;
 }
 
-interface CategoryContextValue {
-  // Data
+interface CategoryContextType {
   categoryName: string;
-  allProducts: Product[];
-  filteredProducts: Product[];
-  sortedProducts: Product[];
+  products: IntegratedProduct[];
+  filters: CategoryFilters;
+  sortedProducts: IntegratedProduct[];
   activeFiltersCount: number;
   isLoading: boolean;
-
-  // Filter state
-  filters: FilterState;
-
-  // Filter actions
   setSearchQuery: (query: string) => void;
-  toggleColor: (colorName: string) => void;
+  toggleColor: (color: string) => void;
   toggleSize: (size: string) => void;
   setPriceRange: (range: [number, number]) => void;
   setInStockOnly: (inStock: boolean) => void;
-  setSortBy: (sortBy: string) => void;
+  setSortBy: (sort: string) => void;
   clearFilters: () => void;
 }
 
-const CategoryContext = createContext<CategoryContextValue | undefined>(
-  undefined
-);
+const CategoryContext = createContext<CategoryContextType | undefined>(undefined);
 
 interface CategoryProviderProps {
   children: ReactNode;
   categoryName: string;
-  initialProducts: Product[];
+  initialProducts: IntegratedProduct[];
 }
 
-export function CategoryProvider({
-  children,
-  categoryName,
-  initialProducts,
-}: CategoryProviderProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedColors, setSelectedColors] = useState<string[]>([]);
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
-  const [inStockOnly, setInStockOnly] = useState(false);
-  const [sortBy, setSortBy] = useState('newest');
+export function CategoryProvider({ children, categoryName, initialProducts }: CategoryProviderProps) {
+  const [products] = useState<IntegratedProduct[]>(initialProducts);
   const [isLoading, setIsLoading] = useState(false);
+  const [filters, setFilters] = useState<CategoryFilters>({
+    searchQuery: '',
+    selectedColors: [],
+    selectedSizes: [],
+    priceRange: [0, 1000],
+    inStockOnly: false,
+    sortBy: 'newest',
+  });
 
-  const filteredProducts = useMemo(() => {
-    return initialProducts.filter((product) => {
-      // Search filter
-      if (
-        searchQuery &&
-        !product.name.toLowerCase().includes(searchQuery.toLowerCase())
-      ) {
-        return false;
-      }
-
-      // Price filter
-      const price = Number.parseFloat(product.price.replace('£', ''));
-      if (price < priceRange[0] || price > priceRange[1]) {
-        return false;
-      }
-
-      // For demo purposes, we'll assume color and size filtering works
-      // In a real app, products would have these attributes
-
-      return true;
-    });
-  }, [initialProducts, searchQuery, priceRange]);
-
+  // Compute filtered and sorted products
   const sortedProducts = useMemo(() => {
-    const sorted = [...filteredProducts];
-    switch (sortBy) {
-      case 'price-low':
-        return sorted.sort(
-          (a, b) =>
-            Number.parseFloat(a.price.replace('£', '')) -
-            Number.parseFloat(b.price.replace('£', ''))
-        );
-      case 'price-high':
-        return sorted.sort(
-          (a, b) =>
-            Number.parseFloat(b.price.replace('£', '')) -
-            Number.parseFloat(a.price.replace('£', ''))
-        );
-      case 'newest':
-        return sorted.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-      default:
-        return sorted;
-    }
-  }, [filteredProducts, sortBy]);
+    let filtered = [...products];
 
-  const toggleColor = (colorName: string) => {
-    setSelectedColors((prev) =>
-      prev.includes(colorName)
-        ? prev.filter((c) => c !== colorName)
-        : [...prev, colorName]
-    );
+    // Search filter
+    if (filters.searchQuery) {
+      const query = filters.searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (product) =>
+          product.title.toLowerCase().includes(query) ||
+          product.description?.toLowerCase().includes(query)
+      );
+    }
+
+    // Color filter
+    if (filters.selectedColors.length > 0) {
+      filtered = filtered.filter((product) =>
+        product.variants?.some((variant) =>
+          filters.selectedColors.includes(variant.metadata?.color as string)
+        )
+      );
+    }
+
+    // Size filter
+    if (filters.selectedSizes.length > 0) {
+      filtered = filtered.filter((product) =>
+        product.variants?.some((variant) =>
+          filters.selectedSizes.includes(variant.metadata?.size as string)
+        )
+      );
+    }
+
+    // Price filter
+    filtered = filtered.filter((product) => {
+      const price = product.priceNum || 0;
+      return price >= filters.priceRange[0] && price <= filters.priceRange[1];
+    });
+
+    // Stock filter
+    if (filters.inStockOnly) {
+      filtered = filtered.filter((product) => product.inStock);
+    }
+
+    // Sort
+    switch (filters.sortBy) {
+      case 'price-low':
+        filtered.sort((a, b) => (a.priceNum || 0) - (b.priceNum || 0));
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => (b.priceNum || 0) - (a.priceNum || 0));
+        break;
+      case 'name-asc':
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'name-desc':
+        filtered.sort((a, b) => b.title.localeCompare(a.title));
+        break;
+      case 'newest':
+      default:
+        // Keep original order (assuming products are already sorted by newest)
+        break;
+    }
+
+    return filtered;
+  }, [products, filters]);
+
+  // Compute active filters count
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (filters.searchQuery) count++;
+    if (filters.selectedColors.length > 0) count++;
+    if (filters.selectedSizes.length > 0) count++;
+    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000) count++;
+    if (filters.inStockOnly) count++;
+    if (filters.sortBy !== 'newest') count++;
+    return count;
+  }, [filters]);
+
+  // Filter update functions
+  const setSearchQuery = (query: string) => {
+    setFilters((prev) => ({ ...prev, searchQuery: query }));
+  };
+
+  const toggleColor = (color: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      selectedColors: prev.selectedColors.includes(color)
+        ? prev.selectedColors.filter((c) => c !== color)
+        : [...prev.selectedColors, color],
+    }));
   };
 
   const toggleSize = (size: string) => {
-    setSelectedSizes((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
-    );
+    setFilters((prev) => ({
+      ...prev,
+      selectedSizes: prev.selectedSizes.includes(size)
+        ? prev.selectedSizes.filter((s) => s !== size)
+        : [...prev.selectedSizes, size],
+    }));
+  };
+
+  const setPriceRange = (range: [number, number]) => {
+    setFilters((prev) => ({ ...prev, priceRange: range }));
+  };
+
+  const setInStockOnly = (inStock: boolean) => {
+    setFilters((prev) => ({ ...prev, inStockOnly: inStock }));
+  };
+
+  const setSortBy = (sort: string) => {
+    setFilters((prev) => ({ ...prev, sortBy: sort }));
   };
 
   const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedColors([]);
-    setSelectedSizes([]);
-    setPriceRange([0, 500]);
-    setInStockOnly(false);
+    setFilters({
+      searchQuery: '',
+      selectedColors: [],
+      selectedSizes: [],
+      priceRange: [0, 1000],
+      inStockOnly: false,
+      sortBy: 'newest',
+    });
   };
 
-  const activeFiltersCount =
-    (searchQuery ? 1 : 0) +
-    selectedColors.length +
-    selectedSizes.length +
-    (priceRange[0] > 0 || priceRange[1] < 500 ? 1 : 0) +
-    (inStockOnly ? 1 : 0);
-
-  const filters: FilterState = {
-    searchQuery,
-    selectedColors,
-    selectedSizes,
-    priceRange,
-    inStockOnly,
-    sortBy,
-  };
-
-  const value: CategoryContextValue = {
+  const value: CategoryContextType = {
     categoryName,
-    allProducts: initialProducts,
-    filteredProducts,
+    products,
+    filters,
     sortedProducts,
     activeFiltersCount,
     isLoading,
-    filters,
     setSearchQuery,
     toggleColor,
     toggleSize,
@@ -174,11 +188,7 @@ export function CategoryProvider({
     clearFilters,
   };
 
-  return (
-    <CategoryContext.Provider value={value}>
-      {children}
-    </CategoryContext.Provider>
-  );
+  return <CategoryContext.Provider value={value}>{children}</CategoryContext.Provider>;
 }
 
 export function useCategory() {

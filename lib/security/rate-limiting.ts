@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { createClient } from '@/lib/supabase/server'
 import crypto from 'crypto'
 
 // Rate limit tiers
@@ -134,9 +134,14 @@ export class RateLimiter {
    */
   private async getIdentifier(request: NextRequest): Promise<string> {
     // Try to get user ID first (most specific)
-    const { userId } = auth()
-    if (userId) {
-      return `user:${userId}`
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.id) {
+        return `user:${user.id}`
+      }
+    } catch (error) {
+      // Continue to IP fallback
     }
 
     // Fall back to IP address

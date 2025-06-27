@@ -2,13 +2,18 @@
 
 import { Footer } from '@/components/footer/footer';
 import { footerConfig } from '@/config/footer';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 export default function FooterWrapper() {
+  const { toast } = useToast();
+  
   const handleNewsletterSubmit = (email: string, preferences: string[]) => {
     // Handle newsletter submission
     console.log('Newsletter submission:', { email, preferences });
-    toast.success('Thank you for subscribing!');
+    toast({
+      title: 'Success',
+      description: 'Thank you for subscribing!',
+    });
   };
 
   return (

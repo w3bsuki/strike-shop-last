@@ -6,14 +6,14 @@ import { useRouter } from 'next/navigation';
 import { SiteHeader } from '@/components/navigation';
 import Footer from '@/components/footer';
 import { useCartStore } from '@/lib/cart-store';
-import { useUser } from '@/lib/clerk-mock';
+import { useUser } from '@/lib/supabase/hooks';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, Truck, Shield } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { medusaClient } from '@/lib/medusa';
+import { medusaClient } from '@/lib/medusa-service-refactored';
 import { toast } from '@/hooks/use-toast';
 
 // BUNDLE OPTIMIZATION: Lazy load checkout form (includes Stripe SDK)

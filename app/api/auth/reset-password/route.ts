@@ -58,12 +58,10 @@ export async function POST(req: NextRequest) {
       .update(resetToken)
       .digest('hex');
 
-    // TODO: Store reset token in database with expiration
-    // For now, we'll store it in Redis with 1-hour expiration
-    const redis = (await import('ioredis')).default;
-    const redisClient = new redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    // Store reset token in KV store with 1-hour expiration
+    const { kv } = await import('@vercel/kv');
     
-    await redisClient.setex(
+    await kv.setex(
       `password-reset:${resetTokenHash}`,
       3600, // 1 hour
       JSON.stringify({
@@ -132,10 +130,9 @@ export async function PUT(req: NextRequest) {
       .digest('hex');
 
     // Retrieve reset token data
-    const redis = (await import('ioredis')).default;
-    const redisClient = new redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    const { kv } = await import('@vercel/kv');
     
-    const resetData = await redisClient.get(`password-reset:${resetTokenHash}`);
+    const resetData = await kv.get(`password-reset:${resetTokenHash}`);
     
     if (!resetData) {
       return NextResponse.json(
@@ -144,7 +141,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const { email, ip: originalIp } = JSON.parse(resetData);
+    const { email, ip: originalIp } = JSON.parse(resetData as string);
     
     // Validate new password
     const passwordSecurity = getPasswordSecurity();
@@ -179,7 +176,7 @@ export async function PUT(req: NextRequest) {
     console.log(`Password updated for ${email}`);
 
     // Delete the reset token
-    await redisClient.del(`password-reset:${resetTokenHash}`);
+    await kv.del(`password-reset:${resetTokenHash}`);
 
     // Invalidate all existing sessions for this user
     const sessionSecurity = getSessionSecurity();

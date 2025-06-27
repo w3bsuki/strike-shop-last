@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { MedusaProductService } from '@/lib/medusa-service';
+import { MedusaProductService } from '@/lib/medusa-service-refactored';
 import type { HomePageCategory, HomePageProduct } from '@/types/home-page';
 import { createCategoryId, createImageURL, createSlug, createProductId } from '@/types';
 import HomePageClient from '@/components/home-page-client';
@@ -147,7 +147,7 @@ async function getHomePageData() {
         isNew: isNew,
         colors: colorCount,
         description: prod.description || '',
-        sku: undefined,
+        sku: (prod.variants?.[0] as any)?.sku || (prod as any)?.sku || '',
         variants: [],
         variantId: variantId, // Add variant ID for cart functionality
       };
