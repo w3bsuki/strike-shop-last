@@ -1,5 +1,6 @@
 import type { MedusaProduct, MedusaProductCategory } from '@/types/medusa';
 import Medusa from '@medusajs/js-sdk';
+import { getMedusaUrl, getMedusaPublishableKey, getMedusaRegionId } from '@/lib/config/medusa';
 
 /**
  * Medusa Product Service - Refactored to be stateless
@@ -14,19 +15,14 @@ export class MedusaProductService {
    */
   static async getCategories(): Promise<MedusaProductCategory[]> {
     try {
-      // Check if Medusa backend URL is configured
-      const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
-      if (!backendUrl) {
-        console.warn('Medusa backend URL not configured, returning mock categories');
-        return this.getMockCategories();
-      }
+      const backendUrl = getMedusaUrl();
+      const publishableKey = getMedusaPublishableKey();
 
       const response = await fetch(
         `${backendUrl}/store/product-categories`,
         {
           headers: {
-            'x-publishable-api-key':
-              process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+            'x-publishable-api-key': publishableKey,
           },
         }
       );
@@ -130,23 +126,15 @@ export class MedusaProductService {
     sales_channel_id?: string[];
   }): Promise<{ products: MedusaProduct[]; count: number }> {
     try {
-      // Check if Medusa backend URL is configured
-      const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
-      if (!backendUrl) {
-        console.warn('Medusa backend URL not configured, returning mock products');
-        return this.getMockProducts(params?.limit || 24);
-      }
+      const backendUrl = getMedusaUrl();
+      const publishableKey = getMedusaPublishableKey();
+      const regionId = getMedusaRegionId();
 
       // Build URL with proper query parameters including region_id
       const url = new URL(`${backendUrl}/store/products`);
       url.searchParams.set('limit', String(params?.limit || 100));
       url.searchParams.set('offset', String(params?.offset || 0));
-      
-      // Only add region_id if it's configured
-      const regionId = process.env.NEXT_PUBLIC_MEDUSA_REGION_ID;
-      if (regionId) {
-        url.searchParams.set('region_id', regionId);
-      }
+      url.searchParams.set('region_id', regionId);
       
       if (params?.category_id?.length) {
         params.category_id.forEach(id => url.searchParams.append('category_id', id));
@@ -160,8 +148,7 @@ export class MedusaProductService {
 
       const response = await fetch(url.toString(), {
         headers: {
-          'x-publishable-api-key':
-            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+          'x-publishable-api-key': publishableKey,
         },
       });
 
@@ -298,16 +285,19 @@ export class MedusaProductService {
    */
   static async getProduct(handleOrId: string): Promise<MedusaProduct | null> {
     try {
+      const backendUrl = getMedusaUrl();
+      const publishableKey = getMedusaPublishableKey();
+      const regionId = getMedusaRegionId();
+      
       // Try by handle first
-      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+      const url = new URL(`${backendUrl}/store/products`);
       url.searchParams.set('handle', handleOrId);
       url.searchParams.set('limit', '1');
-      url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+      url.searchParams.set('region_id', regionId);
       
       const response = await fetch(url.toString(), {
         headers: {
-          'x-publishable-api-key':
-            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+          'x-publishable-api-key': publishableKey,
         },
       });
 
@@ -322,8 +312,8 @@ export class MedusaProductService {
       }
 
       // If not found by handle, try by ID
-      const idUrl = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products/${handleOrId}`);
-      idUrl.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+      const idUrl = new URL(`${backendUrl}/store/products/${handleOrId}`);
+      idUrl.searchParams.set('region_id', regionId);
       
       const idResponse = await fetch(idUrl.toString(), {
         headers: {
@@ -351,15 +341,18 @@ export class MedusaProductService {
    */
   static async getProductsByCategory(categoryId: string, limit = 50): Promise<MedusaProduct[]> {
     try {
-      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+      const backendUrl = getMedusaUrl();
+      const publishableKey = getMedusaPublishableKey();
+      const regionId = getMedusaRegionId();
+      
+      const url = new URL(`${backendUrl}/store/products`);
       url.searchParams.set('category_id', categoryId);
       url.searchParams.set('limit', String(limit));
-      url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+      url.searchParams.set('region_id', regionId);
       
       const response = await fetch(url.toString(), {
         headers: {
-          'x-publishable-api-key':
-            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+          'x-publishable-api-key': publishableKey,
         },
       });
 
@@ -380,15 +373,18 @@ export class MedusaProductService {
    */
   static async searchProducts(query: string, limit = 20): Promise<MedusaProduct[]> {
     try {
-      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+      const backendUrl = getMedusaUrl();
+      const publishableKey = getMedusaPublishableKey();
+      const regionId = getMedusaRegionId();
+      
+      const url = new URL(`${backendUrl}/store/products`);
       url.searchParams.set('q', query);
       url.searchParams.set('limit', String(limit));
-      url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+      url.searchParams.set('region_id', regionId);
       
       const response = await fetch(url.toString(), {
         headers: {
-          'x-publishable-api-key':
-            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+          'x-publishable-api-key': publishableKey,
         },
       });
 
@@ -409,15 +405,18 @@ export class MedusaProductService {
    */
   static async getFeaturedProducts(limit = 8): Promise<MedusaProduct[]> {
     try {
+      const backendUrl = getMedusaUrl();
+      const publishableKey = getMedusaPublishableKey();
+      const regionId = getMedusaRegionId();
+      
       // In production, you might want to use tags or metadata to mark featured products
-      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+      const url = new URL(`${backendUrl}/store/products`);
       url.searchParams.set('limit', String(limit));
-      url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+      url.searchParams.set('region_id', regionId);
       
       const response = await fetch(url.toString(), {
         headers: {
-          'x-publishable-api-key':
-            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+          'x-publishable-api-key': publishableKey,
         },
       });
 
@@ -442,14 +441,17 @@ export class MedusaProductService {
       const product = await this.getProduct(productId);
       if (!product || !product.categories?.length) {
         // If no categories, just get some random products
-        const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+        const backendUrl = getMedusaUrl();
+        const publishableKey = getMedusaPublishableKey();
+        const regionId = getMedusaRegionId();
+        
+        const url = new URL(`${backendUrl}/store/products`);
         url.searchParams.set('limit', String(limit + 1));
-        url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+        url.searchParams.set('region_id', regionId);
         
         const response = await fetch(url.toString(), {
           headers: {
-            'x-publishable-api-key':
-              process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+            'x-publishable-api-key': publishableKey,
           },
         });
 
@@ -462,15 +464,18 @@ export class MedusaProductService {
 
       // Get products from the same category
       const categoryId = product.categories[0].id;
-      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/products`);
+      const backendUrl = getMedusaUrl();
+      const publishableKey = getMedusaPublishableKey();
+      const regionId = getMedusaRegionId();
+      
+      const url = new URL(`${backendUrl}/store/products`);
       url.searchParams.set('category_id', categoryId);
       url.searchParams.set('limit', String(limit + 1));
-      url.searchParams.set('region_id', process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || '');
+      url.searchParams.set('region_id', regionId);
       
       const response = await fetch(url.toString(), {
         headers: {
-          'x-publishable-api-key':
-            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+          'x-publishable-api-key': publishableKey,
         },
       });
 
@@ -492,14 +497,16 @@ export class MedusaProductService {
    */
   static async getCollections(): Promise<unknown[]> {
     try {
-      const url = new URL(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/collections`);
+      const backendUrl = getMedusaUrl();
+      const publishableKey = getMedusaPublishableKey();
+      
+      const url = new URL(`${backendUrl}/store/collections`);
       url.searchParams.set('limit', '100');
       // Note: collections endpoint doesn't require region_id
       
       const response = await fetch(url.toString(), {
         headers: {
-          'x-publishable-api-key':
-            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+          'x-publishable-api-key': publishableKey,
         },
       });
 
@@ -620,14 +627,18 @@ export class MedusaProductService {
   }
 }
 
-// Create and export Medusa client instance
-export const medusaClient = new Medusa({
-  baseUrl: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'http://localhost:9000',
-  publishableKey: process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
-  auth: {
-    type: 'session'
-  }
-});
+// Create and export Medusa client instance with dynamic configuration
+export const getMedusaClient = () => {
+  return new Medusa({
+    baseUrl: getMedusaUrl(),
+    publishableKey: getMedusaPublishableKey(),
+    auth: {
+      type: 'session'
+    }
+  });
+};
+
+export const medusaClient = getMedusaClient();
 
 // Export convenience functions
 export const getProducts = MedusaProductService.getProducts;
