@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { createClient } from '@/lib/supabase/server';
 import { withAPISecurity, APISecurityMiddleware } from '@/lib/api-security';
 import { SecureRefundService } from '@/lib/security/secure-refunds';
 import { z } from 'zod';
@@ -26,15 +26,19 @@ const refundRequestSchema = z.object({
 const securePostHandler = async (request: NextRequest) => {
   try {
     // Authentication verification
-    const { userId, sessionClaims } = await auth();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!user) {
       return APISecurityMiddleware.createErrorResponse(
         401,
         'UNAUTHORIZED',
         'User authentication required for refund processing'
       );
     }
+    
+    const userId = user.id;
+    const sessionClaims = user.user_metadata;
 
     // Parse and validate request body
     let body: any;
@@ -136,9 +140,12 @@ const securePostHandler = async (request: NextRequest) => {
     }, 'Refund processed successfully');
 
   } catch (error) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     logSecurityEvent('Refund endpoint error', {
       error: error instanceof Error ? error.message : 'Unknown error',
-      userId: (await auth()).userId,
+      userId: user?.id,
     });
 
     return APISecurityMiddleware.createErrorResponse(
@@ -153,15 +160,18 @@ const securePostHandler = async (request: NextRequest) => {
 const secureGetHandler = async (_request: NextRequest) => {
   try {
     // Authentication verification
-    const { userId } = await auth();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (!userId) {
+    if (!user) {
       return APISecurityMiddleware.createErrorResponse(
         401,
         'UNAUTHORIZED',
         'User authentication required'
       );
     }
+    
+    const userId = user.id;
 
     // Get refund history
     const history = await SecureRefundService.getRefundHistory(userId, 20);
@@ -172,9 +182,12 @@ const secureGetHandler = async (_request: NextRequest) => {
     }, 'Refund history retrieved successfully');
 
   } catch (error) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     logSecurityEvent('Refund history error', {
       error: error instanceof Error ? error.message : 'Unknown error',
-      userId: (await auth()).userId,
+      userId: user?.id,
     });
 
     return APISecurityMiddleware.createErrorResponse(

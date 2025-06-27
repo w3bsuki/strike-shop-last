@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { createPaymentIntent } from '@/lib/stripe-server';
 import { validateCSRF } from '@/lib/csrf-protection';
 import { logSecurityEvent, sanitizeLogData } from '@/lib/security-config';
-import { getAuthUser } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 
 // Rate limiting for payment intent creation
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -47,7 +47,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Get authenticated user
-    const user = await getAuthUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json(
         { error: 'Authentication required' },
@@ -189,7 +190,8 @@ export async function GET(req: NextRequest) {
     await validateCSRF(req);
 
     // Get authenticated user
-    const user = await getAuthUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json(
         { error: 'Authentication required' },
