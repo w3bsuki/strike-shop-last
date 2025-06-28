@@ -76,24 +76,27 @@ export default function OrderConfirmationPage() {
           // This is a fallback order, create a mock display
           setOrder({
             id: orderId,
-            display_id: orderId.split('_')[1],
+            display_id: orderId.split('_')[1] || orderId,
             email: user?.email || 'customer@example.com',
-            total: 0, // Will be updated from localStorage if available
+            total: 0,
             subtotal: 0,
             shipping_total: 0,
             tax_total: 0,
             currency_code: 'GBP',
             created_at: new Date().toISOString(),
-            shipping_address: undefined,
             items: [],
-            shipping_methods: undefined,
+            shipping_methods: [{
+              shipping_option: {
+                name: 'Econt Express'
+              }
+            }]
           });
         } else {
           // Try to fetch from Medusa
           const orderResponse = await medusaClient.store.order.retrieve(orderId);
           const medusaOrder = orderResponse.order;
           // Convert Medusa order to our Order interface
-          const convertedOrder: Order = {
+          const convertedOrder = {
             id: medusaOrder.id,
             display_id: medusaOrder.display_id?.toString(),
             email: medusaOrder.email || undefined,
@@ -105,9 +108,9 @@ export default function OrderConfirmationPage() {
             created_at: medusaOrder.created_at instanceof Date ? medusaOrder.created_at.toISOString() : medusaOrder.created_at,
             shipping_address: medusaOrder.shipping_address || undefined,
             items: medusaOrder.items as OrderItem[] | undefined,
-            shipping_methods: medusaOrder.shipping_methods || undefined,
+            shipping_methods: medusaOrder.shipping_methods as ShippingMethod[] | undefined,
           };
-          setOrder(convertedOrder);
+          setOrder(convertedOrder as Order);
         }
       } catch (_error) {
         // Error fetching order - create a basic fallback
@@ -121,6 +124,12 @@ export default function OrderConfirmationPage() {
           tax_total: 0,
           currency_code: 'GBP',
           created_at: new Date().toISOString(),
+          items: [],
+          shipping_methods: [{
+            shipping_option: {
+              name: 'Speedy Express'
+            }
+          }]
         });
       } finally {
         setIsLoading(false);

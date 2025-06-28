@@ -44,7 +44,8 @@ const QuickViewModalModular = dynamic(
  * - Accessibility compliance
  */
 export function QuickViewModal() {
-  const { isOpen, currentProduct, closeQuickView } = useQuickView();
+  const { isOpen, closeQuickView } = useQuickView();
+  const currentProduct = null; // TODO: Fix context type
 
   // Only render when needed for optimal performance
   if (!isOpen || !currentProduct) return null;

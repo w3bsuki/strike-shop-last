@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Minus, Plus, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ProductScroll } from '@/components/product/product-scroll';
 import {
   Accordion,
   AccordionContent,
@@ -262,11 +261,9 @@ export default function ProductPageClient({ product }: ProductPageProps) {
           <section className="mt-16">
             <h2 className="text-2xl font-bold mb-8">You May Also Like</h2>
             {/* TODO: Fetch related products based on collection_id */}
-            <ProductScroll 
-              title="Related Products" 
-              products={[]} 
-              viewAllLink={product.collection_id ? `/category/${product.collection_id}` : undefined}
-            />
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Related products coming soon</p>
+            </div>
           </section>
         </main>
       </div>
