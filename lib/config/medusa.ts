@@ -3,24 +3,17 @@
  * This handles environment variables correctly for both client and server
  */
 
-// Server-side config (build time)
-const serverConfig = {
-  backendUrl: 'http://localhost:9000',
-  publishableKey: 'pk_29b82d9f59f0a63f3af01b371bbb4213c0f335610e50c3b9db479d3cea8247ae',
-  regionId: 'reg_01JXFMWZWX24XQD1BYNTS3N15Q',
-};
+// Get config from environment variables (works for both server and client)
+const getConfig = () => ({
+  backendUrl: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'http://localhost:9000',
+  publishableKey: process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || 'pk_29b82d9f59f0a63f3af01b371bbb4213c0f335610e50c3b9db479d3cea8247ae',
+  regionId: process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || 'reg_01JXFMWZWX24XQD1BYNTS3N15Q',
+});
 
-// Client-side config (runtime)
-const clientConfig = {
-  backendUrl: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || serverConfig.backendUrl,
-  publishableKey: process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || serverConfig.publishableKey,
-  regionId: process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || serverConfig.regionId,
-};
+// Helper functions to get config values (always fresh)
+export const getMedusaUrl = () => getConfig().backendUrl;
+export const getMedusaPublishableKey = () => getConfig().publishableKey;
+export const getMedusaRegionId = () => getConfig().regionId;
 
-// Export the appropriate config based on environment
-export const medusaConfig = typeof window === 'undefined' ? serverConfig : clientConfig;
-
-// Helper to get config values
-export const getMedusaUrl = () => medusaConfig.backendUrl;
-export const getMedusaPublishableKey = () => medusaConfig.publishableKey;
-export const getMedusaRegionId = () => medusaConfig.regionId;
+// Export config for backwards compatibility
+export const medusaConfig = getConfig();
