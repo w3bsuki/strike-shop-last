@@ -132,7 +132,7 @@ export function FocusManagerProvider({ children }: FocusManagerProviderProps) {
     }
 
     if (focusableElements[targetIndex]) {
-      focusableElements[targetIndex].focus();
+      focusableElements[targetIndex]?.focus();
     }
   }, [getFocusableElements]);
 
