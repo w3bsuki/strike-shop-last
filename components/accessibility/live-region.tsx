@@ -22,7 +22,7 @@ export function LiveRegion({
   clearAfter = 5000,
   className = 'sr-only',
   id,
-  relevant = 'additions text',
+  relevant = 'all',
 }: LiveRegionProps) {
   const [announcement, setAnnouncement] = useState(message);
   const [key, setKey] = useState(0);
