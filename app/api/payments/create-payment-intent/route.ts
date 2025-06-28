@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
     const paymentIntent = await createPaymentIntent({
       amount: body.amount, // createPaymentIntent will handle conversion
       currency: body.currency || 'gbp',
-      customerEmail: user.email,
+      ...(user.email && { customerEmail: user.email }),
       description: `Strike™ Order - ${body.items?.length || 0} items`,
       metadata: {
         userId: user.id,

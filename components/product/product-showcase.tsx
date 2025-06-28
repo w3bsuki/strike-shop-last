@@ -88,7 +88,7 @@ export function ProductShowcase({
         <ProductScroll showControls controlsPosition="outside">
           {products.map((product, index) => (
             <ProductCard
-              key={product.id}
+              key={`${product.id}-${index}`}
               product={product}
               className="flex-shrink-0 w-44 sm:w-48 md:w-52 lg:w-60 snap-start touch-manipulation"
               priority={priority && index < 4}
@@ -99,7 +99,7 @@ export function ProductShowcase({
         <ProductGrid cols={gridCols}>
           {products.map((product, index) => (
             <ProductCard
-              key={product.id}
+              key={`${product.id}-${index}`}
               product={product}
               priority={priority && index < gridCols}
             />

@@ -81,9 +81,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const userId = user.id;
-
-    // TODO: Add admin role check
+    // TODO: Add admin role check using user.id
     if (process.env.NODE_ENV === 'production') {
       return NextResponse.json(
         { error: 'Forbidden' },

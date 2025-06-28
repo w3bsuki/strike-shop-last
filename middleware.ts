@@ -85,12 +85,33 @@ export async function middleware(request: NextRequest) {
   );
 
   if (isProtectedRoute) {
-    // Check if user is authenticated by looking for session cookie
-    const hasSession = request.cookies.has('sb-access-token') || 
-                      request.cookies.has('sb-refresh-token');
-    
-    if (!hasSession) {
-      // Redirect to sign-in page
+    // Properly validate session using Supabase middleware
+    try {
+      const authResponse = await updateSession(request);
+      
+      // Extract user from auth response to verify valid session
+      const userCookie = authResponse.cookies.get('sb-user');
+      const isValidSession = userCookie && userCookie.value && userCookie.value !== 'null';
+      
+      if (!isValidSession) {
+        // Clear invalid cookies and redirect to sign-in
+        const signInUrl = new URL('/sign-in', request.url);
+        signInUrl.searchParams.set('redirect_url', path);
+        const redirectResponse = NextResponse.redirect(signInUrl);
+        
+        // Clear invalid auth cookies
+        redirectResponse.cookies.delete('sb-access-token');
+        redirectResponse.cookies.delete('sb-refresh-token');
+        redirectResponse.cookies.delete('sb-user');
+        
+        return redirectResponse;
+      }
+      
+      // If we have a valid session, use the auth response
+      response = authResponse;
+    } catch (error) {
+      // Session validation failed, redirect to sign-in
+      console.error('Auth validation failed:', error);
       const signInUrl = new URL('/sign-in', request.url);
       signInUrl.searchParams.set('redirect_url', path);
       return NextResponse.redirect(signInUrl);

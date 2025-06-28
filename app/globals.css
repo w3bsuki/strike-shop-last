@@ -8,42 +8,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Fallback font definitions with enhanced loading */
-@font-face {
-  font-family: 'Typewriter';
-  src: url('/fonts/CourierPrime-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-  /* Subset for faster initial load */
-  unicode-range: U+0020-007F, U+00A0-00FF, U+0100-017F, U+2010-2027, U+2030-205E;
-}
+/* Font loading is now handled by Next.js font optimization in lib/fonts.ts */
 
-@font-face {
-  font-family: 'Typewriter';
-  src: url('/fonts/CourierPrime-Bold.ttf') format('truetype');
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-  /* Subset for faster initial load */
-  unicode-range: U+0020-007F, U+00A0-00FF, U+0100-017F, U+2010-2027, U+2030-205E;
-}
-
-/* Font loading states for smooth transitions */
-.fonts-loading {
-  /* Use system fonts while custom fonts load */
-  --font-stack: 'Courier New', 'Courier', ui-monospace, monospace;
-}
-
-.fonts-loaded {
-  /* Use custom fonts once loaded */
-  --font-stack: 'Typewriter', 'Courier Prime', 'Courier New', ui-monospace, monospace;
-}
-
-/* Apply font stack dynamically */
-body {
-  font-family: var(--font-stack, 'Courier New', ui-monospace, monospace);
-}
 
 :root {
   /* ==========================================================================

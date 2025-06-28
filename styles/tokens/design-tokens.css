@@ -1,0 +1,297 @@
+/**
+ * Strike Shop Consolidated Design Tokens
+ * Central source of truth for all design system values
+ * 
+ * Usage: These tokens should be used via Tailwind utilities or CSS variables
+ * Never use hardcoded values in components
+ */
+
+:root {
+  /* ============================================================================
+     Spacing Scale - Mobile-First
+     Based on 4px grid system with special touch targets
+     ============================================================================ */
+  
+  /* Base spacing values */
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 0.125rem;   /* 2px */
+  --space-1: 0.25rem;      /* 4px */
+  --space-1-5: 0.375rem;   /* 6px */
+  --space-2: 0.5rem;       /* 8px */
+  --space-2-5: 0.625rem;   /* 10px */
+  --space-3: 0.75rem;      /* 12px */
+  --space-3-5: 0.875rem;   /* 14px */
+  --space-4: 1rem;         /* 16px */
+  --space-5: 1.25rem;      /* 20px */
+  --space-6: 1.5rem;       /* 24px */
+  --space-7: 1.75rem;      /* 28px */
+  --space-8: 2rem;         /* 32px */
+  --space-9: 2.25rem;      /* 36px */
+  --space-10: 2.5rem;      /* 40px */
+  --space-11: 2.75rem;     /* 44px - minimum touch target */
+  --space-12: 3rem;        /* 48px - comfortable touch target */
+  --space-14: 3.5rem;      /* 56px */
+  --space-16: 4rem;        /* 64px */
+  --space-20: 5rem;        /* 80px */
+  --space-24: 6rem;        /* 96px */
+  --space-32: 8rem;        /* 128px */
+  --space-40: 10rem;       /* 160px */
+  --space-48: 12rem;       /* 192px */
+  --space-56: 14rem;       /* 224px */
+  --space-64: 16rem;       /* 256px */
+  
+  /* Touch targets for accessibility */
+  --touch-min: var(--space-11);         /* 44px WCAG minimum */
+  --touch-comfortable: var(--space-12); /* 48px comfortable target */
+  
+  /* ============================================================================
+     Typography Scale - Fluid Responsive
+     Using clamp() for smooth scaling across devices
+     ============================================================================ */
+  
+  /* Font sizes with fluid scaling */
+  --text-xs: clamp(0.625rem, 0.5rem + 0.5vw, 0.75rem);
+  --text-sm: clamp(0.75rem, 0.625rem + 0.5vw, 0.875rem);
+  --text-base: clamp(0.875rem, 0.75rem + 0.5vw, 1rem);
+  --text-lg: clamp(1rem, 0.875rem + 0.5vw, 1.125rem);
+  --text-xl: clamp(1.125rem, 1rem + 0.5vw, 1.25rem);
+  --text-2xl: clamp(1.25rem, 1.125rem + 0.75vw, 1.5rem);
+  --text-3xl: clamp(1.5rem, 1.25rem + 1vw, 1.875rem);
+  --text-4xl: clamp(1.875rem, 1.5rem + 1.5vw, 2.25rem);
+  --text-5xl: clamp(2.25rem, 1.875rem + 2vw, 3rem);
+  --text-6xl: clamp(3rem, 2.25rem + 3vw, 3.75rem);
+  
+  /* Line heights */
+  --leading-none: 1;
+  --leading-tight: 1.1;
+  --leading-snug: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+  --leading-loose: 1.75;
+  
+  /* Letter spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+  --tracking-strike: 0.1em;      /* Strike brand tracking */
+  --tracking-strike-wide: 0.15em; /* Strike brand wide */
+  
+  /* Font weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  
+  /* Font families */
+  --font-typewriter: 'Typewriter', 'Courier Prime', ui-monospace, monospace;
+  --font-system: system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, monospace;
+  
+  /* ============================================================================
+     Color System - Semantic Tokens
+     All colors should reference these semantic tokens, not raw values
+     ============================================================================ */
+  
+  /* Base brand colors */
+  --strike-black: 0 0% 0%;
+  --strike-white: 0 0% 100%;
+  --strike-gray-50: 0 0% 98%;
+  --strike-gray-100: 0 0% 96%;
+  --strike-gray-200: 0 0% 90%;
+  --strike-gray-300: 0 0% 80%;
+  --strike-gray-400: 0 0% 65%;
+  --strike-gray-500: 0 0% 50%;
+  --strike-gray-600: 0 0% 40%;
+  --strike-gray-700: 0 0% 30%;
+  --strike-gray-800: 0 0% 20%;
+  --strike-gray-900: 0 0% 10%;
+  --strike-gray-950: 0 0% 5%;
+  
+  /* Semantic color tokens - Light mode */
+  --color-background: var(--strike-white);
+  --color-foreground: var(--strike-black);
+  
+  /* Surface colors */
+  --color-surface: var(--strike-white);
+  --color-surface-elevated: var(--strike-gray-50);
+  --color-surface-overlay: var(--strike-gray-100);
+  --color-surface-interactive: var(--strike-gray-50);
+  --color-surface-selected: var(--strike-gray-100);
+  
+  /* Content colors */
+  --color-content-primary: var(--strike-black);
+  --color-content-secondary: var(--strike-gray-700);
+  --color-content-tertiary: var(--strike-gray-600);
+  --color-content-disabled: var(--strike-gray-400);
+  --color-content-inverse: var(--strike-white);
+  
+  /* Border colors */
+  --color-border-primary: var(--strike-gray-200);
+  --color-border-secondary: var(--strike-gray-100);
+  --color-border-interactive: var(--strike-gray-300);
+  --color-border-focus: var(--strike-black);
+  
+  /* Interactive states */
+  --color-interactive-primary: var(--strike-black);
+  --color-interactive-primary-hover: var(--strike-gray-800);
+  --color-interactive-primary-active: var(--strike-gray-900);
+  --color-interactive-secondary: var(--strike-gray-100);
+  --color-interactive-secondary-hover: var(--strike-gray-200);
+  --color-interactive-secondary-active: var(--strike-gray-300);
+  
+  /* Feedback colors */
+  --color-success: 142 71% 45%;
+  --color-warning: 38 92% 50%;
+  --color-error: 0 84% 60%;
+  --color-info: 210 100% 50%;
+  
+  /* ============================================================================
+     Effects & Animations
+     ============================================================================ */
+  
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  
+  /* Animation durations */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-moderate: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
+  --duration-slowest: 1000ms;
+  
+  /* Animation easings */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* Border radius (Sharp edges design) */
+  --radius-none: 0;
+  --radius-subtle: 2px;  /* Only for special cases */
+  --radius-soft: 4px;    /* Only for special cases */
+  
+  /* ============================================================================
+     Layout & Z-Index
+     ============================================================================ */
+  
+  /* Z-index scale */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-fixed: 200;
+  --z-modal-backdrop: 300;
+  --z-modal: 400;
+  --z-notification: 500;
+  --z-tooltip: 600;
+  
+  /* Container widths */
+  --container-xs: 20rem;     /* 320px */
+  --container-sm: 24rem;     /* 384px */
+  --container-md: 28rem;     /* 448px */
+  --container-lg: 32rem;     /* 512px */
+  --container-xl: 36rem;     /* 576px */
+  --container-2xl: 42rem;    /* 672px */
+  --container-3xl: 48rem;    /* 768px */
+  --container-4xl: 56rem;    /* 896px */
+  --container-5xl: 64rem;    /* 1024px */
+  --container-6xl: 72rem;    /* 1152px */
+  --container-7xl: 80rem;    /* 1280px */
+  --container-full: 100%;
+  
+  /* Breakpoints (for reference) */
+  --screen-sm: 640px;
+  --screen-md: 768px;
+  --screen-lg: 1024px;
+  --screen-xl: 1280px;
+  --screen-2xl: 1536px;
+}
+
+/* ============================================================================
+   Dark Mode Overrides
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Invert surface colors */
+    --color-background: var(--strike-gray-900);
+    --color-foreground: var(--strike-gray-50);
+    
+    /* Surface colors */
+    --color-surface: var(--strike-gray-900);
+    --color-surface-elevated: var(--strike-gray-800);
+    --color-surface-overlay: var(--strike-gray-700);
+    --color-surface-interactive: var(--strike-gray-800);
+    --color-surface-selected: var(--strike-gray-700);
+    
+    /* Content colors */
+    --color-content-primary: var(--strike-gray-50);
+    --color-content-secondary: var(--strike-gray-300);
+    --color-content-tertiary: var(--strike-gray-400);
+    --color-content-disabled: var(--strike-gray-600);
+    --color-content-inverse: var(--strike-gray-900);
+    
+    /* Border colors */
+    --color-border-primary: var(--strike-gray-700);
+    --color-border-secondary: var(--strike-gray-800);
+    --color-border-interactive: var(--strike-gray-600);
+    --color-border-focus: var(--strike-gray-50);
+    
+    /* Interactive states */
+    --color-interactive-primary: var(--strike-gray-50);
+    --color-interactive-primary-hover: var(--strike-gray-200);
+    --color-interactive-primary-active: var(--strike-gray-100);
+    --color-interactive-secondary: var(--strike-gray-800);
+    --color-interactive-secondary-hover: var(--strike-gray-700);
+    --color-interactive-secondary-active: var(--strike-gray-600);
+  }
+}
+
+/* ============================================================================
+   Utility Classes for Direct Token Usage
+   ============================================================================ */
+
+/* Spacing utilities */
+.space-0 { --spacing: var(--space-0); }
+.space-px { --spacing: var(--space-px); }
+.space-0-5 { --spacing: var(--space-0-5); }
+.space-1 { --spacing: var(--space-1); }
+.space-2 { --spacing: var(--space-2); }
+.space-3 { --spacing: var(--space-3); }
+.space-4 { --spacing: var(--space-4); }
+.space-5 { --spacing: var(--space-5); }
+.space-6 { --spacing: var(--space-6); }
+.space-8 { --spacing: var(--space-8); }
+.space-10 { --spacing: var(--space-10); }
+.space-12 { --spacing: var(--space-12); }
+
+/* Duration utilities */
+.duration-instant { --duration: var(--duration-instant); }
+.duration-fast { --duration: var(--duration-fast); }
+.duration-base { --duration: var(--duration-base); }
+.duration-moderate { --duration: var(--duration-moderate); }
+.duration-slow { --duration: var(--duration-slow); }
+
+/* Z-index utilities */
+.z-base { z-index: var(--z-base); }
+.z-raised { z-index: var(--z-raised); }
+.z-dropdown { z-index: var(--z-dropdown); }
+.z-sticky { z-index: var(--z-sticky); }
+.z-fixed { z-index: var(--z-fixed); }
+.z-modal-backdrop { z-index: var(--z-modal-backdrop); }
+.z-modal { z-index: var(--z-modal); }
+.z-notification { z-index: var(--z-notification); }
+.z-tooltip { z-index: var(--z-tooltip); }

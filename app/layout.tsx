@@ -11,6 +11,7 @@ import { ProvidersWrapper } from './providers-wrapper';
 import { SkipLink } from '@/components/accessibility/skip-link';
 import { ServiceWorkerProvider } from '@/components/service-worker-provider';
 import { PWAInstallPrompt } from '@/components/pwa-install-prompt';
+import { AppErrorBoundary } from '@/components/app-error-boundary';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://strike-shop.com';
 
@@ -201,12 +202,14 @@ export default function RootLayout({
       </head>
       <body className="font-typewriter">
         <SkipLink />
-        <ProvidersWrapper>
-          {children}
-          {modal}
-          <ServiceWorkerProvider />
-          <PWAInstallPrompt />
-        </ProvidersWrapper>
+        <AppErrorBoundary>
+          <ProvidersWrapper>
+            {children}
+            {modal}
+            <ServiceWorkerProvider />
+            <PWAInstallPrompt />
+          </ProvidersWrapper>
+        </AppErrorBoundary>
       </body>
     </html>
   );
