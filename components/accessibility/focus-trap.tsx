@@ -53,7 +53,7 @@ export function FocusTrap({
     // Focus first focusable element
     const focusableElements = getFocusableElements();
     if (focusableElements.length > 0) {
-      focusableElements[0].focus();
+      focusableElements[0]?.focus();
     }
 
     // Handle tab key
@@ -69,17 +69,17 @@ export function FocusTrap({
       // Trap focus
       if (e.shiftKey && document.activeElement === firstElement) {
         e.preventDefault();
-        lastElement.focus();
+        lastElement?.focus();
       } else if (!e.shiftKey && document.activeElement === lastElement) {
         e.preventDefault();
-        firstElement.focus();
+        firstElement?.focus();
       }
     };
 
     // Handle escape key
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && previousActiveElement.current) {
-        previousActiveElement.current.focus();
+        previousActiveElement.current?.focus();
       }
     };
 
@@ -92,7 +92,7 @@ export function FocusTrap({
 
       // Return focus to previous element
       if (returnFocus && previousActiveElement.current) {
-        previousActiveElement.current.focus();
+        previousActiveElement.current?.focus();
       }
     };
   }, [active, returnFocus]);
