@@ -165,7 +165,7 @@ export function ColorContrastProvider({ children }: ColorContrastProviderProps) 
       ratio: Math.round(ratio * 100) / 100,
       isAccessible,
       level,
-      recommendation
+      ...(recommendation && { recommendation })
     };
   };
 

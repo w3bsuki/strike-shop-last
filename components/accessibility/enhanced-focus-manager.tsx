@@ -65,7 +65,7 @@ export function FocusManagerProvider({ children }: FocusManagerProviderProps) {
     if (focusableElements.length === 0) return () => {};
 
     // Focus the first element
-    focusableElements[0].focus();
+    focusableElements[0]?.focus();
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;

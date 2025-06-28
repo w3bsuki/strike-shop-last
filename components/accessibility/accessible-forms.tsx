@@ -201,8 +201,8 @@ export function AccessibleInput({
   return (
     <AccessibleField
       label={label}
-      description={description}
-      error={displayError || undefined}
+      {...(description && { description })}
+      {...(displayError && { error: displayError })}
       required={required}
       className={className}
     >
@@ -306,8 +306,8 @@ export function AccessibleTextarea({
   return (
     <AccessibleField
       label={label}
-      description={description}
-      error={displayError || undefined}
+      {...(description && { description })}
+      {...(displayError && { error: displayError })}
       required={required}
       className={className}
     >
@@ -369,8 +369,8 @@ export function AccessibleSelect({
   return (
     <AccessibleField
       label={label}
-      description={description}
-      error={error}
+      {...(description && { description })}
+      {...(error && { error })}
       required={required}
       className={className}
     >
@@ -422,8 +422,8 @@ export function AccessibleCheckbox({
   return (
     <AccessibleField
       label=""
-      description={description}
-      error={error}
+      {...(description && { description })}
+      {...(error && { error })}
       className={className}
     >
       <div className="flex items-start gap-2">
