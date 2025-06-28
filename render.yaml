@@ -5,8 +5,8 @@ services:
     region: frankfurt
     plan: starter
     rootDir: my-medusa-store
-    buildCommand: npm install && npm run build
-    startCommand: npm run start:render
+    buildCommand: npm install && npm run build && npm run predeploy
+    startCommand: npm start
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
