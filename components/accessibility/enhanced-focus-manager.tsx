@@ -363,7 +363,7 @@ export function useEnhancedKeyboardNavigation<T>(
 
       case 'Enter':
       case ' ':
-        if (onSelect) {
+        if (onSelect && items[currentIndex]) {
           handled = true;
           onSelect(items[currentIndex], currentIndex);
         }
