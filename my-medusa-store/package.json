@@ -13,12 +13,12 @@
     "medusa"
   ],
   "scripts": {
-    "build": "medusa build && medusa build --admin-only",
+    "build": "medusa build",
     "seed": "medusa exec ./src/scripts/seed.ts",
     "start": "medusa start",
     "start:prod": "NODE_ENV=production medusa start",
     "start:railway": "medusa migrations run && medusa start",
-    "start:render": "ls -la .medusa/ && medusa start",
+    "start:render": "medusa start",
     "start:medusa": "medusa start",
     "dev": "medusa develop",
     "predeploy": "medusa db:migrate",
