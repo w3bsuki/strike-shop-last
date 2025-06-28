@@ -7,6 +7,12 @@ module.exports = defineConfig({
     databaseUrl: process.env.DATABASE_URL,
     workerMode: process.env.MEDUSA_WORKER_MODE || "shared",
     redisUrl: process.env.REDIS_URL,
+    // Add SSL support for Supabase
+    databaseDriverOptions: process.env.NODE_ENV === "production" || process.env.DATABASE_URL?.includes("supabase") ? {
+      connection: {
+        ssl: { rejectUnauthorized: false }
+      }
+    } : {},
     http: {
       host: "0.0.0.0",
       port: parseInt(process.env.PORT || "9000"),
@@ -21,7 +27,7 @@ module.exports = defineConfig({
   admin: {
     disable: process.env.DISABLE_MEDUSA_ADMIN === "true",
     path: "/app",
-    backendUrl: process.env.MEDUSA_BACKEND_URL,
+    backendUrl: process.env.MEDUSA_BACKEND_URL || "http://localhost:9000",
   },
   modules: {
     // Core e-commerce modules (CRITICAL FIX: These were missing)
