@@ -5,9 +5,9 @@
 
 // Server-side config (build time)
 const serverConfig = {
-  backendUrl: 'https://medusa-starter-default-production-3201.up.railway.app',
-  publishableKey: '',
-  regionId: 'reg_01J7K5CZXGP2FBS7C5B9MRV4DT',
+  backendUrl: 'http://localhost:9000',
+  publishableKey: 'pk_29b82d9f59f0a63f3af01b371bbb4213c0f335610e50c3b9db479d3cea8247ae',
+  regionId: 'reg_01JXFMWZWX24XQD1BYNTS3N15Q',
 };
 
 // Client-side config (runtime)
