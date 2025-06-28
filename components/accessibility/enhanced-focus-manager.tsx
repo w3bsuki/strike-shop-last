@@ -78,13 +78,13 @@ export function FocusManagerProvider({ children }: FocusManagerProviderProps) {
         // Shift + Tab (backwards)
         if (document.activeElement === firstElement) {
           e.preventDefault();
-          lastElement.focus();
+          lastElement?.focus();
         }
       } else {
         // Tab (forwards)
         if (document.activeElement === lastElement) {
           e.preventDefault();
-          firstElement.focus();
+          firstElement?.focus();
         }
       }
     };
