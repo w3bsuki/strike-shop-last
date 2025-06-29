@@ -254,7 +254,7 @@ export function AdminDashboard() {
                 <LineChart data={revenueData}>
                   <XAxis dataKey="date" />
                   <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartTooltip />
                   <Line
                     type="monotone"
                     dataKey="revenue"
