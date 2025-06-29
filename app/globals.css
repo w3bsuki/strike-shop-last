@@ -1350,6 +1350,20 @@ button, [role="button"], a, input, select, textarea {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Marquee animation for hero */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
 .modal-backdrop { animation: fadeIn 0.2s ease-out; }
 .modal-content { animation: slideInUp 0.3s ease-out; }
 
