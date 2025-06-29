@@ -27,7 +27,6 @@ import {
   YAxis,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from '@/components/ui/chart-dynamic';
 
 export function AdminDashboard() {
