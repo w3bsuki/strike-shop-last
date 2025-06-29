@@ -110,7 +110,7 @@ export interface CreatePaymentIntentRequest {
   currency?: string | undefined;
   items: PaymentLineItem[];
   shipping?: ShippingDetails | undefined;
-  metadata?: Record<string | undefined, string>;
+  metadata?: Record<string, string>;
 }
 
 export interface PaymentLineItem {
@@ -145,7 +145,7 @@ export interface PaymentIntentResponse {
   amount: Price;
   currency: string;
   status: PaymentIntentStatus;
-  metadata?: Record<string | undefined, string>;
+  metadata?: Record<string, string>;
 }
 
 export interface PaymentStatusResponse {
@@ -225,7 +225,7 @@ export class CartAPIError extends Error {
     details?: unknown | undefined,
     httpStatus?: number
   ) {
-    super(message) | undefined;
+    super(message);
     this.name = 'CartAPIError';
     this.code = code;
     this.details = details;
@@ -244,7 +244,7 @@ export class PaymentAPIError extends Error {
     details?: unknown | undefined,
     httpStatus?: number
   ) {
-    super(message) | undefined;
+    super(message);
     this.name = 'PaymentAPIError';
     this.code = code;
     this.details = details;
@@ -316,7 +316,7 @@ export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 // Request configuration
 export interface APIRequestConfig {
   method: HTTPMethod;
-  headers?: Record<string | undefined, string>;
+  headers?: Record<string, string>;
   body?: unknown | undefined;
   cartId?: CartId | null | undefined;
   timeout?: number | undefined;

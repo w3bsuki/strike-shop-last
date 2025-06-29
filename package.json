@@ -67,6 +67,7 @@
     "build:optimized": "npm run optimize:all && npm run build"
   },
   "dependencies": {
+    "@emotion/is-prop-valid": "^1.3.1",
     "@medusajs/js-sdk": "^2.8.4",
     "@next/bundle-analyzer": "^14.2.5",
     "@prisma/client": "^6.10.1",

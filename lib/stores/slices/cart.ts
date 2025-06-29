@@ -3,6 +3,7 @@ import type { StoreState, CartSlice, CartActions, CartItem } from '../types';
 import { medusaClient } from '../../medusa-service-refactored';
 import { cartEventEmitter } from '../../events';
 import { toast } from '@/hooks/use-toast';
+import { createProductId } from '@/types/branded';
 
 
 const formatPrice = (amount: number, currencyCode: string = 'GBP') => {
@@ -42,12 +43,13 @@ export const createCartSlice: StateCreator<
         if (cart.cartId) {
           // Validate existing cart
           try {
-            const medusaCart = await medusaClient.store.cart.retrieve(cart.cartId);
-            if (medusaCart) {
+            const response = await medusaClient.store.cart.retrieve(cart.cartId);
+            if (response && response.cart) {
+              const medusaCart = response.cart;
               // Update items from server
               const items: CartItem[] =
-                medusaCart.items?.map((item) => ({
-                  id: item.variant?.product_id || item.product_id || '',
+                medusaCart.items?.map((item: any) => ({
+                  id: createProductId(item.variant?.product_id || item.product_id || ''),
                   lineItemId: item.id,
                   variantId: item.variant_id,
                   name: item.title,
@@ -58,19 +60,12 @@ export const createCartSlice: StateCreator<
                   ...(item.thumbnail && { image: item.thumbnail }),
                   pricing: {
                     unitPrice: item.unit_price,
-                    ...(item.variant?.prices?.[0]?.amount && { unitSalePrice: item.variant.prices[0].amount }),
                     totalPrice:
                       item.subtotal || item.unit_price * item.quantity,
                     displayUnitPrice: formatPrice(
                       item.unit_price,
                       medusaCart.region?.currency_code
                     ),
-                    ...(item.variant?.prices?.[0]?.amount && {
-                      displayUnitSalePrice: formatPrice(
-                        item.variant.prices[0].amount,
-                        medusaCart.region?.currency_code
-                      )
-                    }),
                     displayTotalPrice: formatPrice(
                       item.subtotal || item.unit_price * item.quantity,
                       medusaCart.region?.currency_code
@@ -99,7 +94,7 @@ export const createCartSlice: StateCreator<
 
         // Create new cart
         try {
-          const medusaCart = await medusaClient.store.carts.create(
+          const response = await medusaClient.store.cart.create(
             {
               region_id:
                 process.env.NEXT_PUBLIC_MEDUSA_REGION_ID ||
@@ -107,12 +102,12 @@ export const createCartSlice: StateCreator<
             }
           );
           set((state) => ({
-            cart: { ...state.cart, cartId: medusaCart.id, items: [] },
+            cart: { ...state.cart, cartId: response.cart.id, items: [] },
           }));
 
           // Emit cart initialized event
           cartEventEmitter.emit('cart-initialized', {
-            cartId: medusaCart.id,
+            cartId: response.cart.id,
             items: [],
             timestamp: new Date(),
             source: 'system',
@@ -161,14 +156,14 @@ export const createCartSlice: StateCreator<
           }
 
           // Add line item
-          const medusaCart = await medusaClient.store.carts.addLineItem(currentCartId, {
+          const response = await (medusaClient.store.cart as any).createLineItem(currentCartId, {
             variant_id: variantId,
             quantity,
           });
 
           // Update local state
           const items: CartItem[] =
-            medusaCart.items?.map((item) => ({
+            response.cart?.items?.map((item: any) => ({
               id: item.variant?.product_id || item.product_id || '',
               lineItemId: item.id,
               variantId: item.variant_id,
@@ -184,17 +179,17 @@ export const createCartSlice: StateCreator<
                 totalPrice: item.subtotal || item.unit_price * item.quantity,
                 displayUnitPrice: formatPrice(
                   item.unit_price,
-                  medusaCart.region?.currency_code
+                  response.cart?.region?.currency_code
                 ),
                 ...(item.variant?.prices?.[0]?.amount && {
                   displayUnitSalePrice: formatPrice(
                     item.variant.prices[0].amount,
-                    medusaCart.region?.currency_code
+                    response.cart?.region?.currency_code
                   )
                 }),
                 displayTotalPrice: formatPrice(
                   item.subtotal || item.unit_price * item.quantity,
-                  medusaCart.region?.currency_code
+                  response.cart?.region?.currency_code
                 ),
               },
             })) || [];
@@ -285,14 +280,14 @@ export const createCartSlice: StateCreator<
           if (!item) throw new Error('Item not found');
 
           // Update line item
-          const medusaCart = await medusaClient.store.carts.updateLineItem(cart.cartId, item.lineItemId, {
+          const response = await medusaClient.store.cart.updateLineItem(cart.cartId, item.lineItemId, {
             quantity,
           });
 
           // Update local state
           const updatedItems =
-            medusaCart.items?.map((item) => ({
-              id: item.variant?.product_id || item.product_id,
+            response.cart?.items?.map((item: any) => ({
+              id: createProductId(item.variant?.product_id || item.product_id || ''),
               lineItemId: item.id,
               variantId: item.variant_id,
               name: item.title,
@@ -303,21 +298,21 @@ export const createCartSlice: StateCreator<
               image: item.thumbnail,
               pricing: {
                 unitPrice: item.unit_price,
-                unitSalePrice: item.variant?.prices?.[0]?.amount,
+                ...(item.variant?.prices?.[0]?.amount && { unitSalePrice: item.variant.prices[0].amount }),
                 totalPrice: item.subtotal || item.unit_price * item.quantity,
                 displayUnitPrice: formatPrice(
                   item.unit_price,
-                  medusaCart.region?.currency_code
+                  response.cart?.region?.currency_code
                 ),
-                displayUnitSalePrice: item.variant?.prices?.[0]?.amount
-                  ? formatPrice(
-                      item.variant.prices[0].amount,
-                      medusaCart.region?.currency_code
-                    )
-                  : undefined,
+                ...(item.variant?.prices?.[0]?.amount && {
+                  displayUnitSalePrice: formatPrice(
+                    item.variant.prices[0].amount,
+                    response.cart?.region?.currency_code
+                  )
+                }),
                 displayTotalPrice: formatPrice(
                   item.subtotal || item.unit_price * item.quantity,
-                  medusaCart.region?.currency_code
+                  response.cart?.region?.currency_code
                 ),
               },
             })) || [];
@@ -357,12 +352,12 @@ export const createCartSlice: StateCreator<
           if (!item) throw new Error('Item not found');
 
           // Delete line item
-          const medusaCart = await medusaClient.store.carts.deleteLineItem(cart.cartId, item.lineItemId);
+          const response = await medusaClient.store.cart.deleteLineItem(cart.cartId, item.lineItemId);
 
           // Update local state
           const updatedItems =
-            medusaCart.items?.map((item) => ({
-              id: item.variant?.product_id || item.product_id,
+            response.parent?.items?.map((item: any) => ({
+              id: createProductId(item.variant?.product_id || item.product_id || ''),
               lineItemId: item.id,
               variantId: item.variant_id,
               name: item.title,
@@ -373,21 +368,21 @@ export const createCartSlice: StateCreator<
               image: item.thumbnail,
               pricing: {
                 unitPrice: item.unit_price,
-                unitSalePrice: item.variant?.prices?.[0]?.amount,
+                ...(item.variant?.prices?.[0]?.amount && { unitSalePrice: item.variant.prices[0].amount }),
                 totalPrice: item.subtotal || item.unit_price * item.quantity,
                 displayUnitPrice: formatPrice(
                   item.unit_price,
-                  medusaCart.region?.currency_code
+                  response.parent?.region?.currency_code
                 ),
-                displayUnitSalePrice: item.variant?.prices?.[0]?.amount
-                  ? formatPrice(
-                      item.variant.prices[0].amount,
-                      medusaCart.region?.currency_code
-                    )
-                  : undefined,
+                ...(item.variant?.prices?.[0]?.amount && {
+                  displayUnitSalePrice: formatPrice(
+                    item.variant.prices[0].amount,
+                    response.parent?.region?.currency_code
+                  )
+                }),
                 displayTotalPrice: formatPrice(
                   item.subtotal || item.unit_price * item.quantity,
-                  medusaCart.region?.currency_code
+                  response.parent?.region?.currency_code
                 ),
               },
             })) || [];

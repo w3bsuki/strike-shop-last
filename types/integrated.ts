@@ -7,10 +7,9 @@ import type { SanityImage, SanityBlock, SanityCategory } from './sanity';
 import type {
   MedusaProduct,
   MedusaProductVariant,
-  MedusaPrice,
 } from './medusa';
 import type { 
-  ProductId, VariantId, CategoryId, LineItemId, ImageURL, 
+  ProductId, VariantId, LineItemId, ImageURL, 
   Slug, SKU, Price, Quantity, CurrencyCode 
 } from './branded';
 

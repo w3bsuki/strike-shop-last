@@ -21,7 +21,7 @@ export {
 export type {
   DeepReadonly, DeepPartial, DeepRequired,
   StrictPick, StrictOmit, StrictPartial, StrictRequired,
-  Prettify, UnionToIntersection, NonEmptyArray,
+  NonEmptyArray,
   ApiResponse, Result, ValidationResult
 } from './utilities';
 

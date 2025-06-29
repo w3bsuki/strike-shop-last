@@ -59,20 +59,20 @@ export async function createPaymentIntent({
       payment_method_options: {
         card: {
           // Require 3DS for high-value transactions (£100+)
-          request_three_d_secure: amountInCents >= 10000 ? 'required' : 'automatic',
+          request_three_d_secure: amountInCents >= 10000 ? 'any' : 'automatic',
           // Capture method - manual for fraud review on high amounts
-          capture_method: amountInCents >= 50000 ? 'manual' : 'automatic',
+          capture_method: 'manual' as const,
         },
       },
       
       // 🔴 FRAUD DETECTION - Stripe Radar settings
-      radar_options: {
-        // Skip rules for test mode only
-        skip_rules: process.env.NODE_ENV === 'development' ? ['all'] : [],
-      },
+      // radar_options: {
+      //   // Skip rules for test mode only
+      //   skip_rules: process.env.NODE_ENV === 'development' ? ['all'] : [],
+      // },
       
       // Additional fraud prevention
-      receipt_email: customerEmail,
+      ...(customerEmail && { receipt_email: customerEmail }),
       description: description || `Payment for order ${metadata.order_id || 'N/A'}`,
       
       // Statement descriptor for clear billing
