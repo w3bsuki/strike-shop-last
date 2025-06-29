@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/loading-states';
 import { CategorySection, CategoryScroll, CategoryCard } from '@/components/category';
 import { ProductHeader } from '@/components/product/product-header';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 // PERFORMANCE: Below-the-fold components (lazy loaded with smart preloading)
 
