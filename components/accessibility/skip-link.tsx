@@ -29,6 +29,8 @@ export function SkipLink({ targetId = 'main-content', text = 'Skip to main conte
         skipLink.removeEventListener('blur', handleBlur);
       };
     }
+    
+    return () => {};
   }, []);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
