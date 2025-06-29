@@ -238,7 +238,7 @@ export function FormErrorAnnouncer({ errors }: { errors: string[] }) {
   const { announceError } = useLiveRegion();
 
   useEffect(() => {
-    if (errors.length > 0) {
+    if (errors.length > 0 && errors[0]) {
       const errorMessage = errors.length === 1 
         ? errors[0]
         : `There are ${errors.length} errors in the form. ${errors[0]}`;
