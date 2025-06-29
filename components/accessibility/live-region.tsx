@@ -41,6 +41,9 @@ export function LiveRegion({
         return () => clearTimeout(timer);
       }
     }
+    
+    // Return empty cleanup function when no timer is set
+    return () => {};
   }, [message, clearAfter]);
 
   return (
