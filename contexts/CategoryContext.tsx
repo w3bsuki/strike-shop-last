@@ -82,22 +82,22 @@ export function CategoryProvider({ children, categoryName, initialProducts }: Ca
 
     // Price filter
     filtered = filtered.filter((product) => {
-      const price = product.pricing.basePrice || 0;
+      const price = product.pricing?.basePrice || 0;
       return price >= filters.priceRange[0] && price <= filters.priceRange[1];
     });
 
     // Stock filter
     if (filters.inStockOnly) {
-      filtered = filtered.filter((product) => product.commerce.inventory.available);
+      filtered = filtered.filter((product) => product.commerce?.inventory?.available);
     }
 
     // Sort
     switch (filters.sortBy) {
       case 'price-low':
-        filtered.sort((a, b) => (a.pricing.basePrice || 0) - (b.pricing.basePrice || 0));
+        filtered.sort((a, b) => (a.pricing?.basePrice || 0) - (b.pricing?.basePrice || 0));
         break;
       case 'price-high':
-        filtered.sort((a, b) => (b.pricing.basePrice || 0) - (a.pricing.basePrice || 0));
+        filtered.sort((a, b) => (b.pricing?.basePrice || 0) - (a.pricing?.basePrice || 0));
         break;
       case 'name-asc':
         filtered.sort((a, b) => a.content.name.localeCompare(b.content.name));

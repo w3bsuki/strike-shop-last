@@ -38,7 +38,7 @@ export function generateProductSchemaLd(product: IntegratedProduct, baseUrl: str
       '@id': `${baseUrl}/product/${product.slug}#offer${index}`,
       url: `${baseUrl}/product/${product.slug}`,
       priceCurrency: 'GBP',
-      price: variant.prices?.[0]?.amount || product.pricing.basePrice,
+      price: variant.prices?.[0]?.amount || product.pricing?.basePrice || 0,
       priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 year from now
       availability: 'https://schema.org/InStock',
       itemCondition: 'https://schema.org/NewCondition',
@@ -201,9 +201,9 @@ export function generateCollectionSchema(
             : '',
           offers: {
             '@type': 'Offer',
-            price: product.pricing.basePrice,
+            price: product.pricing?.basePrice || 0,
             priceCurrency: 'GBP',
-            availability: product.commerce.inventory.available 
+            availability: product.commerce?.inventory?.available 
               ? 'https://schema.org/InStock' 
               : 'https://schema.org/OutOfStock',
           },
