@@ -3,16 +3,12 @@
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { ErrorBoundary } from '@/components/error-boundary';
-import { QuickViewProvider } from '@/contexts/QuickViewContext';
 import { 
   ProductScrollSkeleton, 
   CategoryScrollSkeleton
 } from '@/components/ui/loading-states';
-import { Hero, OptimizedHeroImage as HeroImage, HeroContent, HeroTitle, HeroDescription, HeroActions, HeroMarquee, HeroMarqueeItem } from '@/components/hero';
 import { CategorySection, CategoryScroll, CategoryCard } from '@/components/category';
 import { ProductHeader } from '@/components/product/product-header';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 
 // PERFORMANCE: Below-the-fold components (lazy loaded with smart preloading)
 
@@ -36,16 +32,6 @@ const QuickViewModal = dynamic(() =>
   loading: () => null
 });
 
-const Footer = dynamic(() => import('@/components/footer'), {
-  
-  loading: () => <div style={{ minHeight: '256px' }} className="bg-muted animate-pulse" />
-});
-
-// Updated to use new modular mobile navigation
-const MobileNav = dynamic(() => import('@/components/mobile/navigation').then(mod => ({ default: mod.MobileNav })), {
-  
-  loading: () => null
-});
 
 // Divider components
 const DividerSection = dynamic(() => 
@@ -76,88 +62,54 @@ export default function HomePageClient({
   kidsItems,
 }: HomePageProps) {
   return (
-    <QuickViewProvider>
-      <main className="bg-white">
+    <>
 
-        <Hero size="default">
-          <HeroImage 
-            src="/images/hero/strike-ss25-hero.jpg" 
-            alt="STRIKE SS25" 
-            overlay="stark"
-          >
-            <HeroContent position="center">
-              <HeroTitle size="massive">STRIKE SS25</HeroTitle>
-              <HeroDescription size="lg">
-                DEFINING THE GRAY AREA BETWEEN BLACK AND WHITE
-              </HeroDescription>
-              <HeroActions align="center">
-                <Button
-                  asChild
-                  size="lg"
-                  className="bg-white text-black hover:bg-black hover:text-white uppercase tracking-wider"
-                >
-                  <Link href="/new">EXPLORE COLLECTION</Link>
-                </Button>
-              </HeroActions>
-            </HeroContent>
-          </HeroImage>
-          <HeroMarquee speed="normal" pauseOnHover>
-            <HeroMarqueeItem>FREE SHIPPING ON ORDERS OVER $150</HeroMarqueeItem>
-            <span className="text-white/50">•</span>
-            <HeroMarqueeItem>PREMIUM QUALITY</HeroMarqueeItem>
-            <span className="text-white/50">•</span>
-            <HeroMarqueeItem>SUSTAINABLE MATERIALS</HeroMarqueeItem>
-            <span className="text-white/50">•</span>
-            <HeroMarqueeItem>24/7 SUPPORT</HeroMarqueeItem>
-          </HeroMarquee>
-        </Hero>
+      <ErrorBoundary>
+        <Suspense fallback={<div style={{ minHeight: '320px' }}><CategoryScrollSkeleton /></div>}>
+          <CategorySection spacing="default">
+            <ProductHeader 
+              title="SHOP BY CATEGORY" 
+              viewAllText="View All Categories"
+              viewAllHref="/categories"
+            />
+            <CategoryScroll showControls={false}>
+              {categories.map((category, index) => (
+                <div key={category.id} className="flex-none w-[200px] sm:w-[240px] md:w-[280px] lg:w-[320px]">
+                  <CategoryCard
+                    category={category}
+                    priority={index < 3}
+                  />
+                </div>
+              ))}
+            </CategoryScroll>
+          </CategorySection>
+        </Suspense>
+      </ErrorBoundary>
 
-        <ErrorBoundary>
-          <Suspense fallback={<div style={{ minHeight: '320px' }}><CategoryScrollSkeleton /></div>}>
-            <CategorySection spacing="default">
-              <ProductHeader 
-                title="SHOP BY CATEGORY" 
-                viewAllText="View All Categories"
-                viewAllHref="/categories"
-              />
-              <CategoryScroll showControls={false}>
-                {categories.map((category, index) => (
-                  <div key={category.id} className="flex-none w-[200px] sm:w-[240px] md:w-[280px] lg:w-[320px]">
-                    <CategoryCard
-                      category={category}
-                      priority={index < 3}
-                    />
-                  </div>
-                ))}
-              </CategoryScroll>
-            </CategorySection>
-          </Suspense>
-        </ErrorBoundary>
-
-        {/* Winter Sale Banner - Black background + White text */}
-        <section className="bg-black text-white">
-          <div className="strike-container py-4 sm:py-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-baseline gap-3 sm:gap-4">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-typewriter font-bold uppercase tracking-wider text-white">
-                  WINTER SALE
-                </h2>
-                <span className="text-2xl sm:text-3xl md:text-4xl font-typewriter font-bold text-white">
-                  70% OFF
-                </span>
-              </div>
-              <Button
-                asChild
-                size="sm"
-                className="font-typewriter uppercase tracking-wider flex-shrink-0 bg-white text-black hover:bg-gray-200"
-              >
-                <Link href="/sale">SHOP NOW</Link>
-              </Button>
+      {/* Winter Sale Banner - Black background + White text */}
+      <section className="bg-black text-white">
+        <div className="strike-container py-4 sm:py-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-baseline gap-3 sm:gap-4">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-typewriter font-bold uppercase tracking-wider text-white">
+                WINTER SALE
+              </h2>
+              <span className="text-2xl sm:text-3xl md:text-4xl font-typewriter font-bold text-white">
+                70% OFF
+              </span>
             </div>
+            <Button
+              asChild
+              size="sm"
+              className="font-typewriter uppercase tracking-wider flex-shrink-0 bg-white text-black hover:bg-gray-200"
+            >
+              <Link href="/sale">SHOP NOW</Link>
+            </Button>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <ErrorBoundary>
+      <ErrorBoundary>
           <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
             <ProductShowcase
               title="SS25 MENS"
@@ -172,8 +124,8 @@ export default function HomePageClient({
           </Suspense>
         </ErrorBoundary>
 
-        {/* Divider Section using modular components */}
-        <DividerSection theme="default" size="sm">
+      {/* Divider Section using modular components */}
+      <DividerSection theme="default" size="sm">
           <div className="flex items-center justify-center gap-4">
             <DividerLine variant="solid" color="default" className="flex-1" />
             <DividerText text="LUXURY STREETWEAR" size="sm" spacing="default" />
@@ -196,7 +148,7 @@ export default function HomePageClient({
           </Suspense>
         </ErrorBoundary>
 
-        <DividerSection theme="default" size="sm">
+      <DividerSection theme="default" size="sm">
           <div className="flex items-center justify-center gap-4">
             <DividerLine variant="solid" color="default" className="flex-1" />
             <DividerText text="PREMIUM QUALITY" size="sm" spacing="default" />
@@ -216,7 +168,7 @@ export default function HomePageClient({
           </Suspense>
         </ErrorBoundary>
 
-        <DividerSection theme="default" size="sm">
+      <DividerSection theme="default" size="sm">
           <div className="flex items-center justify-center gap-4">
             <DividerLine variant="solid" color="default" className="flex-1" />
             <DividerText text="NEXT GENERATION" size="sm" spacing="default" />
@@ -236,7 +188,7 @@ export default function HomePageClient({
           </Suspense>
         </ErrorBoundary>
 
-        <DividerSection theme="default" size="sm">
+      <DividerSection theme="default" size="sm">
           <div className="flex items-center justify-center gap-4">
             <DividerLine variant="solid" color="default" className="flex-1" />
             <DividerText text="COMMUNITY" size="sm" spacing="default" />
@@ -339,12 +291,8 @@ export default function HomePageClient({
           </Suspense>
         </ErrorBoundary>
 
-        <Footer />
-        <MobileNav variant="default" showLabels={true} />
-      </main>
-
       {/* Quick View Modal */}
       <QuickViewModal />
-    </QuickViewProvider>
+    </>
   );
 }

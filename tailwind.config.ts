@@ -20,23 +20,23 @@ const config: Config = {
       
       // Typography scale with responsive clamp()
       fontSize: {
-        // Base scale with clamp for responsive sizing
-        'xs': ['clamp(0.625rem, 0.5rem + 0.5vw, 0.75rem)', { lineHeight: '1.6', letterSpacing: '0.05em' }],
-        'sm': ['clamp(0.75rem, 0.625rem + 0.5vw, 0.875rem)', { lineHeight: '1.5', letterSpacing: '0.025em' }],
-        'base': ['clamp(0.875rem, 0.75rem + 0.5vw, 1rem)', { lineHeight: '1.5', letterSpacing: '0' }],
-        'lg': ['clamp(1rem, 0.875rem + 0.5vw, 1.125rem)', { lineHeight: '1.4', letterSpacing: '-0.025em' }],
-        'xl': ['clamp(1.125rem, 1rem + 0.5vw, 1.25rem)', { lineHeight: '1.4', letterSpacing: '-0.025em' }],
-        '2xl': ['clamp(1.25rem, 1.125rem + 0.75vw, 1.5rem)', { lineHeight: '1.3', letterSpacing: '-0.05em' }],
-        '3xl': ['clamp(1.5rem, 1.25rem + 1vw, 1.875rem)', { lineHeight: '1.2', letterSpacing: '-0.05em' }],
-        '4xl': ['clamp(1.875rem, 1.5rem + 1.5vw, 2.25rem)', { lineHeight: '1.1', letterSpacing: '-0.075em' }],
-        '5xl': ['clamp(2.25rem, 1.875rem + 2vw, 3rem)', { lineHeight: '1.1', letterSpacing: '-0.075em' }],
-        '6xl': ['clamp(3rem, 2.25rem + 3vw, 3.75rem)', { lineHeight: '1', letterSpacing: '-0.1em' }],
+        // Base scale with clamp for responsive sizing - MOBILE OPTIMIZED (16px minimum)
+        'xs': ['clamp(0.75rem, 0.625rem + 0.5vw, 0.875rem)', { lineHeight: '1.6', letterSpacing: '0.05em' }],
+        'sm': ['clamp(0.875rem, 0.75rem + 0.5vw, 1rem)', { lineHeight: '1.5', letterSpacing: '0.025em' }],
+        'base': ['clamp(1rem, 0.875rem + 0.5vw, 1.125rem)', { lineHeight: '1.5', letterSpacing: '0' }],
+        'lg': ['clamp(1.125rem, 1rem + 0.5vw, 1.25rem)', { lineHeight: '1.4', letterSpacing: '-0.025em' }],
+        'xl': ['clamp(1.25rem, 1.125rem + 0.5vw, 1.375rem)', { lineHeight: '1.4', letterSpacing: '-0.025em' }],
+        '2xl': ['clamp(1.5rem, 1.25rem + 0.75vw, 1.75rem)', { lineHeight: '1.3', letterSpacing: '-0.05em' }],
+        '3xl': ['clamp(1.75rem, 1.5rem + 1vw, 2.125rem)', { lineHeight: '1.2', letterSpacing: '-0.05em' }],
+        '4xl': ['clamp(2.125rem, 1.75rem + 1.5vw, 2.5rem)', { lineHeight: '1.1', letterSpacing: '-0.075em' }],
+        '5xl': ['clamp(2.5rem, 2rem + 2vw, 3.25rem)', { lineHeight: '1.1', letterSpacing: '-0.075em' }],
+        '6xl': ['clamp(3.25rem, 2.5rem + 3vw, 4rem)', { lineHeight: '1', letterSpacing: '-0.1em' }],
         
-        // Strike-specific typography tokens
-        'strike-xs': ['clamp(0.625rem, 0.5rem + 0.5vw, 0.75rem)', { lineHeight: '1.4', letterSpacing: '0.1em', fontWeight: '700' }],
-        'strike-sm': ['clamp(0.75rem, 0.625rem + 0.5vw, 0.875rem)', { lineHeight: '1.4', letterSpacing: '0.1em', fontWeight: '700' }],
-        'strike-base': ['clamp(0.875rem, 0.75rem + 0.5vw, 1rem)', { lineHeight: '1.5', letterSpacing: '0.05em', fontWeight: '500' }],
-        'strike-lg': ['clamp(1rem, 0.875rem + 0.5vw, 1.125rem)', { lineHeight: '1.4', letterSpacing: '0.05em', fontWeight: '600' }],
+        // Strike-specific typography tokens - also updated to 16px minimum
+        'strike-xs': ['clamp(0.75rem, 0.625rem + 0.5vw, 0.875rem)', { lineHeight: '1.4', letterSpacing: '0.1em', fontWeight: '700' }],
+        'strike-sm': ['clamp(0.875rem, 0.75rem + 0.5vw, 1rem)', { lineHeight: '1.4', letterSpacing: '0.1em', fontWeight: '700' }],
+        'strike-base': ['clamp(1rem, 0.875rem + 0.5vw, 1.125rem)', { lineHeight: '1.5', letterSpacing: '0.05em', fontWeight: '500' }],
+        'strike-lg': ['clamp(1.125rem, 1rem + 0.5vw, 1.25rem)', { lineHeight: '1.4', letterSpacing: '0.05em', fontWeight: '600' }],
       },
       
       // Consistent spacing scale (0.25rem to 6rem)
