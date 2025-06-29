@@ -31,54 +31,54 @@ export const ResponsiveContainer = dynamic(
 );
 
 export const XAxis = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.XAxis })),
+  () => import('recharts').then(mod => ({ default: mod.XAxis as any })),
   { ssr: false, loading: DefaultLoading }
-);
+) as any;
 
 export const YAxis = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.YAxis })),
+  () => import('recharts').then(mod => ({ default: mod.YAxis as any })),
   { ssr: false, loading: DefaultLoading }
-);
+) as any;
 
 export const CartesianGrid = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.CartesianGrid })),
+  () => import('recharts').then(mod => ({ default: mod.CartesianGrid as any })),
   { ssr: false, loading: DefaultLoading }
-);
+) as any;
 
 export const Tooltip = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.Tooltip })),
+  () => import('recharts').then(mod => ({ default: mod.Tooltip as any })),
   { ssr: false, loading: DefaultLoading }
-);
+) as any;
 
 export const Legend = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.Legend })),
+  () => import('recharts').then(mod => ({ default: mod.Legend as any })),
   { ssr: false, loading: DefaultLoading }
-);
+) as any;
 
 export const Line = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.Line })),
+  () => import('recharts').then(mod => ({ default: mod.Line as any })),
   { ssr: false, loading: DefaultLoading }
-);
+) as any;
 
 export const Bar = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.Bar })),
+  () => import('recharts').then(mod => ({ default: mod.Bar as any })),
   { ssr: false, loading: DefaultLoading }
-);
+) as any;
 
 export const Area = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.Area })),
+  () => import('recharts').then(mod => ({ default: mod.Area as any })),
   { ssr: false, loading: DefaultLoading }
-);
+) as any;
 
 export const Pie = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.Pie })),
+  () => import('recharts').then(mod => ({ default: mod.Pie as any })),
   { ssr: false, loading: DefaultLoading }
-);
+) as any;
 
 export const Cell = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.Cell })),
+  () => import('recharts').then(mod => ({ default: mod.Cell as any })),
   { ssr: false, loading: DefaultLoading }
-);
+) as any;
 
 // Framer Motion components (~150KB)
 export const motion = dynamic(
@@ -96,16 +96,14 @@ export const LazyMotion = dynamic(
   { ssr: false }
 );
 
-export const domAnimation = dynamic(
-  () => import('framer-motion').then(mod => ({ default: mod.domAnimation })),
-  { ssr: false }
-);
+// domAnimation is not a component, export it directly
+export const domAnimation = import('framer-motion').then(mod => mod.domAnimation);
 
-// Sanity Studio (~2MB)
-export const Studio = dynamic(
-  () => import('sanity').then(mod => ({ default: mod.Studio })),
-  { ssr: false, loading: () => null }
-);
+// Sanity Studio (~2MB) - commented out as sanity is not installed
+// export const Studio = dynamic(
+//   () => import('sanity').then(mod => ({ default: mod.Studio })),
+//   { ssr: false, loading: () => null }
+// );
 
 
 // Heavy UI components
@@ -143,7 +141,7 @@ export const CategoryPageClient = dynamic(
 
 // Product components (using existing components)
 export const ProductGallery = dynamic(
-  () => import('@/components/product/enhanced-product-gallery').then(mod => ({ default: mod.ProductGallery || (() => null) })),
+  () => import('@/components/product/enhanced-product-gallery').then(mod => ({ default: mod.EnhancedProductGallery })),
   { ssr: false, loading: DefaultLoading }
 );
 
@@ -159,13 +157,13 @@ export const MobileNav = dynamic(
 );
 
 export const MobileMenu = dynamic(
-  () => import('@/components/mobile/utilities/mobile-drawer').then(mod => ({ default: mod.default || (() => null) })),
+  () => import('@/components/mobile/utilities/mobile-drawer').then(mod => ({ default: mod.MobileDrawer })),
   { ssr: false, loading: DefaultLoading }
 );
 
 // Search components
 export const SearchModal = dynamic(
-  () => import('@/components/navigation/search-bar').then(mod => ({ default: mod.default || (() => null) })),
+  () => import('@/components/navigation/search-bar').then(mod => ({ default: mod.SearchBar })),
   { ssr: false, loading: DefaultLoading }
 );
 
@@ -177,7 +175,7 @@ export const CartDrawer = dynamic(
 
 // Checkout components
 export const CheckoutForm = dynamic(
-  () => import('@/components/checkout/enhanced-checkout-form').then(mod => ({ default: mod.default || (() => null) })),
+  () => import('@/components/checkout/enhanced-checkout-form').then(mod => ({ default: mod.EnhancedCheckoutForm })),
   { ssr: false, loading: DefaultLoading }
 );
 
@@ -203,7 +201,7 @@ export function createDynamicImport<T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
   options?: {
     ssr?: boolean;
-    loading?: ComponentType;
+    loading?: () => JSX.Element | null;
   }
 ) {
   return dynamic(importFn, {

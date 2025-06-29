@@ -3,11 +3,13 @@ import { dataService } from '@/lib/data-service';
 import { ProductGrid } from './product-grid';
 import { ProductFilters } from './product-filters';
 import { ProductSort } from './product-sort';
+import { ProductCard } from './ProductCard';
 import type {
   ProductFilters as FilterType,
   ProductSortOption,
   IntegratedProduct,
 } from '@/types/integrated';
+import type { Price } from '@/types/branded';
 
 interface ProductListProps {
   category?: string;
@@ -38,19 +40,19 @@ function convertToIntegratedProduct(product: any): IntegratedProduct {
     pricing: {
       currency: product.price?.currency || 'GBP',
       basePrice: product.price?.amount || 0,
-      salePrice: product.compareAtPrice?.amount,
       displayPrice: product.price?.formatted || '£0.00',
-      displaySalePrice: product.compareAtPrice?.formatted,
-      discount: product.compareAtPrice
-        ? {
-            amount: product.compareAtPrice.amount - product.price.amount,
-            percentage: Math.round(
-              ((product.compareAtPrice.amount - product.price.amount) /
-                product.compareAtPrice.amount) *
-                100
-            ),
-          }
-        : undefined,
+      ...(product.compareAtPrice && {
+        salePrice: product.compareAtPrice.amount,
+        displaySalePrice: product.compareAtPrice.formatted,
+        discount: {
+          amount: (product.compareAtPrice.amount - product.price.amount) as Price,
+          percentage: Math.round(
+            ((product.compareAtPrice.amount - product.price.amount) /
+              product.compareAtPrice.amount) *
+              100
+          ),
+        }
+      }),
     },
     badges: {
       isNew: false,
@@ -73,7 +75,7 @@ export async function ProductList({
 }: ProductListProps) {
   // Fetch products server-side
   const response = await dataService.getProducts({
-    categoryHandle: category,
+    ...(category && { categoryHandle: category }),
     limit,
   });
 
@@ -108,7 +110,11 @@ export async function ProductList({
 
         {/* Product grid */}
         <div className="flex-1">
-          <ProductGrid products={convertedProducts} />
+          <ProductGrid>
+            {convertedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </ProductGrid>
         </div>
       </div>
     </div>

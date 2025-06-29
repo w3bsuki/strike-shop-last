@@ -90,9 +90,9 @@ const AccessibleButton = React.forwardRef<HTMLButtonElement, AccessibleButtonPro
 
     // Ensure proper ARIA attributes
     const ariaProps = {
-      'aria-busy': loading || undefined,
-      'aria-disabled': disabled || loading || undefined,
-      'aria-live': loading ? 'polite' : undefined,
+      ...(loading && { 'aria-busy': true }),
+      ...((disabled || loading) && { 'aria-disabled': true }),
+      ...(loading && { 'aria-live': 'polite' as const }),
     };
 
     return (

@@ -78,7 +78,7 @@ export const ModalContent = React.forwardRef<
     <ModalOverlay />
     <DialogPrimitive.Content
       ref={ref}
-      onInteractOutside={onInteractOutside}
+      {...(onInteractOutside && { onInteractOutside })}
       className={cn(
         'fixed left-[50%] top-[50%]',
         'w-full max-w-lg',

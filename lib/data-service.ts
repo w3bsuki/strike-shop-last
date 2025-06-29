@@ -3,8 +3,7 @@
  * Now uses Factory Pattern for consistent product creation
  */
 
-import { sanityClient as client, urlForImage } from '@/lib/sanity';
-import { medusaClient } from '@/lib/medusa-service-refactored';
+import { sanityClient as client } from '@/lib/sanity';
 import { MedusaProductService } from '@/lib/medusa-service-refactored';
 import { ProductFactory } from '@/lib/factories/ProductFactory';
 import { ProductQueryBuilder, type ProductQuery } from '@/lib/builders';

@@ -7,9 +7,8 @@
 import type { NextRequest} from 'next/server';
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { InputValidator, CryptoUtils } from './security-fortress'
+import { InputValidator } from './security-fortress'
 import { validateCSRF } from './csrf-protection'
-import rateLimit from 'express-rate-limit'
 
 // 🔐 API Security Configuration
 export const API_SECURITY_CONFIG = {
@@ -99,10 +98,10 @@ export class APISecurityMiddleware {
 
     try {
       // Parse request body for validation
-      const body: any = {}
+      // Note: In middleware, we can't directly access request.json()
+      // This validation would typically be done in the API route handler
       if (request.headers.get('content-type')?.includes('application/json')) {
-        // Note: In middleware, we can't directly access request.json()
-        // This validation would typically be done in the API route handler
+        // Body validation would happen in API route handler
       }
 
       // Validate query parameters
@@ -320,7 +319,7 @@ export function withAPISecurity(
       // Authentication validation
       if (options.requireAuth && !APISecurityMiddleware.isPublicEndpoint(request.nextUrl.pathname)) {
         try {
-          const supabase = createClient()
+          const supabase = await createClient()
           const { data: { user } } = await supabase.auth.getUser()
           if (!user) {
             return APISecurityMiddleware.createErrorResponse(

@@ -64,7 +64,9 @@ export function ServiceWorkerProvider() {
           if ('sync' in registration) {
             // Register background sync for cart
             navigator.serviceWorker.ready.then((reg) => {
-              return reg.sync.register('sync-cart')
+              if ('sync' in reg) {
+                return (reg as any).sync.register('sync-cart')
+              }
             }).catch((error) => {
               console.error('Background sync registration failed:', error)
             })
@@ -79,9 +81,9 @@ export function ServiceWorkerProvider() {
                 })
                 
                 if (status.state === 'granted') {
-                  const tags = await registration.periodicSync.getTags()
+                  const tags = await (registration as any).periodicSync.getTags()
                   if (!tags.includes('price-update')) {
-                    await registration.periodicSync.register('price-update', {
+                    await (registration as any).periodicSync.register('price-update', {
                       minInterval: 24 * 60 * 60 * 1000, // 24 hours
                     })
                   }

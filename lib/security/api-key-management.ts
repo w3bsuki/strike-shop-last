@@ -281,8 +281,8 @@ export class ApiKeyManager {
       name: `${currentKey.name} (Rotated)`,
       userId,
       scopes: currentKey.scopes as ApiKeyScope[],
-      expiresInDays,
-      ipWhitelist: currentKey.ipWhitelist || undefined,
+      ...(expiresInDays !== undefined && { expiresInDays }),
+      ...(currentKey.ipWhitelist && { ipWhitelist: currentKey.ipWhitelist }),
       metadata: {
         ...currentKey.metadata,
         rotatedFrom: currentKeyId,

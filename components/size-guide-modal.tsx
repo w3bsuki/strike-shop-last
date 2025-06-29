@@ -48,7 +48,7 @@ export function SizeGuideModal({
   onClose,
 }: SizeGuideModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose?.()}>
+    <Dialog open={isOpen || false} onOpenChange={(open) => !open && onClose?.()}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>

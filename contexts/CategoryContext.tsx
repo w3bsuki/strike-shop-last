@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useMemo, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useMemo, ReactNode } from 'react';
 import type { IntegratedProduct } from '@/types/integrated';
 
 interface CategoryFilters {
@@ -38,7 +38,7 @@ interface CategoryProviderProps {
 
 export function CategoryProvider({ children, categoryName, initialProducts }: CategoryProviderProps) {
   const [products] = useState<IntegratedProduct[]>(initialProducts);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [filters, setFilters] = useState<CategoryFilters>({
     searchQuery: '',
     selectedColors: [],
@@ -57,16 +57,16 @@ export function CategoryProvider({ children, categoryName, initialProducts }: Ca
       const query = filters.searchQuery.toLowerCase();
       filtered = filtered.filter(
         (product) =>
-          product.title.toLowerCase().includes(query) ||
-          product.description?.toLowerCase().includes(query)
+          product.content.name.toLowerCase().includes(query) ||
+          product.content.description?.toLowerCase().includes(query)
       );
     }
 
     // Color filter
     if (filters.selectedColors.length > 0) {
       filtered = filtered.filter((product) =>
-        product.variants?.some((variant) =>
-          filters.selectedColors.includes(variant.metadata?.color as string)
+        product.commerce.variants?.some((variant) =>
+          filters.selectedColors.includes(variant.options.color?.name as string)
         )
       );
     }
@@ -74,36 +74,36 @@ export function CategoryProvider({ children, categoryName, initialProducts }: Ca
     // Size filter
     if (filters.selectedSizes.length > 0) {
       filtered = filtered.filter((product) =>
-        product.variants?.some((variant) =>
-          filters.selectedSizes.includes(variant.metadata?.size as string)
+        product.commerce.variants?.some((variant) =>
+          filters.selectedSizes.includes(variant.options.size as string)
         )
       );
     }
 
     // Price filter
     filtered = filtered.filter((product) => {
-      const price = product.priceNum || 0;
+      const price = product.pricing.basePrice || 0;
       return price >= filters.priceRange[0] && price <= filters.priceRange[1];
     });
 
     // Stock filter
     if (filters.inStockOnly) {
-      filtered = filtered.filter((product) => product.inStock);
+      filtered = filtered.filter((product) => product.commerce.inventory.available);
     }
 
     // Sort
     switch (filters.sortBy) {
       case 'price-low':
-        filtered.sort((a, b) => (a.priceNum || 0) - (b.priceNum || 0));
+        filtered.sort((a, b) => (a.pricing.basePrice || 0) - (b.pricing.basePrice || 0));
         break;
       case 'price-high':
-        filtered.sort((a, b) => (b.priceNum || 0) - (a.priceNum || 0));
+        filtered.sort((a, b) => (b.pricing.basePrice || 0) - (a.pricing.basePrice || 0));
         break;
       case 'name-asc':
-        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        filtered.sort((a, b) => a.content.name.localeCompare(b.content.name));
         break;
       case 'name-desc':
-        filtered.sort((a, b) => b.title.localeCompare(a.title));
+        filtered.sort((a, b) => b.content.name.localeCompare(a.content.name));
         break;
       case 'newest':
       default:

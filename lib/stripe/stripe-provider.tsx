@@ -18,7 +18,7 @@ export function StripeProvider({ children, clientSecret }: StripeProviderProps) 
     : undefined
 
   return (
-    <Elements stripe={stripePromise} options={options}>
+    <Elements stripe={stripePromise} {...(options && { options })}>
       {children}
     </Elements>
   )

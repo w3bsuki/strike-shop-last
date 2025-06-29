@@ -35,7 +35,7 @@ export function EnhancedProductGallery({ images, productName }: ProductGalleryPr
         {/* Current Image */}
         <div className="aspect-[3/4] relative overflow-hidden">
           <Image
-            src={images[currentImageIndex]}
+            src={images[currentImageIndex] || '/placeholder.svg'}
             alt={`${productName} - Image ${currentImageIndex + 1}`}
             fill
             className="object-cover"

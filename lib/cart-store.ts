@@ -1,6 +1,7 @@
 import { useStore } from './stores';
 import type { CartItem as TypedCartItem, CartState } from '@/types/store';
-import type { CartId, ProductId, VariantId, Quantity } from '@/types/branded';
+import type { ProductId, VariantId, Quantity } from '@/types/branded';
+import { createCartId } from '@/types/branded';
 
 // Re-export the CartItem interface for backward compatibility
 export type CartItem = TypedCartItem;
@@ -43,7 +44,7 @@ export const useCartStore = (): CartStore => {
 
   return {
     // State
-    cartId: cart.cartId,
+    cartId: cart.cartId ? createCartId(cart.cartId) : null,
     items: cart.items,
     isOpen: cart.isOpen,
     isLoading: cart.isLoading,

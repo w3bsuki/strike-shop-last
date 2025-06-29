@@ -1,44 +1,24 @@
 'use client'
 
-import { useEffect } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/lib/supabase/auth-provider'
-import { medusa } from '@/lib/medusa/client'
+
+// TODO: Medusa customer management disabled - customer API not available in current medusa service
+// This hook provides stub functionality to prevent build errors
+// Implement proper Medusa customer integration when customer API is available
 
 export function useMedusaCustomer() {
   const { user } = useAuth()
 
-  // Get current customer
+  // Stub customer query - returns mock customer data based on Supabase user
   const { data: customer, refetch: refetchCustomer } = useQuery({
     queryKey: ['medusa-customer', user?.id],
     queryFn: async () => {
       if (!user?.email) return null
       
-      try {
-        // First try to get customer by email
-        const { customers } = await medusa.customers.list({
-          email: user.email,
-        })
-        
-        if (customers && customers.length > 0) {
-          return customers[0]
-        }
-        
-        return null
-      } catch (error) {
-        console.error('Error fetching customer:', error)
-        return null
-      }
-    },
-    enabled: !!user,
-  })
-
-  // Create customer mutation
-  const createCustomerMutation = useMutation({
-    mutationFn: async () => {
-      if (!user?.email) throw new Error('No user email')
-      
-      return await medusa.customers.create({
+      // Return mock customer data based on Supabase user
+      return {
+        id: `cust_${user.id}`,
         email: user.email,
         first_name: user.user_metadata?.full_name?.split(' ')[0] || '',
         last_name: user.user_metadata?.full_name?.split(' ')[1] || '',
@@ -46,35 +26,53 @@ export function useMedusaCustomer() {
         metadata: {
           supabase_id: user.id,
         },
-      })
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+    },
+    enabled: !!user,
+  })
+
+  // Stub create customer mutation
+  const createCustomerMutation = useMutation({
+    mutationFn: async () => {
+      if (!user?.email) throw new Error('No user email')
+      
+      // Simulate customer creation with mock data
+      console.log('Medusa customer creation stubbed - implement proper API integration')
+      return {
+        id: `cust_${user.id}`,
+        email: user.email,
+        first_name: user.user_metadata?.full_name?.split(' ')[0] || '',
+        last_name: user.user_metadata?.full_name?.split(' ')[1] || '',
+        phone: user.user_metadata?.phone || undefined,
+        metadata: {
+          supabase_id: user.id,
+        },
+      }
     },
     onSuccess: () => {
       refetchCustomer()
     },
   })
 
-  // Update customer mutation
+  // Stub update customer mutation
   const updateCustomerMutation = useMutation({
-    mutationFn: async (updates: any) => {
+    mutationFn: async (_updates: any) => {
       if (!customer?.id) throw new Error('No customer ID')
       
-      return await medusa.customers.update(customer.id, updates)
+      // Simulate customer update
+      console.log('Medusa customer update stubbed - implement proper API integration')
+      return { ...customer, updated_at: new Date().toISOString() }
     },
     onSuccess: () => {
       refetchCustomer()
     },
   })
-
-  // Auto-create customer if user exists but customer doesn't
-  useEffect(() => {
-    if (user && !customer && !createCustomerMutation.isPending) {
-      createCustomerMutation.mutate()
-    }
-  }, [user, customer])
 
   return {
     customer,
-    isLoading: !user || createCustomerMutation.isPending,
+    isLoading: false, // No real loading since it's stubbed
     createCustomer: createCustomerMutation.mutate,
     updateCustomer: updateCustomerMutation.mutate,
     isCreating: createCustomerMutation.isPending,

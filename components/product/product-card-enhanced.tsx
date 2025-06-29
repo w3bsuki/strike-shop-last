@@ -84,7 +84,7 @@ export const ProductCardEnhanced = React.memo(function ProductCardEnhanced({
           <h3 className="product-card-title font-typewriter">{product.name}</h3>
           <ProductPrice
             price={product.price}
-            originalPrice={product.originalPrice}
+            {...(product.originalPrice && { originalPrice: product.originalPrice })}
             size="default"
           />
           {product.colors && (

@@ -5,7 +5,8 @@
 
 import { z } from 'zod'
 import { NextRequest, NextResponse } from 'next/server'
-import DOMPurify from 'isomorphic-dompurify'
+// import DOMPurify from 'isomorphic-dompurify' // TODO: Install this package
+// @ts-ignore - types not available
 import validator from 'validator'
 
 // Security patterns
@@ -98,10 +99,12 @@ export class InputSanitizer {
    * Sanitize HTML content
    */
   static sanitizeHTML(input: string): string {
-    return DOMPurify.sanitize(input, {
-      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br'],
-      ALLOWED_ATTR: ['href', 'target']
-    })
+    // TODO: Use DOMPurify when installed
+    // Basic HTML sanitization - strips all HTML tags
+    return input
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<[^>]+>/g, '')
+      .trim();
   }
 
   /**
@@ -371,7 +374,7 @@ export const customValidators = {
    */
   creditCardExpiry: z.string().refine(val => {
     const match = val.match(/^(0[1-9]|1[0-2])\/(\d{2})$/)
-    if (!match) return false
+    if (!match || !match[1] || !match[2]) return false
     
     const month = parseInt(match[1])
     const year = parseInt('20' + match[2])

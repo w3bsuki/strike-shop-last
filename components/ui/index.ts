@@ -33,7 +33,6 @@ export {
 } from './form';
 
 export { Input } from './input';
-export type { InputProps } from './input';
 
 export { Label } from './label';
 export { Textarea } from './textarea';
@@ -54,14 +53,14 @@ export { Dialog, DialogPortal, DialogOverlay, DialogClose, DialogTrigger, Dialog
 export { Sheet, SheetPortal, SheetOverlay, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription } from './sheet';
 export { Drawer, DrawerPortal, DrawerOverlay, DrawerTrigger, DrawerClose, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription } from './drawer';
 export { AlertDialog, AlertDialogPortal, AlertDialogOverlay, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from './alert-dialog';
-export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from './popover';
+export { Popover, PopoverTrigger, PopoverContent } from './popover';
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './tooltip';
 export { HoverCard, HoverCardTrigger, HoverCardContent } from './hover-card';
 
 // Feedback components
 export { Alert, AlertTitle, AlertDescription } from './alert';
 export { Toast, ToastAction, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from './toast';
-export { useToast, toast } from './use-toast';
+export { useToast, toast } from '../../hooks/use-toast';
 export { Toaster } from './toaster';
 export { Progress } from './progress';
 
@@ -86,14 +85,12 @@ export { Command, CommandDialog, CommandInput, CommandList, CommandEmpty, Comman
 // Utility components
 export { ToggleGroup, ToggleGroupItem } from './toggle-group';
 export { Toggle, toggleVariants } from './toggle';
-export type { ToggleProps, ToggleVariants } from './toggle';
 
 export { Calendar } from './calendar';
 export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from './input-otp';
 
 // Custom Strike Shop components
 export { OptimizedImage } from './optimized-image';
-export type { OptimizedImageProps } from './optimized-image';
 
 export { ProductImage } from './optimized-image';
 
@@ -112,7 +109,7 @@ export {
 } from './loading-states';
 
 // Error states
-export { EmptyState, ErrorState, LoadingState } from './error-states';
+export { EmptyState, ErrorState } from './error-states';
 
 // Section components
 export { SectionHeader } from './section-header';

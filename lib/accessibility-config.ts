@@ -128,7 +128,7 @@ export const accessibilityConfig = {
 };
 
 // Helper function to get contrast ratio between two colors
-export function getContrastRatio(foreground: string, background: string): number {
+export function getContrastRatio(_foreground: string, _background: string): number {
   // This is a placeholder - in production, use a proper color contrast library
   return 21; // Maximum contrast for demonstration
 }

@@ -96,9 +96,9 @@ export function CommunityShowcase({
     <ProductSection spacing="default" background="none" className={className}>
       <ProductHeader
         title={title}
-        description={description}
+        {...(description && { description })}
         viewAllText={viewAllText}
-        viewAllHref={viewAllLink}
+        {...(viewAllLink && { viewAllHref: viewAllLink })}
         align="left"
         badge={tabButtons}
       />

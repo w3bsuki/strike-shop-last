@@ -47,6 +47,7 @@ export function usePrefetch(
         element.removeEventListener('focus', handleMouseEnter);
       };
     }
+    return undefined;
   }, [onHover]);
 
   useEffect(() => {

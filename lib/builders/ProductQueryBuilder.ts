@@ -126,7 +126,11 @@ export class ProductQueryBuilder {
    * Price range filtering
    */
   priceRange(min?: number, max?: number, currency = 'GBP'): this {
-    this.query.priceRange = { min, max, currency };
+    this.query.priceRange = {
+      ...(min !== undefined && { min }),
+      ...(max !== undefined && { max }),
+      currency
+    };
     return this;
   }
 
@@ -644,20 +648,20 @@ export class ProductQueryBuilder {
     const query = this.build();
 
     return {
-      categories: query.categories,
-      priceRange: query.priceRange
-        ? {
-            min: query.priceRange.min,
-            max: query.priceRange.max,
-          }
-        : undefined,
-      sizes: query.sizes,
-      colors: query.colors,
-      brands: query.brands,
-      tags: query.tags,
-      inStock: query.availability === 'in_stock',
-      onSale: query.onSale,
-      isNew: query.isNew,
+      ...(query.categories && { categories: query.categories }),
+      ...(query.priceRange && {
+        priceRange: {
+          ...(query.priceRange.min !== undefined && { min: query.priceRange.min }),
+          ...(query.priceRange.max !== undefined && { max: query.priceRange.max }),
+        }
+      }),
+      ...(query.sizes && { sizes: query.sizes }),
+      ...(query.colors && { colors: query.colors }),
+      ...(query.brands && { brands: query.brands }),
+      ...(query.tags && { tags: query.tags }),
+      ...(query.availability === 'in_stock' && { inStock: true }),
+      ...(query.onSale !== undefined && { onSale: query.onSale }),
+      ...(query.isNew !== undefined && { isNew: query.isNew }),
     };
   }
 

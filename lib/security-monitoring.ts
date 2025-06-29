@@ -48,7 +48,7 @@ export interface SecurityEvent {
 }
 
 // Alert thresholds
-const ALERT_THRESHOLDS = {
+const ALERT_THRESHOLDS: Partial<Record<SecurityEventType, { count: number; window: number }>> = {
   [SecurityEventType.AUTHENTICATION_FAILED]: { count: 5, window: 300000 }, // 5 failures in 5 minutes
   [SecurityEventType.RATE_LIMIT_EXCEEDED]: { count: 10, window: 600000 }, // 10 in 10 minutes
   [SecurityEventType.SUSPICIOUS_REQUEST]: { count: 3, window: 300000 }, // 3 in 5 minutes
@@ -95,10 +95,10 @@ export class SecurityMonitor {
       severity,
       timestamp: new Date(),
       ip: details.ip,
-      userAgent: details.userAgent,
-      path: details.path,
-      method: details.method,
-      userId: details.userId,
+      ...(details.userAgent && { userAgent: details.userAgent }),
+      ...(details.path && { path: details.path }),
+      ...(details.method && { method: details.method }),
+      ...(details.userId && { userId: details.userId }),
       details,
       blocked
     };
@@ -342,18 +342,20 @@ export const securityMonitor = SecurityMonitor.getInstance();
 /**
  * Helper function to log security events from API routes
  */
-export function logSecurityEvent(
+export async function logSecurityEvent(
   type: SecurityEventType,
   severity: SecuritySeverity,
   request: Request,
   details: Record<string, any> = {},
   blocked: boolean = false
-): SecurityEvent {
-  const headersList = headers();
+): Promise<SecurityEvent> {
+  const headersList = await headers();
+  
+  const userAgent = headersList.get('user-agent');
   
   return securityMonitor.logEvent(type, severity, {
     ip: headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || 'unknown',
-    userAgent: headersList.get('user-agent') || undefined,
+    ...(userAgent && { userAgent }),
     path: new URL(request.url).pathname,
     method: request.method,
     ...details
@@ -365,18 +367,19 @@ export function logSecurityEvent(
  */
 export function withSecurityMonitoring<T extends (...args: any[]) => any>(
   handler: T,
-  options?: {
+  _options?: {
     rateLimit?: { window: number; max: number };
     requireAuth?: boolean;
   }
 ): T {
   return (async (...args: Parameters<T>) => {
     const request = args[0] as Request;
-    const ip = headers().get('x-forwarded-for') || 'unknown';
+    const headersList = await headers();
+    const ip = headersList.get('x-forwarded-for') || 'unknown';
     
     // Check IP reputation
     if (securityMonitor.shouldBlockIP(ip)) {
-      logSecurityEvent(
+      await logSecurityEvent(
         SecurityEventType.BLOCKED_IP,
         SecuritySeverity.HIGH,
         request,

@@ -7,11 +7,6 @@ export interface RateLimitOptions {
   identifier?: string;
 }
 
-interface RateLimitEntry {
-  count: number;
-  resetAt: number;
-}
-
 // Create separate caches for different rate limit contexts
 const caches = new Map<string, any>();
 
@@ -35,7 +30,7 @@ function getClientIdentifier(req: NextRequest): string {
   const cfConnectingIp = req.headers.get('cf-connecting-ip');
 
   if (cfConnectingIp) return cfConnectingIp;
-  if (forwarded) return forwarded.split(',')[0].trim();
+  if (forwarded) return forwarded.split(',')[0]?.trim() || forwarded;
   if (realIp) return realIp;
 
   // Fallback to a generic identifier if no IP is found

@@ -34,7 +34,7 @@ export const shouldUseCDN = () => process.env.NODE_ENV === 'production';
 export const createCDNFallback = (packageName: string, fallbackImport: () => Promise<any>) => {
   if (typeof window !== 'undefined' && shouldUseCDN()) {
     // Check if CDN package is available
-    const globalName = webpackExternals[packageName];
+    const globalName = webpackExternals[packageName as keyof typeof webpackExternals];
     if (globalName && (window as any)[globalName]) {
       return Promise.resolve((window as any)[globalName]);
     }

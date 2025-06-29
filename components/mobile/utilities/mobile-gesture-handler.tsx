@@ -56,6 +56,7 @@ export function MobileGestureHandler({
 
   const getPinchDistance = (touches: React.TouchList): number => {
     const [touch1, touch2] = Array.from(touches);
+    if (!touch1 || !touch2) return 0;
     const deltaX = touch2.clientX - touch1.clientX;
     const deltaY = touch2.clientY - touch1.clientY;
     return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -63,6 +64,7 @@ export function MobileGestureHandler({
 
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0];
+    if (!touch) return;
     touchStartTime.current = Date.now();
     touchStartX.current = touch.clientX;
     touchStartY.current = touch.clientY;
@@ -123,6 +125,7 @@ export function MobileGestureHandler({
     // Handle swipe
     if (onSwipe && e.changedTouches.length > 0) {
       const touch = e.changedTouches[0];
+      if (!touch) return;
       const deltaX = touch.clientX - touchStartX.current;
       const deltaY = touch.clientY - touchStartY.current;
       const deltaTime = Date.now() - touchStartTime.current;

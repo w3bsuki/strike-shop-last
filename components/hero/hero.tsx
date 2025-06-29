@@ -11,7 +11,6 @@ interface HeroProps extends React.HTMLAttributes<HTMLElement> {
 
 const Hero = React.forwardRef<HTMLElement, HeroProps>(
   ({ className, size = "default", asChild = false, children, ...props }, ref) => {
-    const Comp = asChild ? React.Fragment : "section";
     const containerProps = asChild ? {} : props;
 
     if (asChild) {

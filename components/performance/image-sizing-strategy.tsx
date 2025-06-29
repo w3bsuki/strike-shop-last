@@ -9,11 +9,6 @@ interface ImageSizes {
   wide: string;
 }
 
-interface ResponsiveSizes {
-  sizes: string;
-  srcSet: string;
-}
-
 /**
  * Advanced image sizing strategy for optimal performance
  * Implements responsive image loading with proper srcset and sizes
@@ -131,6 +126,8 @@ export function useImageLoadingStrategy() {
       connection.addEventListener('change', handleChange);
       return () => connection.removeEventListener('change', handleChange);
     }
+    
+    return undefined;
   }, []);
   
   return { strategy, connectionType };
@@ -206,9 +203,9 @@ export function SmartImage({
         srcSet={srcSet}
         sizes={sizes}
         alt={alt}
-        loading={loading}
-        decoding="async"
-        fetchPriority={priority ? 'high' : 'auto'}
+        {...(loading === 'lazy' && { loading: 'lazy' })}
+        {...{ decoding: 'async' }}
+        {...(priority ? { fetchPriority: 'high' } : { fetchPriority: 'auto' })}
         onLoad={() => setIsLoaded(true)}
         className={`w-full h-full object-cover transition-opacity duration-300 ${
           isLoaded ? 'opacity-100' : 'opacity-0'

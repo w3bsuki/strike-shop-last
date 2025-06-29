@@ -39,7 +39,7 @@ const ProductSection = React.forwardRef<HTMLElement, ProductSectionProps>(
   ({ className, spacing, background, as: Comp = "section", container = true, children, ...props }, ref) => {
     return (
       <Comp
-        ref={ref}
+        ref={ref as any}
         className={cn(productSectionVariants({ spacing, background }), className)}
         {...props}
       >

@@ -33,6 +33,7 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
       const timer = setTimeout(() => setOpen(true), 100);
       return () => clearTimeout(timer);
     }
+    return () => {};
   }, [isClient, totalItems, open, setOpen]);
 
   const defaultTrigger = (

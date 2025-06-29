@@ -11,7 +11,7 @@ import type {
 
 // Mock authentication service - replace with actual implementation
 const authService = {
-  login: async (email: string, password: string): Promise<User> => {
+  login: async (email: string, _password: string): Promise<User> => {
     // This would typically make an API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -255,7 +255,7 @@ export const createAuthSlice: StateCreator<
             email: data.email,
             first_name: data.first_name,
             last_name: data.last_name,
-            phone: data.phone,
+            ...(data.phone && { phone: data.phone }),
             addresses: [],
             orders: [],
             createdAt: new Date(),

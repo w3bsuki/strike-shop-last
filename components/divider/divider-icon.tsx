@@ -42,7 +42,7 @@ const dividerIconVariants = cva(
 );
 
 export interface DividerIconProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'color'>,
     VariantProps<typeof dividerIconVariants> {
   icon?: React.ReactNode;
 }

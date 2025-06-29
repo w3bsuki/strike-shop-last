@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Heart, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCartStore } from '@/lib/cart-store';
 import { useWishlistStore, type WishlistItem } from '@/lib/wishlist-store';
+import { createProductId, createVariantId, createQuantity } from '@/types/branded';
 import { useMobile } from '@/hooks/use-mobile';
 import {
   Dialog,
@@ -155,8 +156,11 @@ function QuickViewContent({
 
       if (variant) {
         variantId = variant.id;
-      } else {
-        variantId = product.variants[0].id;
+      } else if (product.variants.length > 0) {
+        const firstVariant = product.variants[0];
+        if (firstVariant) {
+          variantId = firstVariant.id;
+        }
       }
     }
 
@@ -165,12 +169,7 @@ function QuickViewContent({
     }
 
     try {
-      const unitPrice = parseFloat(product.price.replace(/[^0-9.]/g, ''));
-      const originalUnitPrice = product.originalPrice
-        ? parseFloat(product.originalPrice.replace(/[^0-9.]/g, ''))
-        : undefined;
-
-      await addItem(product.id, variantId, quantity);
+      await addItem(createProductId(product.id), createVariantId(variantId), createQuantity(quantity));
 
       setIsAdded(true);
       setTimeout(() => {
@@ -224,9 +223,9 @@ function QuickViewContent({
               onIndexChange={setCurrentImageIndex}
               productName={product.name}
               badges={{
-                discount: product.discount,
-                isNew: product.isNew,
-                soldOut: product.soldOut,
+                ...(product.discount && { discount: product.discount }),
+                ...(product.isNew && { isNew: product.isNew }),
+                ...(product.soldOut && { soldOut: product.soldOut }),
               }}
             />
           </div>
@@ -237,9 +236,9 @@ function QuickViewContent({
             onIndexChange={setCurrentImageIndex}
             productName={product.name}
             badges={{
-              discount: product.discount,
-              isNew: product.isNew,
-              soldOut: product.soldOut,
+              ...(product.discount && { discount: product.discount }),
+              ...(product.isNew && { isNew: product.isNew }),
+              ...(product.soldOut && { soldOut: product.soldOut }),
             }}
           />
         )}
@@ -273,7 +272,7 @@ function QuickViewContent({
               onQuantityChange={setQuantity}
               onAddToCart={handleAddToCart}
               isAdded={isAdded}
-              isSoldOut={product.soldOut}
+              isSoldOut={product.soldOut || false}
               onSizeGuideOpen={() => setIsSizeGuideOpen(true)}
             />
 
@@ -342,13 +341,20 @@ function MobileQuickViewContent({
       const variant = product.variants.find((v) =>
         v.title.toLowerCase().includes(selectedSize.toLowerCase())
       );
-      variantId = variant ? variant.id : product.variants[0].id;
+      if (variant) {
+        variantId = variant.id;
+      } else if (product.variants.length > 0) {
+        const firstVariant = product.variants[0];
+        if (firstVariant) {
+          variantId = firstVariant.id;
+        }
+      }
     }
 
     if (!variantId) return;
 
     try {
-      await addItem(product.id, variantId, 1); // Always quantity 1 for quick add
+      await addItem(createProductId(product.id), createVariantId(variantId), createQuantity(1)); // Always quantity 1 for quick add
       setIsAdded(true);
 
       // Quick haptic feedback simulation
@@ -389,11 +395,17 @@ function MobileQuickViewContent({
   const [touchEnd, setTouchEnd] = useState(0);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
+    const touch = e.targetTouches[0];
+    if (touch) {
+      setTouchStart(touch.clientX);
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    const touch = e.targetTouches[0];
+    if (touch) {
+      setTouchEnd(touch.clientX);
+    }
   };
 
   const handleTouchEnd = () => {
@@ -422,7 +434,7 @@ function MobileQuickViewContent({
           onTouchEnd={handleTouchEnd}
         >
           <Image
-            src={productImages[currentImageIndex]}
+            src={productImages[currentImageIndex] || product.image}
             alt={product.name}
             fill
             className="object-cover"

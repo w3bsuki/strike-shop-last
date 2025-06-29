@@ -15,6 +15,18 @@ import type { CartItem } from '@/lib/cart-store';
 import type { WishlistItem } from '@/lib/wishlist-store';
 import { urlForImage } from '@/lib/sanity';
 import { MedusaProductService } from '@/lib/medusa-service-refactored';
+import {
+  createProductId,
+  createVariantId,
+  createLineItemId,
+  createSlug,
+  createSKU,
+  createImageURL,
+  createPrice,
+  createQuantity,
+  createCurrencyCode,
+  type LineItemId,
+} from '@/types/branded';
 
 /**
  * Context for product creation with necessary data
@@ -51,10 +63,10 @@ export class ProductFactory {
     } = context;
 
     // Extract core identifiers
-    const id = medusaProduct.id;
+    const id = createProductId(medusaProduct.id);
     const sanityId = sanityData?._id;
-    const slug = medusaProduct.handle || sanityData?.slug?.current || '';
-    const sku = medusaProduct.variants?.[0]?.sku || undefined;
+    const slug = createSlug(medusaProduct.handle || sanityData?.slug?.current || '');
+    const sku = medusaProduct.variants?.[0]?.sku ? createSKU(medusaProduct.variants[0].sku) : undefined;
 
     // Create content section (prefer Sanity data)
     const content = this.createProductContent(medusaProduct, sanityData);
@@ -80,9 +92,9 @@ export class ProductFactory {
 
     return {
       id,
-      sanityId,
+      ...( sanityId && { sanityId }),
       slug,
-      sku,
+      ...(sku && { sku }),
       content,
       commerce,
       pricing,
@@ -101,9 +113,9 @@ export class ProductFactory {
     const { currency = this.DEFAULT_CURRENCY, includeVariants = true } =
       context;
 
-    const id = sanityData._id;
-    const slug = sanityData.slug?.current || '';
-    const sku = sanityData.sku;
+    const id = createProductId(sanityData._id);
+    const slug = createSlug(sanityData.slug?.current || '');
+    const sku = (sanityData as any).sku ? createSKU((sanityData as any).sku) : undefined;
 
     // Create content from Sanity
     const content = this.createProductContent(null, sanityData);
@@ -114,12 +126,10 @@ export class ProductFactory {
       currency,
     });
 
-    // Create pricing from Sanity (with strategy if provided)
+    // Create pricing from Sanity
     const pricing = this.createProductPricingFromSanity(
       sanityData,
-      currency,
-      context.pricingStrategy,
-      context.pricingContext
+      currency
     );
 
     // Create badges
@@ -130,9 +140,9 @@ export class ProductFactory {
 
     return {
       id,
-      sanityId: id,
+      sanityId: sanityData._id,
       slug,
-      sku,
+      ...(sku && { sku }),
       content,
       commerce,
       pricing,
@@ -166,30 +176,30 @@ export class ProductFactory {
     const color = variant.options.color?.name;
 
     return {
-      id: `${product.id}-${variantId}`,
-      lineItemId: undefined, // Will be set when added to Medusa cart
+      id: createProductId(`${product.id}-${variantId}`),
+      lineItemId: undefined as unknown as LineItemId, // Will be set when added to Medusa cart
       productId: product.id,
-      variantId: variant.id,
+      variantId: createVariantId(variant.id),
       name: product.content.name,
-      image,
+      image: createImageURL(image),
       slug: product.slug,
       size,
-      color,
-      sku: variant.sku,
+      ...(color && { color }),
+      ...(variant.sku && { sku: variant.sku }),
       pricing: {
         currency: variant.pricing.currency,
         unitPrice: variant.pricing.price,
-        unitSalePrice: variant.pricing.salePrice,
+        ...(variant.pricing.salePrice && { unitSalePrice: variant.pricing.salePrice }),
         displayUnitPrice: variant.pricing.displayPrice,
-        displayUnitSalePrice: variant.pricing.displaySalePrice,
-        totalPrice: variant.pricing.price * quantity,
+        ...(variant.pricing.displaySalePrice && { displayUnitSalePrice: variant.pricing.displaySalePrice }),
+        totalPrice: createPrice(variant.pricing.price * quantity),
         displayTotalPrice: this.formatPrice(
           variant.pricing.price * quantity,
           variant.pricing.currency
         ),
       },
-      quantity,
-      maxQuantity: variant.inventory.quantity,
+      quantity: createQuantity(quantity),
+      ...(variant.inventory.quantity !== undefined && { maxQuantity: createQuantity(variant.inventory.quantity) }),
     };
   }
 
@@ -215,20 +225,20 @@ export class ProductFactory {
   ): CartItem {
     return {
       id: integratedCartItem.id,
-      lineItemId: lineItemId || integratedCartItem.lineItemId || '',
+      lineItemId: createLineItemId(lineItemId || String(integratedCartItem.lineItemId) || ''),
       variantId: integratedCartItem.variantId,
       name: integratedCartItem.name,
       slug: integratedCartItem.slug,
       size: integratedCartItem.size,
-      sku: integratedCartItem.sku,
+      ...(integratedCartItem.sku && { sku: integratedCartItem.sku }),
       quantity: integratedCartItem.quantity,
       image: integratedCartItem.image,
       pricing: {
         unitPrice: integratedCartItem.pricing.unitPrice,
-        unitSalePrice: integratedCartItem.pricing.unitSalePrice,
+        ...(integratedCartItem.pricing.unitSalePrice && { unitSalePrice: integratedCartItem.pricing.unitSalePrice }),
         totalPrice: integratedCartItem.pricing.totalPrice,
         displayUnitPrice: integratedCartItem.pricing.displayUnitPrice,
-        displayUnitSalePrice: integratedCartItem.pricing.displayUnitSalePrice,
+        ...(integratedCartItem.pricing.displayUnitSalePrice && { displayUnitSalePrice: integratedCartItem.pricing.displayUnitSalePrice }),
         displayTotalPrice: integratedCartItem.pricing.displayTotalPrice,
       },
     };
@@ -250,13 +260,13 @@ export class ProductFactory {
     // Use Sanity images if available, fallback to Medusa
     const images = sanityData?.images?.length
       ? sanityData.images.map((img) => ({
-          url: urlForImage(img).url(),
+          url: createImageURL(urlForImage(img).url()),
           alt: name,
           width: 800,
           height: 800,
         }))
       : medusaProduct?.images?.map((img) => ({
-          url: img.url,
+          url: createImageURL(img.url),
           alt: name,
           width: 800,
           height: 800,
@@ -264,21 +274,21 @@ export class ProductFactory {
 
     return {
       name,
-      description,
-      details: sanityData?.details || [],
+      ...(description && { description }),
+      ...((sanityData as any)?.details && { details: (sanityData as any).details }),
       images,
-      categories: sanityData?.categories || [],
+      ...(sanityData?.categories?.length && { categories: sanityData.categories }),
       tags: [
         ...(sanityData?.tags || []),
         ...(medusaProduct?.tags?.map((t) => t.value) || []),
       ].filter((v, i, a) => a.indexOf(v) === i),
-      brand: sanityData?.brand,
-      material: sanityData?.material,
-      care: sanityData?.care || [],
-      features: sanityData?.features || [],
-      story: sanityData?.story || [],
-      sizeGuide: sanityData?.sizeGuide,
-      sustainability: sanityData?.sustainability,
+      ...(sanityData?.brand && { brand: sanityData.brand }),
+      ...(sanityData?.material && { material: sanityData.material }),
+      ...(sanityData?.care?.length && { care: sanityData.care }),
+      ...(sanityData?.features?.length && { features: sanityData.features }),
+      ...(sanityData?.story?.length && { story: sanityData.story }),
+      ...(sanityData?.sizeGuide && { sizeGuide: sanityData.sizeGuide }),
+      ...(sanityData?.sustainability && { sustainability: sanityData.sustainability }),
     };
   }
 
@@ -304,10 +314,12 @@ export class ProductFactory {
     // Calculate overall inventory
     const inventory = {
       available: variants.some((v) => v.inventory.available),
-      quantity: variants.reduce(
-        (sum, v) => sum + (v.inventory.quantity || 0),
-        0
-      ),
+      ...(options.includeInventory && {
+        quantity: variants.reduce(
+          (sum, v) => sum + (v.inventory.quantity || 0),
+          0
+        ),
+      }),
     };
 
     // Extract prices
@@ -316,13 +328,13 @@ export class ProductFactory {
         (variant) =>
           variant.prices?.map((price) => ({
             id: price.id,
-            currencyCode: price.currency_code,
-            amount: price.amount,
-            saleAmount: undefined, // TODO: Implement sale pricing
-            regionId: price.region_id || undefined,
-            minQuantity: price.min_quantity || undefined,
-            maxQuantity: price.max_quantity || undefined,
-            includesTax: undefined, // Not available in Medusa price data
+            currencyCode: createCurrencyCode(price.currency_code),
+            amount: createPrice(price.amount),
+            // saleAmount omitted - TODO: Implement sale pricing
+            ...(price.region_id && { regionId: price.region_id }),
+            ...(price.min_quantity && { minQuantity: createQuantity(price.min_quantity) }),
+            ...(price.max_quantity && { maxQuantity: createQuantity(price.max_quantity) }),
+            // includesTax omitted - Not available in Medusa price data
           })) || []
       ) || [];
 
@@ -331,7 +343,7 @@ export class ProductFactory {
       variants,
       prices,
       inventory,
-      tax: undefined, // TODO: Implement tax calculation
+      // tax property omitted - TODO: Implement tax calculation
     };
   }
 
@@ -344,80 +356,80 @@ export class ProductFactory {
   ) {
     // Create variants from Sanity
     const variants: IntegratedVariant[] = (
-      options.includeVariants && sanityData.variants
-        ? sanityData.variants.map((variant) => ({
-            id: variant._key,
+      options.includeVariants && (sanityData as any).variants
+        ? (sanityData as any).variants.map((variant: any) => ({
+            id: createVariantId(variant._key),
             title: variant.name,
-            sku: variant.sku,
+            ...(variant.sku && { sku: createSKU(variant.sku) }),
             options: {
               size: variant.size,
-              color: variant.color ? { name: variant.color } : undefined,
+              ...(variant.color && { color: { name: variant.color } }),
             },
             prices: [
               {
                 id: `${variant._key}-price`,
                 currencyCode: options.currency,
                 amount: (variant as any).price * 100 || 0,
-                saleAmount: (variant as any).salePrice
-                  ? (variant as any).salePrice * 100
-                  : undefined,
+                ...((variant as any).salePrice && {
+                  saleAmount: (variant as any).salePrice * 100,
+                }),
               },
             ],
             pricing: {
-              currency: options.currency,
-              price: (variant as any).price * 100 || 0, // Fallback for missing price
-              salePrice: (variant as any).salePrice
-                ? (variant as any).salePrice * 100
-                : undefined,
+              currency: createCurrencyCode(options.currency),
+              price: createPrice((variant as any).price * 100 || 0),
+              ...((variant as any).salePrice && {
+                salePrice: createPrice((variant as any).salePrice * 100),
+              }),
               displayPrice: this.formatPrice(
                 (variant as any).price * 100 || 0,
                 options.currency
               ),
-              displaySalePrice: (variant as any).salePrice
-                ? this.formatPrice(
-                    (variant as any).salePrice * 100,
-                    options.currency
-                  )
-                : undefined,
+              ...((variant as any).salePrice && {
+                displaySalePrice: this.formatPrice(
+                  (variant as any).salePrice * 100,
+                  options.currency
+                ),
+              }),
             },
             inventory: {
               available: variant.stock ? variant.stock > 0 : true,
-              quantity: variant.stock || 0,
+              ...(variant.stock !== undefined && { quantity: variant.stock }),
               allowBackorder: false,
             },
           }))
         : [
             {
-              id: 'default',
+              id: createVariantId('default'),
               title: 'Default',
-              sku: sanityData.sku,
+              ...((sanityData as any).sku && { sku: createSKU((sanityData as any).sku) }),
               options: {},
               prices: [
                 {
                   id: 'default-price',
                   currencyCode: options.currency,
                   amount: (sanityData as any).price * 100 || 0,
-                  saleAmount: (sanityData as any).compareAtPrice
-                    ? (sanityData as any).compareAtPrice * 100
-                    : undefined,
+                  ...((sanityData as any).compareAtPrice && {
+                    saleAmount: (sanityData as any).compareAtPrice * 100,
+                  }),
                 },
               ],
               pricing: {
-                currency: options.currency,
-                price: (sanityData as any).price * 100 || 0,
-                salePrice: (sanityData as any).compareAtPrice
-                  ? (sanityData as any).compareAtPrice * 100
-                  : undefined,
+                currency: createCurrencyCode(options.currency),
+                price: createPrice((sanityData as any).price * 100 || 0),
+                ...((sanityData as any).compareAtPrice && {
+                  salePrice: createPrice((sanityData as any).compareAtPrice * 100),
+                }),
                 displayPrice: this.formatPrice(
                   (sanityData as any).price * 100 || 0,
                   options.currency
                 ),
-                displaySalePrice: (sanityData as any).compareAtPrice
-                  ? this.formatPrice(
-                      (sanityData as any).compareAtPrice * 100,
-                      options.currency
-                    )
-                  : undefined,
+                ...((sanityData as any).compareAtPrice && {
+                  displaySalePrice: this.formatPrice(
+                    (sanityData as any).compareAtPrice * 100,
+                    options.currency
+                  ),
+                }),
               },
               inventory: {
                 available: (sanityData as any).inStock ?? true,
@@ -430,20 +442,20 @@ export class ProductFactory {
 
     const inventory = {
       available: variants.some((v) => v.inventory.available),
-      quantity: variants.reduce(
-        (sum, v) => sum + (v.inventory.quantity || 0),
-        0
-      ),
+      ...(options.includeVariants && {
+        quantity: variants.reduce(
+          (sum, v) => sum + (v.inventory.quantity || 0),
+          0
+        ),
+      }),
     };
 
     const prices: IntegratedPrice[] = variants.flatMap((v) => v.prices);
 
     return {
-      medusaProduct: undefined,
       variants,
       prices,
       inventory,
-      tax: undefined,
     };
   }
 
@@ -466,12 +478,11 @@ export class ProductFactory {
     const prices: IntegratedPrice[] =
       medusaVariant.prices?.map((price) => ({
         id: price.id,
-        currencyCode: price.currency_code,
-        amount: price.amount,
-        regionId: price.region_id || undefined,
-        minQuantity: price.min_quantity || undefined,
-        maxQuantity: price.max_quantity || undefined,
-        includesTax: undefined, // Not available in Medusa price data
+        currencyCode: createCurrencyCode(price.currency_code),
+        amount: createPrice(price.amount),
+        ...(price.region_id && { regionId: price.region_id }),
+        ...(price.min_quantity && { minQuantity: createQuantity(price.min_quantity) }),
+        ...(price.max_quantity && { maxQuantity: createQuantity(price.max_quantity) }),
       })) || [];
 
     // Find relevant price
@@ -481,24 +492,22 @@ export class ProductFactory {
     const priceAmount = relevantPrice?.amount || 0;
 
     return {
-      id: medusaVariant.id,
+      id: createVariantId(medusaVariant.id),
       title: medusaVariant.title,
-      sku: medusaVariant.sku || undefined,
+      ...(medusaVariant.sku && { sku: createSKU(medusaVariant.sku) }),
       options,
       prices,
       pricing: {
-        currency,
-        price: priceAmount,
-        salePrice: undefined, // TODO: Implement sale pricing
+        currency: createCurrencyCode(currency),
+        price: createPrice(priceAmount),
         displayPrice: this.formatPrice(priceAmount, currency),
-        displaySalePrice: undefined,
       },
       inventory: {
         available: (medusaVariant.inventory_quantity || 0) > 0,
-        quantity: medusaVariant.inventory_quantity,
-        allowBackorder: medusaVariant.allow_backorder,
+        ...(medusaVariant.inventory_quantity !== undefined && { quantity: createQuantity(medusaVariant.inventory_quantity) }),
+        ...(medusaVariant.allow_backorder !== undefined && { allowBackorder: medusaVariant.allow_backorder }),
       },
-      medusaVariant,
+      ...(medusaVariant && { medusaVariant }),
     };
   }
 
@@ -513,12 +522,9 @@ export class ProductFactory {
     const basePrice = lowestPrice?.amount || 0;
 
     return {
-      currency,
-      basePrice,
-      salePrice: undefined,
+      currency: createCurrencyCode(currency),
+      basePrice: createPrice(basePrice),
       displayPrice: this.formatPrice(basePrice, currency),
-      displaySalePrice: undefined,
-      discount: undefined,
     };
   }
 
@@ -529,27 +535,27 @@ export class ProductFactory {
     sanityData: SanityProduct,
     currency: string
   ) {
-    const basePrice = (sanityData.price || 0) * 100;
-    const salePrice = sanityData.compareAtPrice
-      ? sanityData.compareAtPrice * 100
+    const basePrice = ((sanityData as any).price || 0) * 100;
+    const salePrice = (sanityData as any).compareAtPrice
+      ? (sanityData as any).compareAtPrice * 100
       : undefined;
 
     return {
-      currency,
-      basePrice,
-      salePrice,
+      currency: createCurrencyCode(currency),
+      basePrice: createPrice(basePrice),
+      ...(salePrice && { salePrice: createPrice(salePrice) }),
       displayPrice: this.formatPrice(basePrice, currency),
-      displaySalePrice: salePrice
-        ? this.formatPrice(salePrice, currency)
-        : undefined,
-      discount: salePrice
-        ? {
-            amount: basePrice - salePrice,
-            percentage: Math.round(
-              ((basePrice - salePrice) / basePrice) * 100
-            ),
-          }
-        : undefined,
+      ...(salePrice && {
+        displaySalePrice: this.formatPrice(salePrice, currency),
+      }),
+      ...(salePrice && {
+        discount: {
+          amount: createPrice(basePrice - salePrice),
+          percentage: Math.round(
+            ((basePrice - salePrice) / basePrice) * 100
+          ),
+        },
+      }),
     };
   }
 
@@ -558,12 +564,9 @@ export class ProductFactory {
    */
   private static createDefaultPricing(currency: string) {
     return {
-      currency,
-      basePrice: 0,
-      salePrice: undefined,
+      currency: createCurrencyCode(currency),
+      basePrice: createPrice(0),
       displayPrice: this.formatPrice(0, currency),
-      displaySalePrice: undefined,
-      discount: undefined,
     };
   }
 
@@ -572,11 +575,11 @@ export class ProductFactory {
    */
   private static createProductBadges(
     medusaProduct: MedusaProduct | null,
-    sanityData: SanityProduct | null | undefined
+    _sanityData: SanityProduct | null | undefined
   ) {
     const now = new Date();
     const createdAt = new Date(
-      medusaProduct?.created_at || sanityData?._createdAt || now
+      medusaProduct?.created_at || now
     );
     const isNew =
       now.getTime() - createdAt.getTime() < 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -585,11 +588,11 @@ export class ProductFactory {
     const isSoldOut =
       medusaProduct?.variants?.every(
         (v) => (v.inventory_quantity || 0) === 0
-      ) ?? !sanityData?.inStock;
+      ) ?? false; // TODO: Implement stock check when Sanity has inStock field
 
     return {
       isNew,
-      isSale: !!sanityData?.compareAtPrice,
+      isSale: false, // TODO: Implement sale logic when Sanity has compareAtPrice
       isLimited: false, // TODO: Implement limited edition logic
       isSoldOut,
     };
@@ -602,16 +605,14 @@ export class ProductFactory {
     medusaProduct: MedusaProduct | null,
     sanityData: SanityProduct | null | undefined
   ) {
+    const title = sanityData?.name || medusaProduct?.title;
+    const description = sanityData?.description || medusaProduct?.description;
+    const keywords = sanityData?.tags || [];
+    
     return {
-      title:
-        sanityData?.seo?.metaTitle ||
-        sanityData?.name ||
-        medusaProduct?.title,
-      description:
-        sanityData?.seo?.metaDescription ||
-        sanityData?.description ||
-        medusaProduct?.description,
-      keywords: sanityData?.tags || [],
+      ...(title && { title }),
+      ...(description && { description }),
+      ...(keywords.length > 0 && { keywords }),
     };
   }
 

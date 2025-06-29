@@ -5,7 +5,6 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import crypto from 'crypto'
 
 // Rate limit tiers
 export const RATE_LIMIT_TIERS = {
@@ -86,33 +85,34 @@ class MemoryStore implements RateLimitStore {
 }
 
 // Redis store (for production/distributed systems)
-class RedisStore implements RateLimitStore {
-  private redis: any // Replace with actual Redis client type
-
-  constructor(redisClient: any) {
-    this.redis = redisClient
-  }
-
-  async increment(key: string, windowMs: number): Promise<number> {
-    const multi = this.redis.multi()
-    const ttl = Math.ceil(windowMs / 1000)
-    
-    multi.incr(key)
-    multi.expire(key, ttl)
-    
-    const results = await multi.exec()
-    return results[0][1]
-  }
-
-  async reset(key: string): Promise<void> {
-    await this.redis.del(key)
-  }
-
-  async get(key: string): Promise<number | null> {
-    const count = await this.redis.get(key)
-    return count ? parseInt(count) : null
-  }
-}
+// Uncomment and implement when Redis is available
+// class RedisStore implements RateLimitStore {
+//   private redis: any // Replace with actual Redis client type
+//
+//   constructor(redisClient: any) {
+//     this.redis = redisClient
+//   }
+//
+//   async increment(key: string, windowMs: number): Promise<number> {
+//     const multi = this.redis.multi()
+//     const ttl = Math.ceil(windowMs / 1000)
+//     
+//     multi.incr(key)
+//     multi.expire(key, ttl)
+//     
+//     const results = await multi.exec()
+//     return results[0][1]
+//   }
+//
+//   async reset(key: string): Promise<void> {
+//     await this.redis.del(key)
+//   }
+//
+//   async get(key: string): Promise<number | null> {
+//     const count = await this.redis.get(key)
+//     return count ? parseInt(count) : null
+//   }
+// }
 
 // Rate limiter class
 export class RateLimiter {
@@ -135,7 +135,7 @@ export class RateLimiter {
   private async getIdentifier(request: NextRequest): Promise<string> {
     // Try to get user ID first (most specific)
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user?.id) {
         return `user:${user.id}`
@@ -365,25 +365,25 @@ export class AdvancedRateLimiter extends RateLimiter {
   }
 
   // Helper methods for advanced strategies
-  private async getRequestTimestamps(key: string, windowStart: number): Promise<number[]> {
+  private async getRequestTimestamps(_key: string, _windowStart: number): Promise<number[]> {
     // Implementation depends on storage backend
     return []
   }
 
-  private async saveRequestTimestamps(key: string, timestamps: number[], ttl: number): Promise<void> {
+  private async saveRequestTimestamps(_key: string, _timestamps: number[], _ttl: number): Promise<void> {
     // Implementation depends on storage backend
   }
 
-  private async getBucket(key: string): Promise<{ tokens: number; lastRefill: number }> {
+  private async getBucket(_key: string): Promise<{ tokens: number; lastRefill: number }> {
     // Implementation depends on storage backend
     return { tokens: 0, lastRefill: Date.now() }
   }
 
-  private async saveBucket(key: string, bucket: { tokens: number; lastRefill: number }): Promise<void> {
+  private async saveBucket(_key: string, _bucket: { tokens: number; lastRefill: number }): Promise<void> {
     // Implementation depends on storage backend
   }
 
-  private async getNodeKeys(endpoint: string, identifier: string): Promise<string[]> {
+  private async getNodeKeys(_endpoint: string, _identifier: string): Promise<string[]> {
     // Implementation depends on storage backend
     return []
   }
@@ -412,7 +412,7 @@ export function getEndpointTier(pathname: string): keyof typeof RATE_LIMIT_TIERS
     }
   }
   
-  // Default based on authentication
-  const { userId } = auth()
-  return userId ? 'AUTHENTICATED' : 'PUBLIC'
+  // Default to PUBLIC tier
+  // TODO: Add authentication check if needed
+  return 'PUBLIC'
 }

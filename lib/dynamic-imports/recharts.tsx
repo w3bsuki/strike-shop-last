@@ -10,6 +10,35 @@ const ChartLoading = () => (
   </div>
 );
 
+// Export recharts components directly (not as dynamic imports)
+// These are not standalone React components but configuration components
+export { 
+  Line,
+  Bar,
+  Area,
+  XAxis,
+  YAxis,
+  ZAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  Cell,
+  Sector,
+  RadialBar,
+  Pie,
+  Dot,
+  Brush,
+  Radar,
+  Scatter,
+  LabelList,
+  ReferenceLine,
+  ReferenceArea,
+  ReferenceDot,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis
+} from 'recharts';
+
 // Dynamic imports for Recharts components
 export const ResponsiveContainer = dynamic(
   () => import('recharts').then((mod) => ({ default: mod.ResponsiveContainer })),
@@ -21,60 +50,42 @@ export const LineChart = dynamic(
   { loading: () => <ChartLoading />,  }
 );
 
-export const Line = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Line })),
-  {  }
-);
+// Line is exported directly above, not as a dynamic import
 
 export const BarChart = dynamic(
   () => import('recharts').then((mod) => ({ default: mod.BarChart })),
   { loading: () => <ChartLoading />,  }
 );
 
-export const Bar = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Bar })),
-  {  }
-);
+// Bar is exported directly above, not as a dynamic import
 
 export const AreaChart = dynamic(
   () => import('recharts').then((mod) => ({ default: mod.AreaChart })),
   { loading: () => <ChartLoading />,  }
 );
 
-export const Area = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Area })),
-  {  }
-);
+// Area is exported directly above, not as a dynamic import
 
 export const PieChart = dynamic(
   () => import('recharts').then((mod) => ({ default: mod.PieChart })),
   { loading: () => <ChartLoading />,  }
 );
 
-export const Pie = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Pie })),
-  {  }
-);
+// Pie is exported directly above, not as a dynamic import
 
 export const RadarChart = dynamic(
   () => import('recharts').then((mod) => ({ default: mod.RadarChart })),
   { loading: () => <ChartLoading />,  }
 );
 
-export const Radar = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Radar })),
-  {  }
-);
+// Radar is exported directly above, not as a dynamic import
 
 export const RadialBarChart = dynamic(
   () => import('recharts').then((mod) => ({ default: mod.RadialBarChart })),
   { loading: () => <ChartLoading />,  }
 );
 
-export const RadialBar = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.RadialBar })),
-  {  }
-);
+// RadialBar is exported directly above, not as a dynamic import
 
 export const ComposedChart = dynamic(
   () => import('recharts').then((mod) => ({ default: mod.ComposedChart })),
@@ -86,113 +97,66 @@ export const ScatterChart = dynamic(
   { loading: () => <ChartLoading />,  }
 );
 
-export const Scatter = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Scatter })),
-  {  }
-);
+// Scatter is exported directly above, not as a dynamic import
 
-export const XAxis = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.XAxis })),
-  {  }
-);
+// XAxis is exported directly above, not as a dynamic import
 
-export const YAxis = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.YAxis })),
-  {  }
-);
+// YAxis is exported directly above, not as a dynamic import
 
-export const ZAxis = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.ZAxis })),
-  {  }
-);
+// ZAxis is exported directly above, not as a dynamic import
 
-export const CartesianGrid = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.CartesianGrid })),
-  {  }
-);
+// CartesianGrid is exported directly above, not as a dynamic import
 
-export const Tooltip = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Tooltip })),
-  {  }
-);
+// Tooltip is exported directly above, not as a dynamic import
 
-export const Legend = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Legend })),
-  {  }
-);
+// Legend is exported directly above, not as a dynamic import
 
-export const Cell = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Cell })),
-  {  }
-);
+// Cell is exported directly above, not as a dynamic import
 
-export const LabelList = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.LabelList })),
-  {  }
-);
+// LabelList is exported directly above, not as a dynamic import
 
-export const ReferenceLine = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.ReferenceLine })),
-  {  }
-);
+// ReferenceLine is exported directly above, not as a dynamic import
 
-export const ReferenceArea = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.ReferenceArea })),
-  {  }
-);
+// ReferenceArea is exported directly above, not as a dynamic import
 
-export const ReferenceDot = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.ReferenceDot })),
-  {  }
-);
+// ReferenceDot is exported directly above, not as a dynamic import
 
-export const Brush = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.Brush })),
-  {  }
-);
+// Brush is exported directly above, not as a dynamic import
 
-export const PolarGrid = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.PolarGrid })),
-  {  }
-);
+// PolarGrid is exported directly above, not as a dynamic import
 
-export const PolarAngleAxis = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.PolarAngleAxis })),
-  {  }
-);
+// PolarAngleAxis is exported directly above, not as a dynamic import
 
-export const PolarRadiusAxis = dynamic(
-  () => import('recharts').then((mod) => ({ default: mod.PolarRadiusAxis })),
-  {  }
-);
+// PolarRadiusAxis is exported directly above, not as a dynamic import
 
 // Export types (these don't need dynamic imports)
-export type {
-  ResponsiveContainerProps,
-  LineChartProps,
-  BarChartProps,
-  AreaChartProps,
-  PieChartProps,
-  RadarChartProps,
-  RadialBarChartProps,
-  ComposedChartProps,
-  ScatterChartProps,
-  XAxisProps,
-  YAxisProps,
-  ZAxisProps,
-  CartesianGridProps,
-  TooltipProps,
-  LegendProps,
-  CellProps,
-  LabelListProps,
-  ReferenceLineProps,
-  ReferenceAreaProps,
-  ReferenceDotProps,
-  BrushProps,
-  PolarGridProps,
-  PolarAngleAxisProps,
-  PolarRadiusAxisProps,
-} from 'recharts';
+// Note: Not all prop types are exported by recharts, commenting out to avoid build errors
+// export type {
+//   ResponsiveContainerProps,
+//   LineChartProps,
+//   BarChartProps,
+//   AreaChartProps,
+//   PieChartProps,
+//   RadarChartProps,
+//   RadialBarChartProps,
+//   ComposedChartProps,
+//   ScatterChartProps,
+//   XAxisProps,
+//   YAxisProps,
+//   ZAxisProps,
+//   CartesianGridProps,
+//   TooltipProps,
+//   LegendProps,
+//   CellProps,
+//   LabelListProps,
+//   ReferenceLineProps,
+//   ReferenceAreaProps,
+//   ReferenceDotProps,
+//   BrushProps,
+//   PolarGridProps,
+//   PolarAngleAxisProps,
+//   PolarRadiusAxisProps,
+// } from 'recharts';
 
 // For components that need immediate access to certain exports
 export const getRechartsSync = () => import('recharts');

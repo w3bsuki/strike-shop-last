@@ -139,12 +139,12 @@ export class EcontShipping {
   }
 
   async calculateShipping(
-    from: ShippingAddress,
-    to: ShippingAddress,
+    _from: ShippingAddress,
+    _to: ShippingAddress,
     weight: number,
-    dimensions: { length: number; width: number; height: number }
+    _dimensions: { length: number; width: number; height: number }
   ): Promise<ShippingQuote> {
-    const response = await fetch('https://demo.econt.com/ee/services/Nomenclatures/NomenclaturesService.getCities.json', {
+    await fetch('https://demo.econt.com/ee/services/Nomenclatures/NomenclaturesService.getCities.json', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

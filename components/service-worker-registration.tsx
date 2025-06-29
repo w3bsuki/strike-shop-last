@@ -34,7 +34,7 @@ export function ServiceWorkerRegistration() {
                 }
               });
             })
-            .catch((error) => {
+            .catch((_error) => {
 
             });
         });

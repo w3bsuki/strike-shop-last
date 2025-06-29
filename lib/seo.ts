@@ -303,15 +303,15 @@ export function generateProductMetadata(
     title: product.metadata?.title || product.content.name,
     description: product.metadata?.description || product.content.description || '',
     keywords: product.metadata?.keywords || product.content.tags || [],
-    image: product.content.images?.[0]?.url || '/images/placeholder.jpg',
+    image: String(product.content.images?.[0]?.url || '/images/placeholder.jpg'),
     url,
     type: 'product',
-    price: product.pricing.basePrice.toString(),
+    price: String(product.pricing.basePrice),
     currency: 'GBP',
     availability: product.commerce.inventory.available ? 'in stock' : 'out of stock',
     brand: product.content.brand || 'STRIKE™',
-    category: product.content.categories?.[0]?.name || undefined,
-    sku: product.commerce.variants?.[0]?.sku || product.sku,
+    ...(product.content.categories?.[0]?.name && { category: product.content.categories[0].name }),
+    ...((product.commerce.variants?.[0]?.sku || product.sku) ? { sku: product.commerce.variants?.[0]?.sku || product.sku } : {}),
   };
 
   return generateMetadata(productData);
@@ -347,15 +347,15 @@ export function generateProductJsonLd(
   const structuredData = generateStructuredData({
     title: product.content.name,
     description: product.content.description || '',
-    image: product.content.images?.[0]?.url,
+    ...(product.content.images?.[0]?.url && { image: product.content.images[0].url }),
     url,
     type: 'product',
-    price: product.pricing.basePrice.toString(),
+    price: String(product.pricing.basePrice),
     currency: 'GBP',
     availability: product.commerce.inventory.available ? 'in stock' : 'out of stock',
     brand: product.content.brand || 'STRIKE™',
-    category: product.content.categories?.[0]?.name,
-    sku: product.commerce.variants?.[0]?.sku || product.sku,
+    ...(product.content.categories?.[0]?.name && { category: product.content.categories[0].name }),
+    ...((product.commerce.variants?.[0]?.sku || product.sku) ? { sku: product.commerce.variants?.[0]?.sku || product.sku } : {}),
   });
 
   return JSON.stringify(structuredData);

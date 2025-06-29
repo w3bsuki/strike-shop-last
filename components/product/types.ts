@@ -1,5 +1,18 @@
 // Product component type definitions
 
+export interface SimpleProduct {
+  id: string;
+  name: string;
+  price: string;
+  originalPrice?: string;
+  discount?: string;
+  image: string;
+  slug: string;
+  isNew?: boolean;
+  soldOut?: boolean;
+  colors?: number;
+}
+
 export interface BaseProduct {
   id: string;
   name: string;
@@ -71,4 +84,13 @@ export interface ProductDisplaySettings {
     enabled: boolean;
     showOnCard: boolean;
   };
+}
+
+export interface ProductCardProps {
+  /** Product data - supports both simple and integrated formats */
+  product: any;
+  /** Optional CSS class names */
+  className?: string;
+  /** Whether to prioritize image loading */
+  priority?: boolean;
 }

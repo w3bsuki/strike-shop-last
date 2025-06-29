@@ -88,7 +88,7 @@ class PerformanceMonitor {
       value,
       unit,
       timestamp: Date.now(),
-      metadata,
+      ...(metadata && { metadata }),
     };
 
     this.metrics.push(metric);

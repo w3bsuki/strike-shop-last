@@ -39,9 +39,9 @@ export function MobileDrawer({
   };
 
   const swipeHandlers = useSwipeGesture({
-    onSwipeDown: position === 'bottom' ? handleClose : undefined,
-    onSwipeLeft: position === 'right' ? handleClose : undefined,
-    onSwipeRight: position === 'left' ? handleClose : undefined,
+    ...(position === 'bottom' && { onSwipeDown: handleClose }),
+    ...(position === 'right' && { onSwipeLeft: handleClose }),
+    ...(position === 'left' && { onSwipeRight: handleClose }),
     threshold: 100,
   });
 

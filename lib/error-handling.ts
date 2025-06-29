@@ -167,29 +167,42 @@ export function handleClientError(
 
 // Error logging utility
 export function logError(error: any, context?: Record<string, any>) {
-  const errorLog = {
-    timestamp: new Date().toISOString(),
-    error: {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-      code: error.code,
-    },
-    context,
-    environment: {
-      nodeEnv: process.env.NODE_ENV,
-      url: typeof window !== 'undefined' ? window.location.href : 'server',
-      userAgent:
-        typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
-    },
-  };
-
   // In production, send to error tracking service
   if (process.env.NODE_ENV === 'production') {
     // Send to Sentry, LogRocket, etc.
-
+    console.error({
+      timestamp: new Date().toISOString(),
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        code: error.code,
+      },
+      context,
+      environment: {
+        nodeEnv: process.env.NODE_ENV,
+        url: typeof window !== 'undefined' ? window.location.href : 'server',
+        userAgent:
+          typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
+      },
+    });
   } else {
-
+    console.error({
+      timestamp: new Date().toISOString(),
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        code: error.code,
+      },
+      context,
+      environment: {
+        nodeEnv: process.env.NODE_ENV,
+        url: typeof window !== 'undefined' ? window.location.href : 'server',
+        userAgent:
+          typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
+      },
+    });
   }
 }
 

@@ -113,7 +113,7 @@ export class PaymentValidator {
     const requires3DS = 
       request.amount >= PAYMENT_LIMITS.REQUIRE_3DS_AMOUNT ||
       riskScore >= 50 ||
-      (request.shippingCountry && HIGH_RISK_COUNTRIES.includes(request.shippingCountry as any));
+      (request.shippingCountry ? HIGH_RISK_COUNTRIES.includes(request.shippingCountry as any) : false);
 
     return {
       isValid: errors.length === 0,
@@ -285,7 +285,7 @@ export class PaymentValidator {
   /**
    * Check velocity limits (simplified - in production, check against database)
    */
-  private static async checkVelocity(userId: string, amount: number): Promise<number> {
+  private static async checkVelocity(userId: string, _amount: number): Promise<number> {
     // In production, this would:
     // 1. Query recent transactions for this user
     // 2. Check daily/weekly/monthly limits
@@ -360,7 +360,7 @@ export class PaymentValidator {
   /**
    * Verify payment token
    */
-  static verifyPaymentToken(token: string, paymentIntentId: string, userId: string): boolean {
+  static verifyPaymentToken(token: string, _paymentIntentId: string, _userId: string): boolean {
     // In production, store tokens with expiry in Redis/database
     // For now, just validate format
     return /^[a-f0-9]{64}$/.test(token);

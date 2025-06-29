@@ -7,7 +7,6 @@
 import type { NextRequest} from 'next/server';
 import { NextResponse } from 'next/server'
 // import crypto from 'crypto' // Edge Runtime incompatible
-import { headers } from 'next/headers'
 
 // 🔐 SECURITY CONSTANTS
 export const SECURITY_CONFIG = {
@@ -396,7 +395,6 @@ export class SecurityMiddleware {
       cfConnectingIP ||
       realIP ||
       forwarded?.split(',')[0]?.trim() ||
-      request.ip ||
       'unknown'
     )
   }

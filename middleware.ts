@@ -22,29 +22,29 @@ const protectedRoutes = [
 ];
 
 // Routes that are always public
-const publicRoutes = [
-  '/',
-  '/sign-in',
-  '/sign-up',
-  '/auth/callback',
-  '/products',
-  '/product',
-  '/category',
-  '/categories',
-  '/search',
-  '/cart',
-  '/checkout',
-  '/about',
-  '/contact',
-  '/privacy',
-  '/terms',
-  '/faq',
-  '/help',
-];
+// const publicRoutes = [
+//   '/',
+//   '/sign-in',
+//   '/sign-up',
+//   '/auth/callback',
+//   '/products',
+//   '/product',
+//   '/category',
+//   '/categories',
+//   '/search',
+//   '/cart',
+//   '/checkout',
+//   '/about',
+//   '/contact',
+//   '/privacy',
+//   '/terms',
+//   '/faq',
+//   '/help',
+// ];
 
 export async function middleware(request: NextRequest) {
   // Update session
-  const response = await updateSession(request);
+  let response = await updateSession(request);
   
   // Apply security headers
   Object.entries(securityHeaders).forEach(([key, value]) => {

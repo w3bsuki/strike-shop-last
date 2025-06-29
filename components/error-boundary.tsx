@@ -3,7 +3,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -36,7 +35,7 @@ export class ErrorBoundary extends React.Component<
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error to monitoring service
 
     // Call custom error handler if provided
@@ -71,7 +70,7 @@ export class ErrorBoundary extends React.Component<
     this.setState((prev) => ({ showDetails: !prev.showDetails }));
   };
 
-  render() {
+  override render() {
     if (this.state.hasError && this.state.error) {
       // Use custom fallback if provided
       if (this.props.fallback) {
@@ -198,7 +197,7 @@ export function AsyncErrorBoundary({
   const [hasError, setHasError] = React.useState(false);
 
   React.useEffect(() => {
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+    const handleUnhandledRejection = (_event: PromiseRejectionEvent) => {
 
       setHasError(true);
     };
@@ -251,7 +250,7 @@ export function SuspenseErrorBoundary({
 }) {
   return (
     <ErrorBoundary
-      fallback={({ error, retry }) => (
+      fallback={({ error: _error, retry }) => (
         <div className="flex min-h-[200px] items-center justify-center">
           <div className="text-center">
             <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary" />

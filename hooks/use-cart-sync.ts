@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '@/lib/stores';
-import { medusaClient } from '@/lib/medusa-service-refactored';
 import { queryKeys } from '@/lib/query-client';
 import { toast } from '@/hooks/use-toast';
 import type { CartItem } from '@/types/store';
+import { createProductId, createVariantId, createLineItemId, createSlug, createQuantity, createPrice, createImageURL } from '@/types/branded';
 
 /**
  * Cart synchronization hooks with optimistic updates
@@ -45,7 +45,7 @@ export function useAddToCart() {
   const cart = useStore((state) => state.cart);
 
   return useMutation({
-    mutationFn: async ({ productId, variantId, quantity, productData }: AddToCartParams) => {
+    mutationFn: async ({ productId, variantId, quantity, productData: _productData }: AddToCartParams) => {
       // Perform the actual server mutation
       await cartActions.addItem(productId, variantId, quantity);
     },
@@ -59,17 +59,17 @@ export function useAddToCart() {
       // Optimistically update the UI
       if (productData) {
         const optimisticItem: CartItem = {
-          id: productId,
-          lineItemId: `temp-${Date.now()}`, // Temporary ID
-          variantId,
+          id: createProductId(productId),
+          lineItemId: createLineItemId(`temp-${Date.now()}`), // Temporary ID
+          variantId: createVariantId(variantId),
           name: productData.name,
-          slug: productData.slug,
+          slug: createSlug(productData.slug),
           size: productData.size || 'One Size',
-          quantity,
-          image: productData.image,
+          quantity: createQuantity(quantity),
+          image: productData.image ? createImageURL(productData.image) : null,
           pricing: {
-            unitPrice: productData.price,
-            totalPrice: productData.price * quantity,
+            unitPrice: createPrice(productData.price),
+            totalPrice: createPrice(productData.price * quantity),
             displayUnitPrice: new Intl.NumberFormat('en-US', {
               style: 'currency',
               currency: 'USD',
@@ -94,7 +94,7 @@ export function useAddToCart() {
       // Return a context object with the snapshot
       return { previousCart };
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousCart) {
         useStore.setState((state) => ({
@@ -140,14 +140,14 @@ export function useUpdateCartQuantity() {
             item.id === itemId && item.size === size
               ? {
                   ...item,
-                  quantity,
+                  quantity: createQuantity(quantity),
                   pricing: {
                     ...item.pricing,
-                    totalPrice: item.pricing.unitPrice * quantity,
+                    totalPrice: createPrice((item.pricing.unitPrice as number) * quantity),
                     displayTotalPrice: new Intl.NumberFormat('en-US', {
                       style: 'currency',
                       currency: 'USD',
-                    }).format((item.pricing.unitPrice * quantity) / 100),
+                    }).format(((item.pricing.unitPrice as number) * quantity) / 100),
                   },
                 }
               : item
@@ -157,7 +157,7 @@ export function useUpdateCartQuantity() {
 
       return { previousCart };
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       if (context?.previousCart) {
         useStore.setState((state) => ({
           cart: {
@@ -205,7 +205,7 @@ export function useRemoveFromCart() {
 
       return { previousCart };
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       if (context?.previousCart) {
         useStore.setState((state) => ({
           cart: {

@@ -76,7 +76,7 @@ interface ErrorContext {
 export class ApiError extends Error {
   constructor(
     public type: ErrorType,
-    public message: string,
+    public override message: string,
     public details?: any,
     public context?: ErrorContext
   ) {
@@ -216,15 +216,16 @@ export class ErrorResponseBuilder {
     }
 
     // Build context
+    const ip = request?.headers?.get('x-forwarded-for') || request?.headers?.get('x-real-ip');
+    const userAgent = request?.headers?.get('user-agent');
+    
     const context: ErrorContext = {
       requestId: options?.correlationId || errorId,
       timestamp: new Date(),
-      ...(request && {
-        method: request.method,
-        path: request.nextUrl.pathname,
-        ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
-        userAgent: request.headers.get('user-agent')
-      })
+      ...(request?.method && { method: request.method }),
+      ...(request?.nextUrl?.pathname && { path: request.nextUrl.pathname }),
+      ...(ip && { ip }),
+      ...(userAgent && { userAgent })
     }
 
     // Log error

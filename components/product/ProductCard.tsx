@@ -11,6 +11,7 @@ import { useAria, AccessibleButton } from '@/components/accessibility/aria-helpe
 import { useCart } from '@/hooks/use-cart';
 import type { IntegratedProduct } from '@/types/integrated';
 import { toast } from '@/hooks/use-toast';
+import type { SimpleProduct } from './types';
 
 /**
  * ProductCard Component
@@ -39,18 +40,6 @@ import { toast } from '@/hooks/use-toast';
  * />
  */
 
-interface SimpleProduct {
-  id: string;
-  name: string;
-  price: string;
-  originalPrice?: string;
-  discount?: string;
-  image: string;
-  slug: string;
-  isNew?: boolean;
-  soldOut?: boolean;
-  colors?: number;
-}
 
 interface ProductCardProps {
   /** Product data - supports both simple and integrated formats */
@@ -83,19 +72,19 @@ function normalizeProduct(product: SimpleProduct | IntegratedProduct): SimplePro
     id: product.id,
     name: content.name,
     price: pricing.displayPrice,
-    originalPrice: pricing.displaySalePrice,
-    discount: badges.isSale && pricing.discount 
-      ? `-${pricing.discount.percentage}%` 
-      : undefined,
     image: typeof mainImage === 'string'
       ? mainImage
-      : mainImage?.asset && 'url' in mainImage.asset
-        ? mainImage.asset.url
-        : '/placeholder.svg',
+      : mainImage && 'asset' in mainImage && mainImage.asset && 'url' in mainImage.asset
+        ? (mainImage.asset as any).url as string
+        : mainImage && 'url' in mainImage
+          ? (mainImage as any).url as string
+          : '/placeholder.svg',
     slug: product.slug,
-    isNew: badges.isNew,
-    soldOut: badges.isSoldOut,
-    colors: content.categories?.length || undefined,
+    ...(pricing.displaySalePrice && { originalPrice: pricing.displaySalePrice }),
+    ...(badges.isSale && pricing.discount && { discount: `-${pricing.discount.percentage}%` }),
+    ...(badges.isNew && { isNew: badges.isNew }),
+    ...(badges.isSoldOut && { soldOut: badges.isSoldOut }),
+    ...(content.categories?.length && { colors: content.categories.length })
   };
 }
 
@@ -145,7 +134,7 @@ export const ProductCard = React.memo(({
   const handleQuickView = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    openQuickView(product);
+    openQuickView(product.id);
     announceToScreenReader(`Quick view opened for ${product.name}`, 'polite');
   };
 
@@ -154,8 +143,8 @@ export const ProductCard = React.memo(({
     e.stopPropagation();
     
     // Check if product has a variantId (from product data) or fetch it
-    let variantId = 'variantId' in product && product.variantId 
-      ? product.variantId 
+    let variantId: string | null = 'variantId' in product && (product as any).variantId 
+      ? (product as any).variantId 
       : null;
     
     try {

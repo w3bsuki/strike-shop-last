@@ -1,4 +1,11 @@
-import type { MedusaProduct, MedusaProductCategory } from '@/types/medusa';
+import type { 
+  MedusaProduct, 
+  MedusaProductCategory, 
+  MedusaPrice, 
+  MedusaImage,
+  MedusaProductVariant,
+  MedusaProductOptionValue
+} from '@/types/medusa';
 import Medusa from '@medusajs/js-sdk';
 import { getMedusaUrl, getMedusaPublishableKey, getMedusaRegionId } from '@/lib/config/medusa';
 
@@ -51,6 +58,9 @@ export class MedusaProductService {
         name: 'Men',
         handle: 'men',
         description: 'Men\'s fashion and accessories',
+        mpath: 'cat_men.',
+        is_active: true,
+        is_internal: false,
         parent_category_id: null,
         parent_category: null,
         category_children: [],
@@ -64,6 +74,9 @@ export class MedusaProductService {
         name: 'Women',
         handle: 'women',
         description: 'Women\'s fashion and accessories',
+        mpath: 'cat_women.',
+        is_active: true,
+        is_internal: false,
         parent_category_id: null,
         parent_category: null,
         category_children: [],
@@ -77,6 +90,9 @@ export class MedusaProductService {
         name: 'Kids',
         handle: 'kids',
         description: 'Children\'s fashion and accessories',
+        mpath: 'cat_kids.',
+        is_active: true,
+        is_internal: false,
         parent_category_id: null,
         parent_category: null,
         category_children: [],
@@ -90,6 +106,9 @@ export class MedusaProductService {
         name: 'Sneakers',
         handle: 'sneakers',
         description: 'Premium sneakers and footwear',
+        mpath: 'cat_sneakers.',
+        is_active: true,
+        is_internal: false,
         parent_category_id: null,
         parent_category: null,
         category_children: [],
@@ -103,6 +122,9 @@ export class MedusaProductService {
         name: 'Accessories',
         handle: 'accessories',
         description: 'Fashion accessories and extras',
+        mpath: 'cat_accessories.',
+        is_active: true,
+        is_internal: false,
         parent_category_id: null,
         parent_category: null,
         category_children: [],
@@ -167,111 +189,255 @@ export class MedusaProductService {
   }
 
   /**
+   * Helper to create a valid MedusaPrice object
+   */
+  private static createMockPrice(id: string, amount: number, currency_code: string, variant_id: string): MedusaPrice {
+    return {
+      id,
+      amount,
+      currency_code,
+      variant_id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      deleted_at: null,
+    };
+  }
+
+  /**
+   * Helper to create a valid MedusaImage object
+   */
+  private static createMockImage(id: string, url: string): MedusaImage {
+    return {
+      id,
+      url,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      deleted_at: null,
+      metadata: null,
+    };
+  }
+
+  /**
+   * Helper to create a valid MedusaProductOptionValue object
+   */
+  private static createMockOptionValue(
+    id: string,
+    value: string,
+    option_id: string,
+    variant_id: string
+  ): MedusaProductOptionValue {
+    return {
+      id,
+      value,
+      option_id,
+      variant_id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      deleted_at: null,
+      metadata: null,
+    };
+  }
+
+  /**
+   * Helper to create a valid MedusaProductVariant object
+   */
+  private static createMockVariant(
+    id: string,
+    title: string,
+    product_id: string,
+    sku: string,
+    inventory_quantity: number,
+    prices: MedusaPrice[],
+    options: MedusaProductOptionValue[]
+  ): MedusaProductVariant {
+    return {
+      id,
+      title,
+      product_id,
+      sku,
+      inventory_quantity,
+      prices,
+      options,
+      barcode: null,
+      ean: null,
+      upc: null,
+      variant_rank: null,
+      allow_backorder: false,
+      manage_inventory: true,
+      hs_code: null,
+      origin_country: null,
+      mid_code: null,
+      material: null,
+      weight: null,
+      length: null,
+      height: null,
+      width: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      deleted_at: null,
+      metadata: null,
+    };
+  }
+
+  /**
    * Mock products for fallback when Medusa is unavailable
    */
   private static getMockProducts(limit: number): { products: MedusaProduct[]; count: number } {
+    const productId = 'prod_01HMVR7CGTQ4QAXM6TPVFN4HZW';
+    
+    // Create main product with proper types
+    const mainProduct: MedusaProduct = {
+      id: productId,
+      title: 'STRIKE™ OVERSIZED HOODIE',
+      subtitle: 'Premium heavyweight hoodie in monochrome',
+      description: 'Our signature oversized hoodie crafted from premium heavyweight cotton. Features dropped shoulders, kangaroo pocket, and our iconic STRIKE™ branding.',
+      handle: 'oversized-hoodie',
+      is_giftcard: false,
+      status: 'published',
+      thumbnail: '/placeholder.svg?height=600&width=600',
+      profile_id: 'sp_01',
+      type_id: null,
+      discountable: true,
+      external_id: null,
+      images: [
+        this.createMockImage('img_1', '/placeholder.svg?height=600&width=600'),
+        this.createMockImage('img_2', '/placeholder.svg?height=600&width=600'),
+      ],
+      variants: [
+        this.createMockVariant(
+          'variant_1',
+          'S / Black',
+          productId,
+          'STRIKE-HOODIE-S-BLK',
+          10,
+          [this.createMockPrice('price_1', 12900, 'GBP', 'variant_1')],
+          [
+            this.createMockOptionValue('opt_val_1', 'S', 'opt_1', 'variant_1'),
+            this.createMockOptionValue('opt_val_2', 'Black', 'opt_2', 'variant_1')
+          ]
+        ),
+        this.createMockVariant(
+          'variant_2',
+          'M / Black',
+          productId,
+          'STRIKE-HOODIE-M-BLK',
+          15,
+          [this.createMockPrice('price_2', 12900, 'GBP', 'variant_2')],
+          [
+            this.createMockOptionValue('opt_val_3', 'M', 'opt_1', 'variant_2'),
+            this.createMockOptionValue('opt_val_4', 'Black', 'opt_2', 'variant_2')
+          ]
+        )
+      ],
+      options: [
+        {
+          id: 'opt_1',
+          title: 'Size',
+          product_id: productId,
+          values: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          deleted_at: null,
+          metadata: null
+        },
+        {
+          id: 'opt_2',
+          title: 'Color',
+          product_id: productId,
+          values: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          deleted_at: null,
+          metadata: null
+        }
+      ],
+      categories: [],
+      tags: [
+        {
+          id: 'tag_1',
+          value: 'new',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          deleted_at: null,
+          metadata: null
+        },
+        {
+          id: 'tag_2',
+          value: 'hoodie',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          deleted_at: null,
+          metadata: null
+        }
+      ],
+      collection_id: null,
+      weight: 500,
+      length: null,
+      height: null,
+      width: null,
+      hs_code: null,
+      origin_country: 'GB',
+      mid_code: null,
+      material: 'Cotton',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      deleted_at: null,
+      metadata: { isNew: true, discount: null }
+    };
+
+    // Create array of mock products
     const mockProducts: MedusaProduct[] = [
-      {
-        id: 'prod_01HMVR7CGTQ4QAXM6TPVFN4HZW',
-        title: 'STRIKE™ OVERSIZED HOODIE',
-        subtitle: 'Premium heavyweight hoodie in monochrome',
-        description: 'Our signature oversized hoodie crafted from premium heavyweight cotton. Features dropped shoulders, kangaroo pocket, and our iconic STRIKE™ branding.',
-        handle: 'oversized-hoodie',
-        status: 'published',
-        thumbnail: '/placeholder.svg?height=600&width=600',
-        images: [
-          { id: 'img_1', url: '/placeholder.svg?height=600&width=600' },
-          { id: 'img_2', url: '/placeholder.svg?height=600&width=600' },
-        ],
-        variants: [
-          {
-            id: 'variant_1',
-            title: 'S / Black',
-            sku: 'STRIKE-HOODIE-S-BLK',
-            inventory_quantity: 10,
-            prices: [
-              { id: 'price_1', amount: 12900, currency_code: 'GBP' }
-            ],
-            options: [
-              { value: 'S', option: { title: 'Size' } },
-              { value: 'Black', option: { title: 'Color' } }
-            ]
-          },
-          {
-            id: 'variant_2', 
-            title: 'M / Black',
-            sku: 'STRIKE-HOODIE-M-BLK',
-            inventory_quantity: 15,
-            prices: [
-              { id: 'price_2', amount: 12900, currency_code: 'GBP' }
-            ],
-            options: [
-              { value: 'M', option: { title: 'Size' } },
-              { value: 'Black', option: { title: 'Color' } }
-            ]
-          }
-        ],
-        options: [
-          { id: 'opt_1', title: 'Size', values: [{ value: 'S' }, { value: 'M' }, { value: 'L' }, { value: 'XL' }] },
-          { id: 'opt_2', title: 'Color', values: [{ value: 'Black' }, { value: 'White' }] }
-        ],
-        categories: [
-          { id: 'cat_men', name: 'Men', handle: 'men' }
-        ],
-        tags: [{ id: 'tag_1', value: 'new' }, { id: 'tag_2', value: 'hoodie' }],
-        collection: null,
-        collection_id: null,
-        type: null,
-        weight: 500,
-        length: null,
-        height: null,
-        width: null,
-        hs_code: null,
-        origin_country: 'GB',
-        mid_code: null,
-        material: 'Cotton',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        deleted_at: null,
-        metadata: { isNew: true, discount: null }
-      },
+      mainProduct,
       // Add more mock products to reach the limit
-      ...Array.from({ length: Math.max(0, limit - 1) }, (_, i) => ({
-        id: `prod_mock_${i + 2}`,
-        title: `Mock Product ${i + 2}`,
-        subtitle: 'Mock product for testing',
-        description: 'This is a mock product for development and testing purposes.',
-        handle: `mock-product-${i + 2}`,
-        status: 'published' as const,
-        thumbnail: '/placeholder.svg?height=600&width=600',
-        images: [{ id: `img_${i + 2}`, url: '/placeholder.svg?height=600&width=600' }],
-        variants: [{
-          id: `variant_${i + 2}`,
-          title: 'One Size',
-          sku: `MOCK-${i + 2}`,
-          inventory_quantity: 10,
-          prices: [{ id: `price_${i + 2}`, amount: 9900, currency_code: 'GBP' }],
-          options: []
-        }],
-        options: [],
-        categories: [],
-        tags: [],
-        collection: null,
-        collection_id: null,
-        type: null,
-        weight: 300,
-        length: null,
-        height: null,
-        width: null,
-        hs_code: null,
-        origin_country: 'GB',
-        mid_code: null,
-        material: 'Cotton',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        deleted_at: null,
-        metadata: null
-      }))
+      ...Array.from({ length: Math.max(0, limit - 1) }, (_, i) => {
+        const mockId = `prod_mock_${i + 2}`;
+        const variantId = `variant_${i + 2}`;
+        
+        return {
+          id: mockId,
+          title: `Mock Product ${i + 2}`,
+          subtitle: 'Mock product for testing',
+          description: 'This is a mock product for development and testing purposes.',
+          handle: `mock-product-${i + 2}`,
+          is_giftcard: false,
+          status: 'published' as const,
+          thumbnail: '/placeholder.svg?height=600&width=600',
+          profile_id: 'sp_01',
+          type_id: null,
+          discountable: true,
+          external_id: null,
+          images: [
+            this.createMockImage(`img_${i + 2}`, '/placeholder.svg?height=600&width=600')
+          ],
+          variants: [
+            this.createMockVariant(
+              variantId,
+              'One Size',
+              mockId,
+              `MOCK-${i + 2}`,
+              10,
+              [this.createMockPrice(`price_${i + 2}`, 9900, 'GBP', variantId)],
+              []
+            )
+          ],
+          options: [],
+          categories: [],
+          tags: [],
+          collection_id: null,
+          weight: 300,
+          length: null,
+          height: null,
+          width: null,
+          hs_code: null,
+          origin_country: 'GB',
+          mid_code: null,
+          material: 'Cotton',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          deleted_at: null,
+          metadata: null
+        };
+      })
     ];
 
     return {
@@ -463,13 +629,15 @@ export class MedusaProductService {
       }
 
       // Get products from the same category
-      const categoryId = product.categories[0].id;
+      const categoryId = product.categories[0]?.id;
       const backendUrl = getMedusaUrl();
       const publishableKey = getMedusaPublishableKey();
       const regionId = getMedusaRegionId();
       
       const url = new URL(`${backendUrl}/store/products`);
-      url.searchParams.set('category_id', categoryId);
+      if (categoryId) {
+        url.searchParams.set('category_id', categoryId);
+      }
       url.searchParams.set('limit', String(limit + 1));
       url.searchParams.set('region_id', regionId);
       
@@ -533,18 +701,21 @@ export class MedusaProductService {
     let lowestPrice: { amount: number; currency: string } | null = null;
     
     for (const variant of product.variants) {
-      // Handle new Medusa v2 calculated_price structure
-      if (variant.calculated_price) {
-        const price = {
-          amount: variant.calculated_price.calculated_amount,
-          currency: variant.calculated_price.currency_code,
-        };
-        
-        if (!lowestPrice || price.amount < lowestPrice.amount) {
-          lowestPrice = price;
+      // Check if variant has a calculated price
+      if (variant.calculated_price !== undefined && variant.prices && variant.prices.length > 0) {
+        const firstPrice = variant.prices[0];
+        if (firstPrice) {
+          const price = {
+            amount: variant.calculated_price,
+            currency: firstPrice.currency_code,
+          };
+          
+          if (!lowestPrice || price.amount < lowestPrice.amount) {
+            lowestPrice = price;
+          }
         }
       }
-      // Fallback to old prices structure if available
+      // Fallback to prices array
       else if (variant.prices?.length) {
         for (const price of variant.prices) {
           if (!lowestPrice || price.amount < lowestPrice.amount) {
@@ -569,35 +740,8 @@ export class MedusaProductService {
     const lowestPrice = this.getLowestPrice(product);
 
     return {
-      id: product.id,
-      handle: product.handle,
-      title: product.title,
-      description: product.description,
-      thumbnail: product.thumbnail || product.images?.[0]?.url,
-      images:
-        product.images?.map((img) => ({
-          url: img.url,
-          alt: product.title,
-        })) || [],
-      variants:
-        product.variants?.map((v) => ({
-          id: v.id,
-          title: v.title,
-          sku: v.sku,
-          // Include both old and new price structures
-          prices: v.prices?.map((p) => ({
-            amount: p.amount,
-            currency_code: p.currency_code,
-          })) || [],
-          calculated_price: v.calculated_price || null,
-          inventory_quantity: v.inventory_quantity || 0,
-        })) || [],
-      categories:
-        product.categories?.map((cat) => ({
-          id: cat.id,
-          name: cat.name,
-          handle: cat.handle,
-        })) || [],
+      ...product,
+      thumbnail: product.thumbnail || product.images?.[0]?.url || null,
       price: lowestPrice
         ? {
             amount: lowestPrice.amount,

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/cart-store';
 import { useWishlistStore, type WishlistItem } from '@/lib/wishlist-store';
+import { createProductId, createVariantId, createQuantity } from '@/types/branded';
 import { useMobile } from '@/hooks/use-mobile';
 import { SizeGuideModal } from '@/components/size-guide-modal';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
@@ -99,8 +100,11 @@ export function QuickViewModalModular({
 
       if (variant) {
         variantId = variant.id;
-      } else {
-        variantId = product.variants[0].id;
+      } else if (product.variants.length > 0) {
+        const firstVariant = product.variants[0];
+        if (firstVariant) {
+          variantId = firstVariant.id;
+        }
       }
     }
 
@@ -109,7 +113,7 @@ export function QuickViewModalModular({
     }
 
     try {
-      await addItem(product.id, variantId, quantity);
+      await addItem(createProductId(product.id), createVariantId(variantId), createQuantity(quantity));
 
       setIsAdded(true);
       setTimeout(() => {
@@ -160,9 +164,9 @@ export function QuickViewModalModular({
                   onIndexChange={setCurrentImageIndex}
                   productName={product.name}
                   badges={{
-                    discount: product.discount,
-                    isNew: product.isNew,
-                    soldOut: product.soldOut,
+                    ...(product.discount && { discount: product.discount }),
+                    ...(product.isNew && { isNew: product.isNew }),
+                    ...(product.soldOut && { soldOut: product.soldOut }),
                   }}
                 />
               </div>
@@ -185,7 +189,7 @@ export function QuickViewModalModular({
                     onQuantityChange={setQuantity}
                     onAddToCart={handleAddToCart}
                     isAdded={isAdded}
-                    isSoldOut={product.soldOut}
+                    isSoldOut={product.soldOut || false}
                     onSizeGuideOpen={() => setIsSizeGuideOpen(true)}
                   />
 
@@ -235,9 +239,9 @@ export function QuickViewModalModular({
               onIndexChange={setCurrentImageIndex}
               productName={product.name}
               badges={{
-                discount: product.discount,
-                isNew: product.isNew,
-                soldOut: product.soldOut,
+                ...(product.discount && { discount: product.discount }),
+                ...(product.isNew && { isNew: product.isNew }),
+                ...(product.soldOut && { soldOut: product.soldOut }),
               }}
             />
 
@@ -259,7 +263,7 @@ export function QuickViewModalModular({
                   onQuantityChange={setQuantity}
                   onAddToCart={handleAddToCart}
                   isAdded={isAdded}
-                  isSoldOut={product.soldOut}
+                  isSoldOut={product.soldOut || false}
                   onSizeGuideOpen={() => setIsSizeGuideOpen(true)}
                 />
               </ModalBody>

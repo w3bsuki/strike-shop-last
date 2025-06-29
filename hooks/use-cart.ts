@@ -81,7 +81,7 @@ export function useCart() {
       // newItem should have productId, variantId, quantity
       await addItem(newItem.productId, newItem.variantId, newItem.quantity);
     },
-    onError: (error, newItem, context) => {
+    onError: (error, _newItem, _context) => {
       // Rollback on error
       console.error('Failed to add item to cart:', error);
       // Could implement rollback logic here
@@ -98,7 +98,7 @@ export function useCart() {
 
   // Mutation for updating items
   const updateItemMutation = useMutation({
-    mutationFn: ({ itemId, size, quantity }: { itemId: string; size: string; quantity: number }) =>
+    mutationFn: ({ itemId, size: _size, quantity }: { itemId: string; size: string; quantity: number }) =>
       cartAPI.updateItem(itemId, quantity, cart.cartId),
     onMutate: async ({ itemId, size, quantity }) => {
       await updateQuantity(itemId, size, quantity);
@@ -113,7 +113,7 @@ export function useCart() {
 
   // Mutation for removing items
   const removeItemMutation = useMutation({
-    mutationFn: ({ itemId, size }: { itemId: string; size: string }) => 
+    mutationFn: ({ itemId, size: _size }: { itemId: string; size: string }) => 
       cartAPI.removeItem(itemId, cart.cartId),
     onMutate: async ({ itemId, size }) => {
       await removeItem(itemId, size);

@@ -20,10 +20,10 @@ export function FlexibleDivider({ config, className }: FlexibleDividerProps) {
       case 'marquee':
         return (
           <DividerMarquee
-            text={config.text}
-            speed={config.speed}
-            direction={config.direction}
-            separator={config.separator}
+            text={config.text || ''}
+            {...(config.speed && { speed: config.speed })}
+            {...(config.direction && { direction: config.direction })}
+            {...(config.separator && { separator: config.separator })}
             pauseOnHover
           />
         );
@@ -32,8 +32,8 @@ export function FlexibleDivider({ config, className }: FlexibleDividerProps) {
         return (
           <div className="text-center">
             <DividerText
-              text={config.text}
-              size={config.size}
+              {...(config.text && { text: config.text })}
+              size={config.size === 'xl' ? 'lg' : (config.size as any)}
               color={config.theme === 'inverted' ? 'black' : 'white'}
             />
           </div>

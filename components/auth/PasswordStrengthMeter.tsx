@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Progress } from '@/components/ui/progress';
 import { Check, X, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -189,11 +188,15 @@ export function PasswordStrengthMeter({
             {strengthLabels[strength.level]}
           </span>
         </div>
-        <Progress
-          value={strength.score}
-          className="h-2"
-          indicatorClassName={strengthColors[strength.level]}
-        />
+        <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+          <div
+            className={cn(
+              "h-full transition-all",
+              strengthColors[strength.level]
+            )}
+            style={{ width: `${strength.score}%` }}
+          />
+        </div>
       </div>
 
       {/* Requirements checklist */}

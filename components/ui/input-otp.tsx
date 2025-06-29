@@ -1,25 +1,37 @@
 'use client';
 
 import * as React from 'react';
-import { OTPInput, OTPInputContext } from 'input-otp';
 import { Dot } from 'lucide-react';
-
 import { cn } from '@/lib/utils';
 
-const InputOTP = React.forwardRef<
-  React.ElementRef<typeof OTPInput>,
-  React.ComponentPropsWithoutRef<typeof OTPInput>
->(({ className, containerClassName, ...props }, ref) => (
-  <OTPInput
-    ref={ref}
-    containerClassName={cn(
-      'flex items-center gap-2 has-[:disabled]:opacity-50',
-      containerClassName
-    )}
-    className={cn('disabled:cursor-not-allowed', className)}
-    {...props}
-  />
-));
+// TODO: InputOTP component disabled due to missing input-otp dependency
+// Install input-otp to re-enable this component
+
+export interface InputOTPProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
+  maxLength?: number;
+  onComplete?: (value: string) => void;
+  value?: string;
+  onChange?: (value: string) => void;
+  containerClassName?: string;
+}
+
+const InputOTP = React.forwardRef<HTMLDivElement, InputOTPProps>(
+  ({ className, containerClassName, maxLength = 6, onComplete, value, onChange, ...props }, ref) => {
+    return (
+      <div 
+        ref={ref} 
+        className={cn('flex items-center gap-2 has-[:disabled]:opacity-50', containerClassName)} 
+        {...props}
+      >
+        <div className={cn('disabled:cursor-not-allowed text-center text-muted-foreground p-4 border rounded', className)}>
+          InputOTP component disabled
+          <br />
+          Install input-otp dependency to enable
+        </div>
+      </div>
+    );
+  }
+);
 InputOTP.displayName = 'InputOTP';
 
 const InputOTPGroup = React.forwardRef<
@@ -34,25 +46,16 @@ const InputOTPSlot = React.forwardRef<
   React.ElementRef<'div'>,
   React.ComponentPropsWithoutRef<'div'> & { index: number }
 >(({ index, className, ...props }, ref) => {
-  const inputOTPContext = React.useContext(OTPInputContext);
-  const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index];
-
   return (
     <div
       ref={ref}
       className={cn(
         'relative flex h-10 w-10 items-center justify-center border-y border-r border-input text-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md',
-        isActive && 'z-10 ring-2 ring-ring ring-offset-background',
         className
       )}
       {...props}
     >
-      {char}
-      {hasFakeCaret && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />
-        </div>
-      )}
+      <span className="text-muted-foreground">-</span>
     </div>
   );
 });

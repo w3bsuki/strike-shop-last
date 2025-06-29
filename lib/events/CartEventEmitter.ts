@@ -4,7 +4,7 @@
  */
 
 import type { CartItem } from '@/lib/cart-store';
-import type { IntegratedCartItem, IntegratedProduct } from '@/types/integrated';
+import type { IntegratedProduct } from '@/types/integrated';
 
 /**
  * Cart event types

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 
 interface SwipeGestureOptions {
   onSwipeLeft?: () => void;
@@ -25,8 +25,11 @@ export function useSwipeGesture({
   const touchEndY = useRef<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
+    const firstTouch = e.touches[0];
+    if (firstTouch) {
+      touchStartX.current = firstTouch.clientX;
+      touchStartY.current = firstTouch.clientY;
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -34,8 +37,11 @@ export function useSwipeGesture({
       e.preventDefault();
     }
     
-    touchEndX.current = e.touches[0].clientX;
-    touchEndY.current = e.touches[0].clientY;
+    const firstTouch = e.touches[0];
+    if (firstTouch) {
+      touchEndX.current = firstTouch.clientX;
+      touchEndY.current = firstTouch.clientY;
+    }
   };
 
   const handleTouchEnd = () => {

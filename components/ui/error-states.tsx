@@ -143,7 +143,7 @@ export function NetworkError({ onRetry }: { onRetry?: () => void }) {
     <ErrorState
       title="Connection Error"
       message="Please check your internet connection and try again."
-      onRetry={onRetry}
+      {...(onRetry && { onRetry })}
       showHomeButton={false}
     />
   );

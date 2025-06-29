@@ -3,14 +3,6 @@
 import { useEffect } from 'react';
 import { onCLS, onFID, onFCP, onLCP, onTTFB } from 'web-vitals';
 
-// Metric type from web-vitals
-interface Metric {
-  name: string;
-  value: number;
-  delta: number;
-  id: string;
-}
-
 interface WebVitalsData {
   name: string;
   value: number;
@@ -26,7 +18,7 @@ export function WebVitalsTracker() {
     if (typeof window === 'undefined') return;
 
     // CRITICAL: Send vitals data to analytics (replace with your analytics service)
-    const sendToAnalytics = (metric: Metric) => {
+    const sendToAnalytics = (metric: { name: string; value: number; delta: number; id: string; navigationType?: string }) => {
       const data: WebVitalsData = {
         name: metric.name,
         value: metric.value,
@@ -68,11 +60,41 @@ export function WebVitalsTracker() {
 
     // CRITICAL: Track all Core Web Vitals
     try {
-      onCLS(sendToAnalytics);
-      onFID(sendToAnalytics);
-      onFCP(sendToAnalytics);
-      onLCP(sendToAnalytics);
-      onTTFB(sendToAnalytics);
+      onCLS((metric) => sendToAnalytics({
+        name: metric.name,
+        value: metric.value,
+        delta: metric.delta,
+        id: metric.id,
+        navigationType: (metric as any).navigationType,
+      }));
+      onFID((metric) => sendToAnalytics({
+        name: metric.name,
+        value: metric.value,
+        delta: metric.delta,
+        id: metric.id,
+        navigationType: (metric as any).navigationType,
+      }));
+      onFCP((metric) => sendToAnalytics({
+        name: metric.name,
+        value: metric.value,
+        delta: metric.delta,
+        id: metric.id,
+        navigationType: (metric as any).navigationType,
+      }));
+      onLCP((metric) => sendToAnalytics({
+        name: metric.name,
+        value: metric.value,
+        delta: metric.delta,
+        id: metric.id,
+        navigationType: (metric as any).navigationType,
+      }));
+      onTTFB((metric) => sendToAnalytics({
+        name: metric.name,
+        value: metric.value,
+        delta: metric.delta,
+        id: metric.id,
+        navigationType: (metric as any).navigationType,
+      }));
     } catch (error) {
       console.warn('Web Vitals tracking failed:', error);
     }
@@ -90,7 +112,7 @@ export function WebVitalsTracker() {
             delta: pageLoadTime,
             id: `page-load-${Date.now()}`,
             navigationType: navigation.type,
-          } as Metric);
+          });
         }
 
         // Track resource loading performance
@@ -106,7 +128,7 @@ export function WebVitalsTracker() {
             delta: slowResources.length,
             id: `slow-resources-${Date.now()}`,
             navigationType: 'navigate',
-          } as Metric);
+          });
         }
       }
     };
@@ -119,27 +141,27 @@ export function WebVitalsTracker() {
     }
 
     // MONITORING: Track JavaScript errors
-    const errorHandler = (event: ErrorEvent) => {
+    const errorHandler = (_event: ErrorEvent) => {
       sendToAnalytics({
         name: 'javascript_error',
         value: 1,
         delta: 1,
         id: `error-${Date.now()}`,
         navigationType: 'navigate',
-      } as Metric);
+      });
     };
 
     window.addEventListener('error', errorHandler);
 
     // MONITORING: Track unhandled promise rejections
-    const rejectionHandler = (event: PromiseRejectionEvent) => {
+    const rejectionHandler = (_event: PromiseRejectionEvent) => {
       sendToAnalytics({
         name: 'unhandled_rejection',
         value: 1,
         delta: 1,
         id: `rejection-${Date.now()}`,
         navigationType: 'navigate',
-      } as Metric);
+      });
     };
 
     window.addEventListener('unhandledrejection', rejectionHandler);

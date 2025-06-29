@@ -93,7 +93,7 @@ export class AuthRateLimiter {
         reason: 'ip',
         remaining: ipCheck.remaining,
         resetAt: ipCheck.resetAt,
-        backoffMinutes: ipCheck.backoffMinutes
+        ...(ipCheck.backoffMinutes !== undefined && { backoffMinutes: ipCheck.backoffMinutes })
       };
     }
 

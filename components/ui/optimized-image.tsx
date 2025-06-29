@@ -17,7 +17,6 @@ interface OptimizedImageProps {
   sizes?: string;
   objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
   quality?: number;
-  loading?: 'lazy' | 'eager';
   onLoad?: () => void;
   onError?: () => void;
 }
@@ -39,7 +38,6 @@ export function OptimizedImage({
   sizes = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw',
   objectFit = 'cover',
   quality = 85,
-  loading = 'lazy',
   onLoad,
   onError,
 }: OptimizedImageProps) {
@@ -128,8 +126,8 @@ export function OptimizedImage({
         <Image
           src={src}
           alt={alt}
-          width={width}
-          height={height}
+          {...(width && { width })}
+          {...(height && { height })}
           className={cn(
             'absolute inset-0 w-full h-full',
             'transition-opacity duration-300 ease-in-out',
@@ -144,16 +142,16 @@ export function OptimizedImage({
           )}
           priority={priority}
           placeholder={placeholder}
-          blurDataURL={defaultBlurDataURL}
+          {...(placeholder === 'blur' && { blurDataURL: defaultBlurDataURL })}
           sizes={sizes}
           quality={quality}
-          loading={priority ? 'eager' : 'lazy'}
+          {...(!priority && { loading: 'lazy' })}
           onLoad={handleLoad}
           onError={handleError}
           // PERFORMANCE: Optimize image decoding
-          decoding="async"
+          {...{ decoding: 'async' }}
           // PERFORMANCE: Fetch priority for LCP images
-          fetchPriority={priority ? 'high' : 'low'}
+          {...(priority ? { fetchPriority: 'high' } : { fetchPriority: 'low' })}
         />
       )}
       

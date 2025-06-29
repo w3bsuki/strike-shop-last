@@ -42,7 +42,7 @@ export function CategoryIcon({
   size = 24 
 }: CategoryIconProps) {
   const normalizedName = categoryName.toLowerCase().replace(/[^a-z]/g, '');
-  const Icon = categoryIcons[normalizedName] || categoryIcons.default;
+  const Icon = categoryIcons[normalizedName] || categoryIcons.default || Package;
   
   return (
     <Icon 

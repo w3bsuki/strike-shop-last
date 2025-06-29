@@ -58,6 +58,7 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
   };
 
   const updatePriceRange = (values: number[]) => {
+    if (values.length < 2 || values[0] === undefined || values[1] === undefined) return;
     const params = new URLSearchParams(searchParams.toString());
     params.set('minPrice', values[0].toString());
     params.set('maxPrice', values[1].toString());

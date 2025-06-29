@@ -28,7 +28,6 @@ export interface SuspiciousPattern {
 export class AuthMonitor {
   private redis: Redis;
   private readonly EVENTS_TTL = 30 * 24 * 60 * 60; // 30 days
-  private readonly LOCATION_CACHE_TTL = 24 * 60 * 60; // 24 hours
 
   constructor() {
     this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
@@ -318,7 +317,7 @@ export class AuthMonitor {
       ...stats,
       uniqueDevices: devices,
       uniqueLocations: locations.size,
-      lastLogin
+      ...(lastLogin && { lastLogin })
     };
   }
 
@@ -338,11 +337,12 @@ export class AuthMonitor {
       '100'
     );
 
-    const recentEvents = streamEvents.map(([id, fields]) => {
+    const recentEvents = streamEvents.map(([_id, fields]) => {
       const eventData = fields.find((f, i) => i % 2 === 0 && f === 'event');
-      const eventIndex = fields.indexOf(eventData!);
-      return JSON.parse(fields[eventIndex + 1]);
-    });
+      const eventIndex = fields.indexOf(eventData || '');
+      const eventValue = eventIndex >= 0 ? fields[eventIndex + 1] : undefined;
+      return eventValue ? JSON.parse(eventValue) : null;
+    }).filter(Boolean) as AuthEvent[];
 
     // Get flagged accounts
     const flaggedKeys = await this.redis.keys('auth:flagged:*');
@@ -429,12 +429,12 @@ export async function logAuthenticationEvent(
 
   await monitor.logAuthEvent({
     type,
-    userId,
+    ...(userId && { userId }),
     email,
     ip,
     userAgent,
-    location,
+    ...(location && { location }),
     deviceFingerprint,
-    metadata
+    ...(metadata && { metadata })
   });
 }

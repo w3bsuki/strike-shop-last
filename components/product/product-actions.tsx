@@ -71,7 +71,7 @@ const ProductActions = React.forwardRef<HTMLDivElement, ProductActionsProps>(
     const handleQuickView = React.useCallback((e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      openQuickView(product);
+      openQuickView(product.id);
       announceToScreenReader(`Quick view opened for ${product.name}`, 'polite');
     }, [openQuickView, product, announceToScreenReader]);
 
@@ -95,7 +95,7 @@ const ProductActions = React.forwardRef<HTMLDivElement, ProductActionsProps>(
       }
     }, [product, addItem, announceToScreenReader]);
 
-    const buttonSize = size === "sm" ? "icon-sm" : size === "lg" ? "icon-lg" : "icon";
+    const buttonSize = "icon" as const;
     const iconSize = size === "sm" ? "h-3 w-3" : size === "lg" ? "h-5 w-5" : "h-4 w-4";
 
     const layoutClasses = {

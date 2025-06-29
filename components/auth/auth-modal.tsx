@@ -11,9 +11,9 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { useAuthStore } from '@/lib/auth-store';
-import { SignInForm } from './sign-in-form';
-import { SignUpForm } from './sign-up-form';
-import { AuthToggle } from './auth-toggle';
+import { SignInForm } from './SignInForm';
+import { SignUpForm } from './SignUpForm';
+import { AuthToggle } from './AuthToggle';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -49,7 +49,7 @@ export default function AuthModal({
 
   const { login, register, socialLogin, isLoading } = useAuthStore();
 
-  const handleSubmit = async (_e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
@@ -72,7 +72,7 @@ export default function AuthModal({
   };
 
   const handleSocialLogin = async (
-    _provider: 'google' | 'apple' | 'facebook'
+    provider: 'google' | 'apple' | 'facebook'
   ) => {
     try {
       const success = await socialLogin(provider);
@@ -173,7 +173,7 @@ export default function AuthModal({
         {mode === 'login' ? (
           <SignInForm
             formData={formData}
-            setFormData={setFormData}
+            setFormData={(data) => setFormData({ ...formData, ...data })}
             onSubmit={handleSubmit}
             isLoading={isLoading}
           />

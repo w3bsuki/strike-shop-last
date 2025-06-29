@@ -56,6 +56,7 @@ export enum SecurityEventType {
   UNUSUAL_TRAFFIC_PATTERN = 'unusual_traffic_pattern',
   API_KEY_ABUSE = 'api_key_abuse',
   CORS_VIOLATION = 'cors_violation',
+  SUSPICIOUS_ACTIVITY = 'suspicious_activity',
   CSRF_VIOLATION = 'csrf_violation'
 }
 
@@ -180,10 +181,10 @@ export class ApiMonitor {
       method: request.method,
       statusCode: response.status,
       responseTime: response.duration,
-      userId: context?.userId,
+      ...(context?.userId && { userId: context.userId }),
       ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
       userAgent: request.headers.get('user-agent') || 'unknown',
-      error: context?.error
+      ...(context?.error && { error: context.error })
     }
     
     metricsStore.addMetric(metric)
@@ -332,7 +333,7 @@ export class ApiMonitor {
         'warning',
         `Suspicious activity detected from ${metric.ip}`,
         {
-          ip: metric.ip,
+          ...(metric.ip !== 'unknown' && { ip: metric.ip }),
           endpoint: metric.endpoint,
           metadata: { indicators: suspiciousIndicators }
         }
@@ -471,7 +472,8 @@ export class ApiMonitor {
       issues.push(`High error rate: ${(summary.summary.errorRate * 100).toFixed(2)}%`)
     }
     
-    if (summary.summary.p95ResponseTime > MONITORING_CONFIG.THRESHOLDS.RESPONSE_TIME_P95) {
+    if (summary.summary.p95ResponseTime !== undefined && 
+        summary.summary.p95ResponseTime > MONITORING_CONFIG.THRESHOLDS.RESPONSE_TIME_P95) {
       issues.push(`High response time: ${summary.summary.p95ResponseTime}ms`)
     }
     
@@ -493,7 +495,7 @@ export function withMonitoring(
 ) {
   return async (request: NextRequest): Promise<Response> => {
     const startTime = Date.now()
-    let response: Response
+    let response: Response | undefined
     let error: string | undefined
     
     try {
@@ -510,7 +512,7 @@ export function withMonitoring(
           status: response?.status || 500,
           duration
         },
-        { error }
+        error ? { error } : undefined
       )
     }
     

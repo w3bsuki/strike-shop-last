@@ -81,10 +81,12 @@ export class CSRFProtection {
       if (tokenSessionId !== sessionId) return false;
 
       // Check token age
+      if (!timestamp) return false;
       const tokenAge = Date.now() - parseInt(timestamp);
       if (tokenAge > maxAge) return false;
 
       // Verify signature
+      if (!signature) return false;
       const payload = `${tokenSessionId}.${timestamp}`;
       const expectedSignature = crypto
         .createHmac('sha256', this.secret)

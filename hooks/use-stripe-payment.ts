@@ -97,7 +97,7 @@ export function useStripePayment() {
         quantity: item.quantity,
         size: item.size,
       })),
-      shipping: shippingDetails,
+      ...(shippingDetails && { shipping: shippingDetails }),
     };
 
     return createPaymentIntentMutation.mutateAsync(paymentData);

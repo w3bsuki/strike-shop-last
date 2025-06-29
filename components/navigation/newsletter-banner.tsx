@@ -18,6 +18,8 @@ export function NewsletterBanner({ className, onDismiss }: NewsletterBannerProps
     onDismiss?.();
   };
 
+  if (!isVisible) return null;
+
   return (
     <div
       className={cn(

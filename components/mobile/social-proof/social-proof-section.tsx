@@ -83,7 +83,6 @@ export function SocialProofSection({
         <div className="strike-container">
           <SectionHeader
             title={title}
-            subtitle={subtitle}
             showCta={showCta}
             ctaText={ctaText}
             ctaHref={ctaHref}
@@ -115,7 +114,6 @@ export function SocialProofSection({
         <div className="strike-container">
           <SectionHeader
             title={title}
-            subtitle={subtitle}
             showCta={showCta}
             ctaText={ctaText}
             ctaHref={ctaHref}

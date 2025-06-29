@@ -7,7 +7,6 @@ import { ProductScroll } from "./product-scroll";
 import { ProductGrid } from "./product-grid";
 import { ProductCard } from "./ProductCard";
 import { ProductBadge } from "./product-badge";
-import { cn } from "@/lib/utils";
 
 type Product = {
   id: string;
@@ -77,11 +76,11 @@ export function ProductShowcase({
     <ProductSection spacing={sectionSpacing} background={sectionBackground} className={className}>
       <ProductHeader
         title={title}
-        description={description}
+        {...(description && { description })}
         viewAllText={viewAllText}
-        viewAllHref={viewAllLink}
+        {...(viewAllLink && { viewAllHref: viewAllLink })}
         align={headerAlign}
-        badge={badge}
+        {...(badge && { badge })}
       />
       
       {layout === "scroll" ? (

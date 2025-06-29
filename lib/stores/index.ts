@@ -3,79 +3,79 @@ import { persist, createJSONStorage, devtools } from 'zustand/middleware';
 import { createCartSlice } from './slices/cart';
 import { createWishlistSlice } from './slices/wishlist';
 import { createAuthSlice } from './slices/auth';
-import { createMigrationStorage, executeMigrations } from './migrations';
+import { executeMigrations } from './migrations';
 import type { StoreState, PersistedState } from './types';
 
 // Create the unified store with all slices
-const createStoreWithMiddleware = () => {
-  const persistedStore = persist<StoreState>(
-    (set, get, api) => {
-      // Create slices once to avoid duplication
-      const cartSlice = createCartSlice(set, get, api);
-      const wishlistSlice = createWishlistSlice(set, get, api);
-      const authSlice = createAuthSlice(set, get, api);
+export const useStore = create<StoreState>()(
+  devtools(
+    persist<StoreState, [], [], PersistedState>(
+      (set, get, api) => {
+        // Create slices once to avoid duplication
+        const cartSlice = createCartSlice(set, get, api);
+        const wishlistSlice = createWishlistSlice(set, get, api);
+        const authSlice = createAuthSlice(set, get, api);
 
-      return {
-        // Cart state
-        cart: {
-          cartId: cartSlice.cartId,
-          items: cartSlice.items,
-          isOpen: cartSlice.isOpen,
-          isLoading: cartSlice.isLoading,
-          error: cartSlice.error,
-        },
+        return {
+          // Cart state
+          cart: {
+            cartId: cartSlice.cartId,
+            items: cartSlice.items,
+            isOpen: cartSlice.isOpen,
+            isLoading: cartSlice.isLoading,
+            error: cartSlice.error,
+          },
 
-        // Wishlist state
-        wishlist: {
-          items: wishlistSlice.items,
-          isLoading: wishlistSlice.isLoading,
-        },
+          // Wishlist state
+          wishlist: {
+            items: wishlistSlice.items,
+            isLoading: wishlistSlice.isLoading,
+          },
 
-        // Auth state
-        auth: {
-          user: authSlice.user,
-          isAuthenticated: authSlice.isAuthenticated,
-          isLoading: authSlice.isLoading,
-          error: authSlice.error,
-        },
+          // Auth state
+          auth: {
+            user: authSlice.user,
+            isAuthenticated: authSlice.isAuthenticated,
+            isLoading: authSlice.isLoading,
+            error: authSlice.error,
+          },
 
-        // Combine all actions
-        actions: {
-          cart: cartSlice.actions.cart,
-          wishlist: wishlistSlice.actions.wishlist,
-          auth: authSlice.actions.auth,
-        },
-      };
-    },
-    {
-      name: 'strike-shop-storage',
-      partialize: (state): PersistedState => ({
-        cart: {
-          cartId: state.cart.cartId,
-        },
-        wishlist: {
-          items: state.wishlist.items,
-        },
-        auth: {
-          user: state.auth.user,
-        },
-      }),
-      onRehydrateStorage: () => (state) => {
-        // Handle rehydration
-        if (state) {
-          // Ensure auth state is properly set after rehydration
-          if (state.auth.user) {
-            state.auth.isAuthenticated = true;
+          // Combine all actions
+          actions: {
+            cart: cartSlice.actions.cart,
+            wishlist: wishlistSlice.actions.wishlist,
+            auth: authSlice.actions.auth,
+          },
+        };
+      },
+      {
+        name: 'strike-shop-storage',
+        partialize: (state): PersistedState => ({
+          cart: {
+            cartId: state.cart.cartId,
+          },
+          wishlist: {
+            items: state.wishlist.items,
+          },
+          auth: {
+            user: state.auth.user,
+          },
+        }),
+        onRehydrateStorage: () => (state) => {
+          // Handle rehydration
+          if (state) {
+            // Ensure auth state is properly set after rehydration
+            if (state.auth.user) {
+              state.auth.isAuthenticated = true;
+            }
           }
-        }
-      },
-      version: 4, // Current version with all migrations
-      migrate: (persistedState: any, version: number) => {
-        // Use the migration system
-        return executeMigrations(persistedState, version, 4);
-      },
-      storage: createMigrationStorage(
-        createJSONStorage(() => {
+        },
+        version: 4, // Current version with all migrations
+        migrate: (persistedState: any, version: number) => {
+          // Use the migration system
+          return executeMigrations(persistedState, version, 4);
+        },
+        storage: createJSONStorage(() => {
           // Safe localStorage access that works with SSR
           if (typeof window !== 'undefined') {
             return localStorage;
@@ -87,22 +87,14 @@ const createStoreWithMiddleware = () => {
             removeItem: () => {},
           };
         }),
-        4
-      ),
-    }
-  );
-
-  // Only wrap with devtools in development
-  if (process.env.NODE_ENV === 'development') {
-    return devtools(persistedStore, {
+      }
+    ),
+    {
       name: 'strike-shop-store',
-    });
-  }
-
-  return persistedStore;
-};
-
-export const useStore = create<StoreState>()(createStoreWithMiddleware());
+      enabled: process.env.NODE_ENV === 'development',
+    }
+  )
+);
 
 // Memoized selectors for better performance
 const cartSelector = (state: StoreState) => state.cart;

@@ -38,21 +38,21 @@ export const DynamicPieChart = dynamic(
 // Sanity Studio Components
 // ========================================
 
-// Dynamic import for Sanity Studio (saves ~2MB from initial bundle)
-export const DynamicStudio = dynamic(
-  () => import('sanity').then(mod => ({ default: mod.Studio })),
-  {
-    
-    loading: () => (
-      <div className="flex items-center justify-center h-screen">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary" />
-          <p className="text-sm text-muted-foreground">Loading Studio...</p>
-        </div>
-      </div>
-    ),
-  }
-);
+// Dynamic import for Sanity Studio (saves ~2MB from initial bundle) - commented out as sanity is not installed
+// export const DynamicStudio = dynamic(
+//   () => import('sanity').then(mod => ({ default: mod.Studio })),
+//   {
+//     
+//     loading: () => (
+//       <div className="flex items-center justify-center h-screen">
+//         <div className="flex flex-col items-center gap-4">
+//           <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary" />
+//           <p className="text-sm text-muted-foreground">Loading Studio...</p>
+//         </div>
+//       </div>
+//     ),
+//   }
+// );
 
 // ========================================
 // Heavy UI Components
@@ -67,14 +67,14 @@ export const DynamicCarousel = dynamic(
   }
 );
 
-// Dynamic import for date picker
-export const DynamicDatePicker = dynamic(
-  () => import('@/components/ui/date-picker').then(mod => ({ default: mod.DatePicker })),
-  {
-    
-    loading: () => <div className="h-10 w-[280px] animate-pulse bg-muted rounded" />,
-  }
-);
+// Dynamic import for date picker - commented out as date-picker component doesn't exist
+// export const DynamicDatePicker = dynamic(
+//   () => import('@/components/ui/date-picker').then(mod => ({ default: mod.DatePicker })),
+//   {
+//     
+//     loading: () => <div className="h-10 w-[280px] animate-pulse bg-muted rounded" />,
+//   }
+// );
 
 // ========================================
 // Usage Examples

@@ -27,37 +27,37 @@ const ChartContainer = dynamic(
     
     loading: () => <div className="h-[300px] bg-gray-100 animate-pulse rounded" />
   }
-);
+) as any;
 
 const ResponsiveContainer = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })),
-  {  }
-);
+  () => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })) as any,
+  { ssr: false }
+) as any;
 
 const LineChart = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.LineChart })),
-  {  }
-);
+  () => import('recharts').then(mod => ({ default: mod.LineChart })) as any,
+  { ssr: false }
+) as any;
 
 const Line = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.Line })),
-  {  }
-);
+  () => import('recharts').then(mod => ({ default: mod.Line })) as any,
+  { ssr: false }
+) as any;
 
 const XAxis = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.XAxis })),
-  {  }
-);
+  () => import('recharts').then(mod => ({ default: mod.XAxis })) as any,
+  { ssr: false }
+) as any;
 
 const YAxis = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.YAxis })),
-  {  }
-);
+  () => import('recharts').then(mod => ({ default: mod.YAxis })) as any,
+  { ssr: false }
+) as any;
 
 const Tooltip = dynamic(
-  () => import('recharts').then(mod => ({ default: mod.Tooltip })),
-  {  }
-);
+  () => import('recharts').then(mod => ({ default: mod.Tooltip })) as any,
+  { ssr: false }
+) as any;
 
 export function AdminDashboardOptimized() {
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month' | 'year'>(

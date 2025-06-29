@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Lock, CreditCard, ShieldCheck } from 'lucide-react';
 import { getStripe, stripeConfig } from '@/lib/stripe-client';
-import { medusaClient } from '@/lib/medusa-service-refactored';
 import { useCartStore } from '@/lib/cart-store';
 import { toast } from '@/hooks/use-toast';
 

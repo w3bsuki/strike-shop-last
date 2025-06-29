@@ -40,7 +40,7 @@ export function QuickViewImage({
       {/* Main Image */}
       <div className="relative h-full w-full">
         <Image
-          src={images[currentIndex]}
+          src={images[currentIndex] || images[0] || ''}
           alt={`${productName} - Image ${currentIndex + 1}`}
           fill
           className="object-contain"

@@ -26,19 +26,19 @@ function normalizeProduct(product: SimpleProduct | IntegratedProduct): SimplePro
     id: product.id,
     name: content.name,
     price: pricing.displayPrice,
-    originalPrice: pricing.displaySalePrice,
-    discount: badges.isSale && pricing.discount 
-      ? `-${pricing.discount.percentage}%` 
-      : undefined,
     image: typeof mainImage === 'string'
       ? mainImage
-      : mainImage?.asset && 'url' in mainImage.asset
-        ? mainImage.asset.url
-        : '/placeholder.svg',
+      : mainImage && 'asset' in mainImage && mainImage.asset && 'url' in mainImage.asset
+        ? (mainImage.asset as any).url as string
+        : mainImage && 'url' in mainImage
+          ? (mainImage as any).url as string
+          : '/placeholder.svg',
     slug: product.slug,
-    isNew: badges.isNew,
-    soldOut: badges.isSoldOut,
-    colors: content.categories?.length || undefined,
+    ...(pricing.displaySalePrice && { originalPrice: pricing.displaySalePrice }),
+    ...(badges.isSale && pricing.discount && { discount: `-${pricing.discount.percentage}%` }),
+    ...(badges.isNew && { isNew: badges.isNew }),
+    ...(badges.isSoldOut && { soldOut: badges.isSoldOut }),
+    ...(content.categories?.length && { colors: content.categories.length })
   };
 }
 

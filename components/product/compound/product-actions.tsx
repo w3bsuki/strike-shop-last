@@ -30,7 +30,7 @@ export const ProductActions = React.memo(({ rawProduct }: ProductActionsProps) =
         <AddToCartButton 
           onClick={actions.handleAddToCart} 
           isLoading={isAddingItem}
-          disabled={product.soldOut}
+          disabled={product.soldOut || false}
           productName={product.name}
         />
       </div>

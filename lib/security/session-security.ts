@@ -67,7 +67,7 @@ export class SessionSecurity {
       ip,
       userAgent,
       deviceFingerprint,
-      metadata
+      ...(metadata && { metadata })
     };
 
     // Store session in Redis
@@ -147,7 +147,7 @@ export class SessionSecurity {
       JSON.stringify(session)
     );
 
-    return { valid: true, session, newToken };
+    return { valid: true, session, ...(newToken && { newToken }) };
   }
 
   // Rotate session ID for security
@@ -382,8 +382,8 @@ export async function validateSessionMiddleware(
       maxAge: 60 * 60 * 8 // 8 hours
     });
     
-    return { valid: true, session: result.session, response };
+    return { valid: true, ...(result.session && { session: result.session }), response };
   }
 
-  return { valid: true, session: result.session };
+  return { valid: true, ...(result.session && { session: result.session }) };
 }

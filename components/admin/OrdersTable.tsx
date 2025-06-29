@@ -102,8 +102,8 @@ export function OrdersTable() {
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.email.toLowerCase().includes(searchQuery.toLowerCase());
+      (order.customer?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (order.email?.toLowerCase() || '').includes(searchQuery.toLowerCase());
 
     const matchesStatus = !statusFilter || order.status === statusFilter;
 
@@ -311,7 +311,7 @@ export function OrdersTable() {
                 <TableCell className="font-medium">{order.total}</TableCell>
                 <TableCell>
                   <span
-                    className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}
+                    className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status || '')}`}
                   >
                     {order.status}
                   </span>

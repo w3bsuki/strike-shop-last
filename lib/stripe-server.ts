@@ -115,8 +115,8 @@ export async function createCustomer({
   try {
     const customer = await stripe.customers.create({
       email,
-      name,
-      metadata,
+      ...(name && { name }),
+      ...(metadata && { metadata }),
     });
 
     return customer;

@@ -49,7 +49,7 @@ const promoBadgeUnitVariants = cva(
 );
 
 export interface PromoBadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'color'>,
     VariantProps<typeof promoBadgeVariants> {
   value: string | number;
   unit?: string;

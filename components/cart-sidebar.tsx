@@ -1,6 +1,7 @@
 'use client';
 
 import { useCartStore } from '@/lib/cart-store';
+import { createProductId, createQuantity } from '@/types/branded';
 import Image from 'next/image';
 import Link from 'next/link';
 import { X, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
@@ -30,7 +31,7 @@ export default function CartSidebar() {
     try {
       // Haptic feedback for mobile
       if (navigator.vibrate) navigator.vibrate(30);
-      await updateQuantity(id, size, quantity);
+      await updateQuantity(createProductId(id), size, createQuantity(quantity));
     } catch (_error) {
       // Error handled by cart store
     }
@@ -40,7 +41,7 @@ export default function CartSidebar() {
     try {
       // Haptic feedback for mobile
       if (navigator.vibrate) navigator.vibrate([50, 25, 50]);
-      await removeItem(id, size);
+      await removeItem(createProductId(id), size);
     } catch (_error) {
       // Error handled by cart store
     }

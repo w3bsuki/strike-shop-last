@@ -19,14 +19,6 @@ const CategoryProducts = dynamic(() => import('./CategoryProducts').then(mod => 
   loading: () => <CategoryProductsSkeleton />
 });
 
-// Lazy load framer-motion components
-const motion = dynamic(() => import('framer-motion').then(mod => ({ default: mod.motion })), {
-  
-}) as any;
-
-const AnimatePresence = dynamic(() => import('framer-motion').then(mod => ({ default: mod.AnimatePresence })), {
-  
-});
 
 interface Product {
   id: string;
@@ -42,7 +34,7 @@ interface Product {
 
 interface CategoryPageClientProps {
   categoryName: string;
-  initialProducts: Product[];
+  initialProducts: any[];
   totalProducts?: number;
 }
 
@@ -56,6 +48,32 @@ function CategoryPageContent() {
     clearFilters,
     isLoading,
   } = useCategory();
+
+  // Transform IntegratedProduct to Product format
+  const transformedProducts: Product[] = sortedProducts.map((product: any) => {
+    const transformed: Product = {
+      id: product.id,
+      name: product.title || product.content?.name || '',
+      price: product.price?.amount ? `£${(product.price.amount / 100).toFixed(2)}` : '£0.00',
+      image: product.thumbnail || product.content?.images?.[0]?.url || '/placeholder.jpg',
+      isNew: product.isNew || false,
+      slug: product.handle || product.slug || '',
+    };
+    
+    if (product.originalPrice?.amount) {
+      transformed.originalPrice = `£${(product.originalPrice.amount / 100).toFixed(2)}`;
+    }
+    
+    if (product.discount) {
+      transformed.discount = `${product.discount}%`;
+    }
+    
+    if (product.variants?.length) {
+      transformed.colors = product.variants.length;
+    }
+    
+    return transformed;
+  });
 
   const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -78,7 +96,7 @@ function CategoryPageContent() {
       <div className="strike-container py-4 sm:py-6 lg:py-8">
         <CategoryHeader
           categoryName={categoryName}
-          productCount={sortedProducts.length}
+          productCount={transformedProducts.length}
           sortBy={filters.sortBy}
           setSortBy={setSortBy}
           activeFiltersCount={activeFiltersCount}
@@ -104,7 +122,7 @@ function CategoryPageContent() {
               <CategoryProductsSkeleton />
             ) : (
               <CategoryProducts
-                products={sortedProducts}
+                products={transformedProducts}
                 clearFilters={clearFilters}
               />
             )}
@@ -132,7 +150,6 @@ function CategoryPageContent() {
 export default function CategoryPageClient({
   categoryName,
   initialProducts,
-  totalProducts = initialProducts.length,
 }: CategoryPageClientProps) {
   return (
     <CategoryProvider

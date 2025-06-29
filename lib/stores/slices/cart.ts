@@ -1,46 +1,9 @@
 import type { StateCreator } from 'zustand';
-import type { StoreState, CartSlice, CartActions } from '../types';
-import type { CartItem } from '../../cart-store';
+import type { StoreState, CartSlice, CartActions, CartItem } from '../types';
 import { medusaClient } from '../../medusa-service-refactored';
 import { cartEventEmitter } from '../../events';
 import { toast } from '@/hooks/use-toast';
 
-// Type definitions for Medusa cart operations
-interface MedusaCartItem {
-  id: string;
-  variant_id: string;
-  variant?: {
-    product_id?: string;
-    product?: { handle?: string };
-    title?: string;
-    sku?: string;
-    prices?: Array<{ amount: number }>;
-  };
-  product_id?: string;
-  title: string;
-  quantity: number;
-  thumbnail?: string;
-  unit_price: number;
-  subtotal?: number;
-}
-
-interface MedusaCart {
-  id: string;
-  items?: MedusaCartItem[];
-  region?: { currency_code: string };
-}
-
-interface MedusaClient {
-  carts: {
-    retrieve: (cartId: string) => Promise<{ cart: MedusaCart }>;
-    create: (data: { region_id: string }) => Promise<{ cart: MedusaCart }>;
-    lineItems: {
-      create: (cartId: string, data: { variant_id: string; quantity: number }) => Promise<{ cart: MedusaCart }>;
-      update: (cartId: string, lineItemId: string, data: { quantity: number }) => Promise<{ cart: MedusaCart }>;
-      delete: (cartId: string, lineItemId: string) => Promise<{ cart: MedusaCart }>;
-    };
-  };
-}
 
 const formatPrice = (amount: number, currencyCode: string = 'GBP') => {
   return new Intl.NumberFormat('en-GB', {
@@ -79,37 +42,35 @@ export const createCartSlice: StateCreator<
         if (cart.cartId) {
           // Validate existing cart
           try {
-            const { cart: medusaCart } = await (
-              medusaClient as MedusaClient
-            ).carts.retrieve(cart.cartId);
+            const medusaCart = await medusaClient.store.cart.retrieve(cart.cartId);
             if (medusaCart) {
               // Update items from server
-              const items =
+              const items: CartItem[] =
                 medusaCart.items?.map((item) => ({
-                  id: item.variant?.product_id || item.product_id,
+                  id: item.variant?.product_id || item.product_id || '',
                   lineItemId: item.id,
                   variantId: item.variant_id,
                   name: item.title,
                   slug: item.variant?.product?.handle || '',
                   size: item.variant?.title || 'One Size',
-                  sku: item.variant?.sku,
+                  ...(item.variant?.sku && { sku: item.variant.sku }),
                   quantity: item.quantity,
-                  image: item.thumbnail,
+                  ...(item.thumbnail && { image: item.thumbnail }),
                   pricing: {
                     unitPrice: item.unit_price,
-                    unitSalePrice: item.variant?.prices?.[0]?.amount,
+                    ...(item.variant?.prices?.[0]?.amount && { unitSalePrice: item.variant.prices[0].amount }),
                     totalPrice:
                       item.subtotal || item.unit_price * item.quantity,
                     displayUnitPrice: formatPrice(
                       item.unit_price,
                       medusaCart.region?.currency_code
                     ),
-                    displayUnitSalePrice: item.variant?.prices?.[0]?.amount
-                      ? formatPrice(
-                          item.variant.prices[0].amount,
-                          medusaCart.region?.currency_code
-                        )
-                      : undefined,
+                    ...(item.variant?.prices?.[0]?.amount && {
+                      displayUnitSalePrice: formatPrice(
+                        item.variant.prices[0].amount,
+                        medusaCart.region?.currency_code
+                      )
+                    }),
                     displayTotalPrice: formatPrice(
                       item.subtotal || item.unit_price * item.quantity,
                       medusaCart.region?.currency_code
@@ -138,7 +99,7 @@ export const createCartSlice: StateCreator<
 
         // Create new cart
         try {
-          const { cart: medusaCart } = await (medusaClient as MedusaClient).carts.create(
+          const medusaCart = await medusaClient.store.carts.create(
             {
               region_id:
                 process.env.NEXT_PUBLIC_MEDUSA_REGION_ID ||
@@ -200,39 +161,37 @@ export const createCartSlice: StateCreator<
           }
 
           // Add line item
-          const { cart: medusaCart } = await (
-            medusaClient as MedusaClient
-          ).carts.lineItems.create(currentCartId, {
+          const medusaCart = await medusaClient.store.carts.addLineItem(currentCartId, {
             variant_id: variantId,
             quantity,
           });
 
           // Update local state
-          const items =
+          const items: CartItem[] =
             medusaCart.items?.map((item) => ({
-              id: item.variant?.product_id || item.product_id,
+              id: item.variant?.product_id || item.product_id || '',
               lineItemId: item.id,
               variantId: item.variant_id,
               name: item.title,
               slug: item.variant?.product?.handle || '',
               size: item.variant?.title || 'One Size',
-              sku: item.variant?.sku,
+              ...(item.variant?.sku && { sku: item.variant.sku }),
               quantity: item.quantity,
-              image: item.thumbnail,
+              ...(item.thumbnail && { image: item.thumbnail }),
               pricing: {
                 unitPrice: item.unit_price,
-                unitSalePrice: item.variant?.prices?.[0]?.amount,
+                ...(item.variant?.prices?.[0]?.amount && { unitSalePrice: item.variant.prices[0].amount }),
                 totalPrice: item.subtotal || item.unit_price * item.quantity,
                 displayUnitPrice: formatPrice(
                   item.unit_price,
                   medusaCart.region?.currency_code
                 ),
-                displayUnitSalePrice: item.variant?.prices?.[0]?.amount
-                  ? formatPrice(
-                      item.variant.prices[0].amount,
-                      medusaCart.region?.currency_code
-                    )
-                  : undefined,
+                ...(item.variant?.prices?.[0]?.amount && {
+                  displayUnitSalePrice: formatPrice(
+                    item.variant.prices[0].amount,
+                    medusaCart.region?.currency_code
+                  )
+                }),
                 displayTotalPrice: formatPrice(
                   item.subtotal || item.unit_price * item.quantity,
                   medusaCart.region?.currency_code
@@ -326,9 +285,7 @@ export const createCartSlice: StateCreator<
           if (!item) throw new Error('Item not found');
 
           // Update line item
-          const { cart: medusaCart } = await (
-            medusaClient as MedusaClient
-          ).carts.lineItems.update(cart.cartId, item.lineItemId, {
+          const medusaCart = await medusaClient.store.carts.updateLineItem(cart.cartId, item.lineItemId, {
             quantity,
           });
 
@@ -400,9 +357,7 @@ export const createCartSlice: StateCreator<
           if (!item) throw new Error('Item not found');
 
           // Delete line item
-          const { cart: medusaCart } = await (
-            medusaClient as MedusaClient
-          ).carts.lineItems.delete(cart.cartId, item.lineItemId);
+          const medusaCart = await medusaClient.store.carts.deleteLineItem(cart.cartId, item.lineItemId);
 
           // Update local state
           const updatedItems =

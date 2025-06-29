@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import React, { ComponentType } from 'react';
+import React from 'react';
 
 // Types for framer-motion components
 interface MotionComponentProps {

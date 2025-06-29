@@ -315,7 +315,7 @@ export function getColor(path: string): string {
  * Get a typography value
  */
 export function getTypography(property: 'fontSize' | 'lineHeight' | 'letterSpacing' | 'fontWeight', key: string): string {
-  return typography[property][key as any] || '';
+  return (typography[property] as any)[key] || '';
 }
 
 /**

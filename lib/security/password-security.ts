@@ -1,5 +1,4 @@
 import Redis from 'ioredis';
-import crypto from 'crypto';
 import { z } from 'zod';
 
 export interface PasswordPolicy {
@@ -250,7 +249,7 @@ export class PasswordSecurity {
     // Check variations (with numbers/symbols at end)
     const basePattern = /^([a-zA-Z]+)[0-9!@#$%^&*]+$/;
     const match = lowerPassword.match(basePattern);
-    if (match && this.commonPasswords.has(match[1])) {
+    if (match && match[1] && this.commonPasswords.has(match[1])) {
       return true;
     }
     
@@ -261,7 +260,7 @@ export class PasswordSecurity {
   private containsUserInfo(password: string, userInfo: any): boolean {
     const lowerPassword = password.toLowerCase();
     const infoValues = Object.values(userInfo)
-      .filter(v => v && typeof v === 'string' && v.length > 2)
+      .filter((v): v is string => v !== null && v !== undefined && typeof v === 'string' && v.length > 2)
       .map(v => v.toLowerCase());
     
     return infoValues.some(info => {

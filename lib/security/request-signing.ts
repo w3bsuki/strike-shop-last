@@ -76,7 +76,7 @@ export class RequestSigner {
         timestamp: timestampNum,
         requestId,
         body,
-        queryParams: Object.keys(queryParams).length > 0 ? queryParams : undefined
+        ...(Object.keys(queryParams).length > 0 && { queryParams })
       }
 
       // Calculate expected signature
@@ -108,7 +108,7 @@ export class RequestSigner {
       timestamp,
       requestId,
       body,
-      queryParams
+      ...(queryParams && { queryParams })
     }
 
     const signature = this.sign(payload)
@@ -158,7 +158,7 @@ export class RequestSigner {
   /**
    * Constant-time string comparison to prevent timing attacks
    */
-  private static secureCompare(a: string, b: string): boolean {
+  public static secureCompare(a: string, b: string): boolean {
     if (a.length !== b.length) {
       return false
     }
@@ -262,8 +262,8 @@ export function withRequestSigning(
  * Client helper for making signed requests
  */
 export class SignedApiClient {
-  constructor(private baseUrl: string, private secret: string) {
-    RequestSigner['secret'] = secret
+  constructor(private baseUrl: string, _secret: string) {
+    RequestSigner['secret'] = _secret
   }
 
   async request(
@@ -300,7 +300,7 @@ export class SignedApiClient {
         ...signatureHeaders,
         ...options?.headers
       },
-      body: options?.body ? JSON.stringify(options.body) : undefined
+      ...(options?.body && { body: JSON.stringify(options.body) })
     })
   }
 

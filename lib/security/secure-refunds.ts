@@ -112,7 +112,7 @@ export class SecureRefundService {
       // Create refund with enhanced metadata
       const refund = await stripe.refunds.create({
         charge: chargeId,
-        amount: request.amount ? Math.round(request.amount) : undefined, // Convert to cents if provided
+        ...(request.amount && { amount: Math.round(request.amount) }), // Convert to cents if provided
         reason: request.reason as Stripe.RefundCreateParams.Reason,
         metadata: {
           ...request.metadata,
@@ -285,10 +285,11 @@ export class SecureRefundService {
       });
 
       let totalRefunded = 0;
-      if (paymentIntent.charges && paymentIntent.charges.data) {
-        for (const charge of paymentIntent.charges.data) {
+      const piWithCharges = paymentIntent as any;
+      if (piWithCharges.charges && piWithCharges.charges.data) {
+        for (const charge of piWithCharges.charges.data) {
           if (charge.refunds && charge.refunds.data) {
-            totalRefunded += charge.refunds.data.reduce((sum, refund) => sum + refund.amount, 0);
+            totalRefunded += charge.refunds.data.reduce((sum: number, refund: any) => sum + refund.amount, 0);
           }
         }
       }
@@ -435,7 +436,7 @@ export class SecureRefundService {
   /**
    * Get refund history for a user
    */
-  static async getRefundHistory(userId: string, limit: number = 10): Promise<{
+  static async getRefundHistory(_userId: string, _limit: number = 10): Promise<{
     refunds: Array<{
       id: string;
       amount: number;

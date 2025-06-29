@@ -48,7 +48,7 @@ export const FILE_UPLOAD_CONFIG = {
     'image/jpeg': [Buffer.from([0xFF, 0xD8, 0xFF])],
     'image/png': [Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])],
     'image/gif': [Buffer.from('GIF87a'), Buffer.from('GIF89a')],
-    'image/webp': [Buffer.from('RIFF'), Buffer.from('WEBP', 'utf8', 8)],
+    'image/webp': [Buffer.from('RIFF'), Buffer.from('WEBP')],
     'application/pdf': [Buffer.from('%PDF-')],
   },
   SCAN_FOR_MALWARE: true,

@@ -129,7 +129,7 @@ export function useAccessibility(options: UseAccessibilityOptions = {}) {
   }, [announce, announceStateChanges]);
 
   // Check contrast ratio
-  const checkContrast = useCallback((foreground: string, background: string) => {
+  const checkContrast = useCallback((_foreground: string, _background: string) => {
     // This is a simplified check - in production, use a proper contrast calculation
     return {
       ratio: 21, // Placeholder
@@ -299,6 +299,7 @@ export function useAccessibleModal(isOpen: boolean) {
         announce('Dialog closed');
       };
     }
+    return undefined;
   }, [isOpen, saveFocus, restorePreviousFocus, createFocusTrap, announce]);
 
   return { modalRef };

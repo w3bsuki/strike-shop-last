@@ -38,17 +38,15 @@ export function InstagramFeed({
   className,
   onPostClick,
 }: InstagramFeedProps) {
-  const { triggerHaptic } = useHapticFeedback();
-
   if (variant === 'grid') {
-    return <InstagramGrid posts={posts} className={className} onPostClick={onPostClick} />;
+    return <InstagramGrid posts={posts} {...(className && { className })} {...(onPostClick && { onPostClick })} />;
   }
 
   if (variant === 'carousel') {
-    return <InstagramCarousel posts={posts} className={className} />;
+    return <InstagramCarousel posts={posts} {...(className && { className })} />;
   }
 
-  return <InstagramStories posts={posts} className={className} />;
+  return <InstagramStories posts={posts} {...(className && { className })} />;
 }
 
 // Grid Layout Component
@@ -114,7 +112,6 @@ function InstagramCarousel({
   className?: string;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { triggerHaptic } = useHapticFeedback();
 
   return (
     <div

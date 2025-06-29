@@ -21,7 +21,7 @@ export function PromoSaleBanner({ config }: PromoSaleBannerProps) {
 
   return (
     <PromoSection 
-      href={config.link} 
+      {...(config.link && { href: config.link })} 
       theme={config.theme} 
       size={config.size} 
       className="group cursor-pointer"
@@ -64,8 +64,8 @@ export function PromoSaleBanner({ config }: PromoSaleBannerProps) {
         {hasDiscount && config.discount && (
           <PromoBadge
             value={config.discount.value}
-            unit={config.discount.unit}
-            suffix={config.discount.suffix}
+            {...(config.discount.unit && { unit: config.discount.unit })}
+            {...(config.discount.suffix && { suffix: config.discount.suffix })}
             size={config.size}
             variant="animated"
             color={config.theme === 'inverted' ? 'black' : 'white'}
@@ -76,10 +76,10 @@ export function PromoSaleBanner({ config }: PromoSaleBannerProps) {
       {/* Background */}
       {config.background && (
         <PromoBackground 
-          pattern={config.background.pattern}
-          image={config.background.image}
-          gradientFrom={config.background.gradientFrom}
-          gradientTo={config.background.gradientTo}
+          {...(config.background.pattern && { pattern: config.background.pattern })}
+          {...(config.background.image && { image: config.background.image })}
+          {...(config.background.gradientFrom && { gradientFrom: config.background.gradientFrom })}
+          {...(config.background.gradientTo && { gradientTo: config.background.gradientTo })}
           variant={config.background.image ? 'image' : 'pattern'}
         />
       )}

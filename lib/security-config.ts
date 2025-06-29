@@ -163,13 +163,13 @@ export function sanitizeLogData(data: any): any {
 }
 
 // Security audit logger
-export function logSecurityEvent(event: string, details?: any) {
-  const timestamp = new Date().toISOString();
-  const sanitizedDetails = details ? sanitizeLogData(details) : {};
-
+export function logSecurityEvent(_event: string, details?: any) {
   // In production, you might want to send this to a security monitoring service
   if (process.env.NODE_ENV === 'production') {
-    // await sendToSecurityMonitoring({ timestamp, event, details: sanitizedDetails })
+    const timestamp = new Date().toISOString();
+    const sanitizedDetails = details ? sanitizeLogData(details) : {};
+    // await sendToSecurityMonitoring({ timestamp, event: _event, details: sanitizedDetails })
+    console.log('Security event:', { timestamp, event: _event, details: sanitizedDetails });
   }
 }
 

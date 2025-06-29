@@ -15,11 +15,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface UserNavProps {
   className?: string;
-  showLabels?: boolean;
   showCart?: boolean;
 }
 
-export function UserNav({ className, showLabels = false, showCart = false }: UserNavProps) {
+export function UserNav({ className, showCart = false }: UserNavProps) {
   const { user } = useUser();
   const router = useRouter();
   const wishlistCount = useWishlistCount();
@@ -72,9 +71,9 @@ export function UserNav({ className, showLabels = false, showCart = false }: Use
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative min-h-[48px] min-w-[48px]">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name || "User"} />
+                <AvatarImage src={user?.imageUrl} alt={user?.fullName || "User"} />
                 <AvatarFallback>
-                  {user?.user_metadata?.full_name?.[0] || user?.email?.[0] || "U"}
+                  {user?.fullName?.[0] || user?.email?.[0] || "U"}
                 </AvatarFallback>
               </Avatar>
               <span className="sr-only">User account menu</span>
@@ -83,7 +82,7 @@ export function UserNav({ className, showLabels = false, showCart = false }: Use
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.user_metadata?.full_name || 'User'}</p>
+                <p className="text-sm font-medium leading-none">{user?.fullName || 'User'}</p>
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.email}
                 </p>

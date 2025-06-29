@@ -16,7 +16,7 @@ interface CheckoutFormProps {
   onPaymentError: (error: any) => void;
 }
 
-function CheckoutForm({ clientSecret, onPaymentSuccess, onPaymentError }: CheckoutFormProps) {
+function CheckoutForm({ clientSecret: _clientSecret, onPaymentSuccess, onPaymentError }: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -40,12 +40,17 @@ function CheckoutForm({ clientSecret, onPaymentSuccess, onPaymentError }: Checko
 
     try {
       // Confirm payment with Stripe
+      const confirmParams: any = {
+        return_url: `${window.location.origin}/order-confirmation`,
+      };
+      
+      if (user?.email) {
+        confirmParams.receipt_email = user.email;
+      }
+
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/order-confirmation`,
-          receipt_email: user?.email,
-        },
+        confirmParams,
         redirect: 'if_required',
       });
 
@@ -321,7 +326,6 @@ export function EnhancedCheckoutForm({ onPaymentSuccess, onPaymentError }: Enhan
       options={{
         clientSecret,
         appearance: stripeConfig.appearance,
-        loader: stripeConfig.loader,
       }}
     >
       <CheckoutForm

@@ -3,32 +3,34 @@
  * Provides tree-shaken imports for maximum bundle efficiency
  */
 
-// Lucide React - Individual icon imports for perfect tree-shaking
-export { Search } from 'lucide-react/dist/esm/icons/search';
-export { Menu } from 'lucide-react/dist/esm/icons/menu';
-export { X } from 'lucide-react/dist/esm/icons/x';
-export { ShoppingCart } from 'lucide-react/dist/esm/icons/shopping-cart';
-export { User as UserIcon } from 'lucide-react/dist/esm/icons/user';
-export { Heart } from 'lucide-react/dist/esm/icons/heart';
-export { Star } from 'lucide-react/dist/esm/icons/star';
-export { Plus } from 'lucide-react/dist/esm/icons/plus';
-export { Minus } from 'lucide-react/dist/esm/icons/minus';
-export { ChevronDown } from 'lucide-react/dist/esm/icons/chevron-down';
-export { ChevronUp } from 'lucide-react/dist/esm/icons/chevron-up';
-export { ChevronLeft } from 'lucide-react/dist/esm/icons/chevron-left';
-export { ChevronRight } from 'lucide-react/dist/esm/icons/chevron-right';
-export { Filter } from 'lucide-react/dist/esm/icons/filter';
-export { SlidersHorizontal } from 'lucide-react/dist/esm/icons/sliders-horizontal';
-export { Grid3X3 } from 'lucide-react/dist/esm/icons/grid-3x3';
-export { List } from 'lucide-react/dist/esm/icons/list';
-export { Trash2 } from 'lucide-react/dist/esm/icons/trash-2';
-export { Edit } from 'lucide-react/dist/esm/icons/edit';
-export { Eye } from 'lucide-react/dist/esm/icons/eye';
-export { EyeOff } from 'lucide-react/dist/esm/icons/eye-off';
-export { Check } from 'lucide-react/dist/esm/icons/check';
-export { AlertCircle } from 'lucide-react/dist/esm/icons/alert-circle';
-export { Info } from 'lucide-react/dist/esm/icons/info';
-export { Loader2 } from 'lucide-react/dist/esm/icons/loader-2';
+// Lucide React - Individual icon imports with proper tree-shaking
+export { 
+  Search,
+  Menu,
+  X,
+  ShoppingCart,
+  User as UserIcon,
+  Heart,
+  Star,
+  Plus,
+  Minus,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  SlidersHorizontal,
+  Grid3X3,
+  List,
+  Trash2,
+  Edit,
+  Eye,
+  EyeOff,
+  Check,
+  AlertCircle,
+  Info,
+  Loader2
+} from 'lucide-react';
 
 // Radix UI - Specific component imports
 export { 
@@ -71,15 +73,19 @@ export const ReactQueryDevtools = process.env.NODE_ENV === 'development'
 export { loadStripe } from '@stripe/stripe-js';
 export { Elements, useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 
-// Sanity - Production optimized imports
-export { createClient } from '@sanity/client';
-export { urlFor } from 'next-sanity';
+// Sanity - Production optimized imports (commented out until Sanity is installed)
+// export { createClient } from '@sanity/client';
+// export { urlFor } from 'next-sanity';
 
 // Utility function to dynamically import icons
-export const getIcon = (iconName: string) => {
-  return import(`lucide-react/dist/esm/icons/${iconName.toLowerCase()}`)
-    .then(module => module.default || module)
-    .catch(() => null);
+export const getIcon = async (iconName: string) => {
+  try {
+    const icons = await import('lucide-react') as any;
+    const iconKey = iconName.charAt(0).toUpperCase() + iconName.slice(1);
+    return icons[iconKey] || null;
+  } catch {
+    return null;
+  }
 };
 
 // Type-only imports for better tree-shaking

@@ -34,7 +34,7 @@ const promoCountdownVariants = cva(
 );
 
 export interface PromoCountdownProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'color'>,
     VariantProps<typeof promoCountdownVariants> {
   endDate?: string | Date;
   prefix?: string;

@@ -40,7 +40,7 @@ const dividerLineVariants = cva(
 );
 
 export interface DividerLineProps
-  extends React.HTMLAttributes<HTMLHRElement>,
+  extends Omit<React.HTMLAttributes<HTMLHRElement>, 'color'>,
     VariantProps<typeof dividerLineVariants> {}
 
 const DividerLine = React.forwardRef<HTMLHRElement, DividerLineProps>(

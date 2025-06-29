@@ -46,18 +46,12 @@ export function EnhancedProductActions({ product, slug }: ProductActionsProps) {
       return;
     }
 
-    const cartItem = {
-      id: `${product.id}-${selectedSize || 'onesize'}`,
+    // Create cart item matching the expected format
+    addItem({
       productId: product.id,
-      name: product.name,
-      price: parseFloat(product.price.replace(/[£$]/g, '')),
-      image: product.image,
-      size: selectedSize,
+      variantId: `${product.id}-${selectedSize || 'onesize'}`,
       quantity,
-      slug,
-    };
-
-    addItem(cartItem);
+    });
     
     toast({
       title: "Added to Cart",

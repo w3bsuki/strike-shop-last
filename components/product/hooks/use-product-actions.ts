@@ -60,7 +60,7 @@ export function useProductActions(
     handleQuickView: (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      openQuickView(product);
+      openQuickView(product.id);
       announceToScreenReader(`Quick view opened for ${product.name}`, 'polite');
     },
 
@@ -69,29 +69,31 @@ export function useProductActions(
       e.stopPropagation();
       
       // For integrated products, check if we have variant information
-      if (isIntegratedProduct(rawProduct) && rawProduct.variants?.length > 0) {
+      if (isIntegratedProduct(rawProduct) && rawProduct.commerce?.variants?.length > 0) {
         // Use the first variant as default
-        const defaultVariant = rawProduct.variants[0];
+        const defaultVariant = rawProduct.commerce.variants[0];
         
-        try {
-          await addItem({
-            productId: rawProduct.id,
-            variantId: defaultVariant.id,
-            quantity: 1
-          });
+        if (defaultVariant) {
+          try {
+            await addItem({
+              productId: rawProduct.id,
+              variantId: defaultVariant.id,
+              quantity: 1
+            });
           announceToScreenReader(`${product.name} added to cart`, 'polite');
           toast({
             title: 'Added to cart',
             description: `${product.name} has been added to your cart.`,
           });
-        } catch (error) {
-          console.error('Error adding item to cart:', error);
-          announceToScreenReader(`Failed to add ${product.name} to cart`, 'assertive');
-          toast({
-            title: 'Error',
-            description: 'Failed to add item to cart. Please try again.',
-            variant: 'destructive',
-          });
+          } catch (error) {
+            console.error('Error adding item to cart:', error);
+            announceToScreenReader(`Failed to add ${product.name} to cart`, 'assertive');
+            toast({
+              title: 'Error',
+              description: 'Failed to add item to cart. Please try again.',
+              variant: 'destructive',
+            });
+          }
         }
       } else {
         // For simple products or products without variants, redirect to product page

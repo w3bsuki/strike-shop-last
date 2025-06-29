@@ -22,8 +22,7 @@ interface CategoryCardProps {
 export const CategoryCard = React.memo(({ 
   category, 
   variant = 'default',
-  priority = false,
-  index = 0 
+  priority = false
 }: CategoryCardProps) => {
 
   if (variant === 'minimal') {

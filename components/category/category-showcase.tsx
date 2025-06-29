@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { CategorySection, CategoryHeader, CategoryScroll, CategoryCard } from "@/components/category";
+import { CategorySection, CategoryScroll, CategoryCard } from "@/components/category";
+import { SectionHeader } from "@/components/ui/section-header";
 import { type CategoryItem, type CategoryConfig, defaultCategoryConfig } from "@/config/categories";
 
 interface CategoryShowcaseProps extends CategoryConfig {
@@ -26,10 +27,10 @@ export function CategoryShowcase({
 
   return (
     <CategorySection {...sectionProps} className={className}>
-      <CategoryHeader
-        title={title}
-        viewAllText={viewAllText}
-        viewAllHref={viewAllHref}
+      <SectionHeader
+        title={title || ''}
+        {...(viewAllText && { ctaText: viewAllText })}
+        {...(viewAllHref && { ctaHref: viewAllHref })}
       />
       
       {variant === "scroll" && (
@@ -37,11 +38,10 @@ export function CategoryShowcase({
           {categories.map((category, index) => (
             <div key={category.id} className="flex-none w-[200px] sm:w-[240px] md:w-[280px] lg:w-[320px]">
               <CategoryCard
-                name={category.name}
-                image={category.image}
-                href={`/${category.slug}`}
-                count={category.count}
-                description={category.description}
+                category={{
+                  ...category,
+                  count: category.count || 0
+                }}
                 priority={index < 3}
                 {...cardProps}
               />

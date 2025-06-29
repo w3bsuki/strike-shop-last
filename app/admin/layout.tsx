@@ -5,8 +5,8 @@ import type React from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/auth-store';
-import AdminSidebar from '@/components/admin/admin-sidebar';
-import AdminHeader from '@/components/admin/admin-header';
+import AdminSidebar from '@/components/admin/AdminSidebar';
+import AdminHeader from '@/components/admin/AdminHeader';
 
 export default function AdminLayout({
   children,

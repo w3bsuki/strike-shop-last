@@ -3,7 +3,6 @@
 import type { ErrorInfo, ReactNode } from 'react';
 import React from 'react';
 import { ErrorState } from '@/components/ui/error-states';
-import { Button } from '@/components/ui/button';
 
 interface Props {
   children: ReactNode;
@@ -29,7 +28,7 @@ export class ErrorBoundaryProvider extends React.Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
     // Log error to error reporting service
 
     // In production, send to error tracking service (e.g., Sentry)
@@ -42,7 +41,7 @@ export class ErrorBoundaryProvider extends React.Component<Props, State> {
     this.setState({ hasError: false, error: null });
   };
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       // Custom fallback UI
       if (this.props.fallback) {

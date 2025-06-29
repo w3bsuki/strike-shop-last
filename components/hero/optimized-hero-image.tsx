@@ -17,9 +17,6 @@ const OptimizedHeroImage = React.forwardRef<HTMLDivElement, OptimizedHeroImagePr
   ({ className, src, alt, overlay = "gradient", priority = true, blurDataURL, children, ...props }, ref) => {
     // Generate srcSet for responsive images
     const generateSrcSet = () => {
-      const basePath = src.replace(/\.(jpg|jpeg|png|webp)$/i, '');
-      const ext = src.match(/\.(jpg|jpeg|png|webp)$/i)?.[0] || '.jpg';
-      
       // Check if it's a local optimized image
       if (src.startsWith('/images/hero/') && src.includes('strike-ss25')) {
         return {
@@ -37,7 +34,7 @@ const OptimizedHeroImage = React.forwardRef<HTMLDivElement, OptimizedHeroImagePr
       return { src, srcSet: undefined, blurDataURL: undefined };
     };
 
-    const { src: imageSrc, srcSet, blurDataURL: placeholderDataURL } = generateSrcSet();
+    const { src: imageSrc, blurDataURL: placeholderDataURL } = generateSrcSet();
 
     return (
       <div ref={ref} className={cn("absolute inset-0", className)} {...props}>
@@ -50,9 +47,9 @@ const OptimizedHeroImage = React.forwardRef<HTMLDivElement, OptimizedHeroImagePr
           sizes="100vw"
           quality={90}
           placeholder={placeholderDataURL ? "blur" : "empty"}
-          blurDataURL={placeholderDataURL}
-          loading={priority ? "eager" : "lazy"}
-          fetchPriority={priority ? "high" : "auto"}
+          {...(placeholderDataURL && { blurDataURL: placeholderDataURL })}
+          {...(!priority && { loading: "lazy" })}
+          {...(priority ? { fetchPriority: "high" } : { fetchPriority: "auto" })}
         />
         {overlay !== "none" && (
           <div

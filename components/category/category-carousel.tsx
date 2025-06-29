@@ -51,7 +51,7 @@ const CategoryCarousel = React.forwardRef<HTMLDivElement, CategoryCarouselProps>
             repeatType: "loop",
             ease: "linear",
           }}
-          whileHover={pauseOnHover ? { animationPlayState: "paused" } : undefined}
+          {...(pauseOnHover && { whileHover: { animationPlayState: "paused" } })}
         >
           {/* Duplicate children for seamless loop */}
           {childrenArray}

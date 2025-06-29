@@ -166,7 +166,7 @@ export class BruteForceProtection {
   }
 
   // Clear failed attempts on successful login
-  async clearFailedAttempts(email: string, ip: string): Promise<void> {
+  async clearFailedAttempts(email: string, _ip: string): Promise<void> {
     const normalizedEmail = email.toLowerCase().trim();
     await Promise.all([
       this.redis.del(`bruteforce:failed:${normalizedEmail}`),

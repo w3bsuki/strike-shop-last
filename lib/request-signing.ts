@@ -132,7 +132,7 @@ export function signRequest(
     signature,
     timestamp,
     nonce,
-    contentHash,
+    ...(contentHash && { contentHash }),
   };
 }
 
@@ -289,7 +289,7 @@ export class SignedApiClient {
     return fetch(`${this.baseUrl}${path}`, {
       method,
       headers,
-      body,
+      ...(body && { body }),
     });
   }
   

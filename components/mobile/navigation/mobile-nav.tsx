@@ -42,7 +42,7 @@ export default function MobileNav({
 
   return (
     <>
-      <MobileNavContainer variant={variant} showThreshold={showThreshold}>
+      <MobileNavContainer variant={variant} {...(showThreshold !== undefined && { showThreshold })}>
         {navItems.map((item) => (
           <MobileNavItem
             key={item.href}
@@ -50,7 +50,7 @@ export default function MobileNav({
             isActive={pathname === item.href}
             variant={variant}
           >
-            <MobileNavIcon badge={item.badge} badgeVariant="number">
+            <MobileNavIcon {...(item.badge !== undefined && { badge: item.badge })} badgeVariant="number">
               <item.icon className="h-6 w-6 mb-1" />
             </MobileNavIcon>
             <MobileNavLabel variant={showLabels ? 'default' : 'hidden'}>

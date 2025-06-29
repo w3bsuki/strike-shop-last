@@ -3,7 +3,6 @@
  * Implements Stripe Radar rules and custom fraud detection
  */
 
-import { stripe } from '@/lib/stripe-server';
 import { kv } from '@vercel/kv';
 import { logSecurityEvent } from '@/lib/security-config';
 
@@ -126,10 +125,10 @@ export class FraudDetectionService {
     try {
       // Get current counts
       const [hourlyCount, dailyCount, hourlyAmount, dailyAmount] = await Promise.all([
-        kv.get<number>(hourKey) || 0,
-        kv.get<number>(dayKey) || 0,
-        kv.get<number>(`${hourKey}:amount`) || 0,
-        kv.get<number>(`${dayKey}:amount`) || 0,
+        kv.get<number>(hourKey).then(v => v ?? 0),
+        kv.get<number>(dayKey).then(v => v ?? 0),
+        kv.get<number>(`${hourKey}:amount`).then(v => v ?? 0),
+        kv.get<number>(`${dayKey}:amount`).then(v => v ?? 0),
       ]);
 
       // Check transaction count limits
@@ -331,9 +330,12 @@ export class FraudDetectionService {
       /selenium/i,
     ];
 
-    if (botPatterns.some(pattern => pattern.test(context.userAgent))) {
-      reasons.push('Bot or automated browser detected');
-      score += 35;
+    const userAgent = context.userAgent;
+    if (userAgent) {
+      if (botPatterns.some(pattern => pattern.test(userAgent))) {
+        reasons.push('Bot or automated browser detected');
+        score += 35;
+      }
     }
 
     // Check for Tor or VPN (simplified - in production use proper detection)
@@ -388,17 +390,18 @@ export class FraudDetectionService {
       'trashmail.com',
     ];
 
-    const emailDomain = email.split('@')[1];
-    if (disposableEmailDomains.includes(emailDomain)) {
+    const emailParts = email.split('@');
+    const emailDomain = emailParts[1];
+    if (emailDomain && disposableEmailDomains.includes(emailDomain)) {
       reasons.push('Disposable email address detected');
       score += 30;
     }
 
     // Check for suspicious email patterns
-    const emailUser = email.split('@')[0];
+    const emailUser = emailParts[0];
     
     // Random character sequences
-    if (/^[a-z0-9]{20,}$/.test(emailUser)) {
+    if (emailUser && /^[a-z0-9]{20,}$/.test(emailUser)) {
       reasons.push('Suspicious email pattern');
       score += 15;
     }

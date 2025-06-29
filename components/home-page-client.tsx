@@ -6,11 +6,11 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { QuickViewProvider } from '@/contexts/QuickViewContext';
 import { 
   ProductScrollSkeleton, 
-  CategoryScrollSkeleton,
-  HeroBannerSkeleton 
+  CategoryScrollSkeleton
 } from '@/components/ui/loading-states';
 import { Hero, OptimizedHeroImage as HeroImage, HeroContent, HeroTitle, HeroDescription, HeroActions, HeroMarquee, HeroMarqueeItem } from '@/components/hero';
-import { CategorySection, CategoryHeader, CategoryScroll, CategoryCard } from '@/components/category';
+import { CategorySection, CategoryScroll, CategoryCard } from '@/components/category';
+import { ProductHeader } from '@/components/product/product-header';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -22,48 +22,6 @@ const ProductShowcase = dynamic(() =>
   loading: () => <div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>
 });
 
-// Promo components
-const PromoSection = dynamic(() => 
-  import('@/components/promo').then(mod => ({ default: mod.PromoSection })), {
-  
-  loading: () => <div style={{ minHeight: '120px' }} className="bg-gray-100 animate-pulse" />
-});
-
-const PromoContent = dynamic(() => 
-  import('@/components/promo').then(mod => ({ default: mod.PromoContent })), {
-  
-  loading: () => null
-});
-
-const PromoTitle = dynamic(() => 
-  import('@/components/promo').then(mod => ({ default: mod.PromoTitle })), {
-  
-  loading: () => null
-});
-
-const PromoDescription = dynamic(() => 
-  import('@/components/promo').then(mod => ({ default: mod.PromoDescription })), {
-  
-  loading: () => null
-});
-
-const PromoBadge = dynamic(() => 
-  import('@/components/promo').then(mod => ({ default: mod.PromoBadge })), {
-  
-  loading: () => null
-});
-
-const PromoActions = dynamic(() => 
-  import('@/components/promo').then(mod => ({ default: mod.PromoActions })), {
-  
-  loading: () => null
-});
-
-const PromoBackground = dynamic(() => 
-  import('@/components/promo').then(mod => ({ default: mod.PromoBackground })), {
-  
-  loading: () => null
-});
 
 // Community section using same pattern as products
 const CommunityShowcase = dynamic(() => 
@@ -157,7 +115,7 @@ export default function HomePageClient({
         <ErrorBoundary>
           <Suspense fallback={<div style={{ minHeight: '320px' }}><CategoryScrollSkeleton /></div>}>
             <CategorySection spacing="default">
-              <CategoryHeader 
+              <ProductHeader 
                 title="SHOP BY CATEGORY" 
                 viewAllText="View All Categories"
                 viewAllHref="/categories"
@@ -166,13 +124,8 @@ export default function HomePageClient({
                 {categories.map((category, index) => (
                   <div key={category.id} className="flex-none w-[200px] sm:w-[240px] md:w-[280px] lg:w-[320px]">
                     <CategoryCard
-                      name={category.name}
-                      image={category.image}
-                      href={`/${category.slug}`}
-                      count={category.count}
+                      category={category}
                       priority={index < 3}
-                      aspectRatio="portrait"
-                      overlay="gradient"
                     />
                   </div>
                 ))}
@@ -223,7 +176,7 @@ export default function HomePageClient({
         <DividerSection theme="default" size="sm">
           <div className="flex items-center justify-center gap-4">
             <DividerLine variant="solid" color="default" className="flex-1" />
-            <DividerText text="LUXURY STREETWEAR" size="sm" spacing="normal" />
+            <DividerText text="LUXURY STREETWEAR" size="sm" spacing="default" />
             <DividerLine variant="solid" color="default" className="flex-1" />
           </div>
         </DividerSection>
@@ -246,7 +199,7 @@ export default function HomePageClient({
         <DividerSection theme="default" size="sm">
           <div className="flex items-center justify-center gap-4">
             <DividerLine variant="solid" color="default" className="flex-1" />
-            <DividerText text="PREMIUM QUALITY" size="sm" spacing="normal" />
+            <DividerText text="PREMIUM QUALITY" size="sm" spacing="default" />
             <DividerLine variant="solid" color="default" className="flex-1" />
           </div>
         </DividerSection>
@@ -266,7 +219,7 @@ export default function HomePageClient({
         <DividerSection theme="default" size="sm">
           <div className="flex items-center justify-center gap-4">
             <DividerLine variant="solid" color="default" className="flex-1" />
-            <DividerText text="NEXT GENERATION" size="sm" spacing="normal" />
+            <DividerText text="NEXT GENERATION" size="sm" spacing="default" />
             <DividerLine variant="solid" color="default" className="flex-1" />
           </div>
         </DividerSection>
@@ -286,7 +239,7 @@ export default function HomePageClient({
         <DividerSection theme="default" size="sm">
           <div className="flex items-center justify-center gap-4">
             <DividerLine variant="solid" color="default" className="flex-1" />
-            <DividerText text="COMMUNITY" size="sm" spacing="normal" />
+            <DividerText text="COMMUNITY" size="sm" spacing="default" />
             <DividerLine variant="solid" color="default" className="flex-1" />
           </div>
         </DividerSection>

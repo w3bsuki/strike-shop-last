@@ -31,7 +31,7 @@ export interface ProductScrollProps
 
 const ProductScroll = React.forwardRef<HTMLDivElement, ProductScrollProps>(
   ({ className, gap, showControls = true, controlsPosition = "outside", children, ...props }, ref) => {
-    const scrollRef = React.useRef<HTMLDivElement>(null);
+    const scrollRef = React.useRef<HTMLDivElement | null>(null);
     const [canScrollLeft, setCanScrollLeft] = React.useState(false);
     const [canScrollRight, setCanScrollRight] = React.useState(false);
 
@@ -63,7 +63,14 @@ const ProductScroll = React.forwardRef<HTMLDivElement, ProductScrollProps>(
     return (
       <div className="relative group">
         <div
-          ref={scrollRef}
+          ref={(node) => {
+            scrollRef.current = node;
+            if (typeof ref === 'function') {
+              ref(node);
+            } else if (ref) {
+              ref.current = node;
+            }
+          }}
           className={cn(productScrollVariants({ gap }), className)}
           style={{ maxWidth: "100%" }}
           onScroll={checkScrollability}

@@ -39,7 +39,7 @@ const CategorySection = React.forwardRef<HTMLElement, CategorySectionProps>(
   ({ className, spacing, background, as: Comp = "section", container = true, children, ...props }, ref) => {
     return (
       <Comp
-        ref={ref}
+        ref={ref as any}
         className={cn(categorySectionVariants({ spacing, background }), className)}
         {...props}
       >

@@ -30,6 +30,7 @@ export function MobilePullToRefresh({
     if (disabled || isRefreshing) return;
     
     const touch = e.touches[0];
+    if (!touch) return;
     if (window.scrollY === 0) {
       touchStartY.current = touch.clientY;
     }
@@ -39,6 +40,7 @@ export function MobilePullToRefresh({
     if (!touchStartY.current || disabled || isRefreshing) return;
 
     const touch = e.touches[0];
+    if (!touch) return;
     const distance = touch.clientY - touchStartY.current;
 
     if (distance > 0 && window.scrollY === 0) {

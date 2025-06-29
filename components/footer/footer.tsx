@@ -33,7 +33,7 @@ export function Footer({
             <FooterBottom
               social={config.social}
               copyright={config.legal.copyright}
-              registration={config.legal.registration}
+              {...(config.legal.registration && { registration: config.legal.registration })}
               localization={config.localization}
               className="border-t-0 pt-0"
             />
@@ -61,7 +61,7 @@ export function Footer({
                   description={config.newsletter.description}
                   placeholder={config.newsletter.placeholder}
                   preferences={config.newsletter.preferences}
-                  onSubmit={onNewsletterSubmit}
+                  {...(onNewsletterSubmit && { onSubmit: onNewsletterSubmit })}
                 />
               )}
 
@@ -80,7 +80,7 @@ export function Footer({
             <FooterBottom
               social={config.social}
               copyright={config.legal.copyright}
-              registration={config.legal.registration}
+              {...(config.legal.registration && { registration: config.legal.registration })}
               localization={config.localization}
             />
           </>

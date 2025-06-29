@@ -44,7 +44,6 @@ export interface AnomalyAlert {
 }
 
 export class PaymentMonitoringService {
-  private static readonly MONITORING_WINDOW = 3600; // 1 hour in seconds
   private static readonly ALERT_THRESHOLDS = {
     FAILURE_RATE: 0.15, // 15% failure rate
     DISPUTE_RATE: 0.01, // 1% dispute rate
@@ -437,7 +436,7 @@ export class PaymentMonitoringService {
         id: `chargeback_${chargebackData.chargeId}`,
         type: 'charge.dispute.created',
         timestamp: new Date().toISOString(),
-        userId: chargebackData.userId,
+        ...(chargebackData.userId && { userId: chargebackData.userId }),
         amount: chargebackData.amount,
         metadata: {
           reason: chargebackData.reason,

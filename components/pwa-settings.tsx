@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { CacheManager } from '@/lib/pwa/cache-manager'
-import { Loader2, Trash2, Download, Bell, Wifi, WifiOff } from 'lucide-react'
+import { Loader2, Trash2, Download, Wifi, WifiOff } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 export function PWASettings() {

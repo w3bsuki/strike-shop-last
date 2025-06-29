@@ -32,7 +32,7 @@ const promoDescriptionVariants = cva(
 );
 
 export interface PromoDescriptionProps
-  extends React.HTMLAttributes<HTMLParagraphElement>,
+  extends Omit<React.HTMLAttributes<HTMLParagraphElement>, 'color'>,
     VariantProps<typeof promoDescriptionVariants> {}
 
 const PromoDescription = React.forwardRef<HTMLParagraphElement, PromoDescriptionProps>(

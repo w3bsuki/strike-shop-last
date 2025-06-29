@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 interface IntersectionOptions {
@@ -12,7 +12,6 @@ interface IntersectionOptions {
 
 interface ProgressiveEnhancementProps {
   children: (isIntersecting: boolean) => ReactNode;
-  fallback?: ReactNode;
   options?: IntersectionOptions;
   onIntersect?: () => void;
 }
@@ -85,7 +84,6 @@ export function useIntersectionObserver(
  */
 export function ProgressiveEnhancement({
   children,
-  fallback = null,
   options = {},
   onIntersect,
 }: ProgressiveEnhancementProps) {
@@ -165,9 +163,9 @@ export function ProgressiveImage({
           className={`transition-opacity duration-300 ${
             isLoaded ? 'opacity-100' : 'opacity-0'
           }`}
-          loading={priority ? 'eager' : 'lazy'}
-          decoding="async"
-          fetchPriority={priority ? 'high' : 'low'}
+          {...(!priority && { loading: 'lazy' })}
+          {...{ decoding: 'async' }}
+          {...(priority ? { fetchPriority: 'high' } : { fetchPriority: 'low' })}
         />
       )}
     </div>
@@ -198,6 +196,7 @@ export function ProgressiveComponent({
       }, delay);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [delay]);
 
   return <>{shouldRender ? children : fallback}</>;

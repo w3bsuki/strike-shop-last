@@ -53,13 +53,18 @@ export async function validateEdgeSession(
       return null;
     }
 
-    return {
+    const session: any = {
       userId: payload.userId as string,
       email: payload.email as string,
-      role: payload.role as string | undefined,
       createdAt: Number(payload.createdAt),
       expiresAt: Number(payload.expiresAt),
     };
+    
+    if (payload.role) {
+      session.role = payload.role as string;
+    }
+    
+    return session;
   } catch (error) {
     return null;
   }

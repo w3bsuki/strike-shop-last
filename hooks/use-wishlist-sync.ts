@@ -29,7 +29,15 @@ export function useAddToWishlist() {
       
       // In a real app, this would sync with the server
       // For now, we just update local state
-      wishlistActions.addToWishlist(item);
+      // Convert branded types to simple types for wishlist store compatibility
+      const wishlistStoreItem = {
+        id: item.id as string,
+        name: item.name,
+        price: item.displayPrice, // Use displayPrice instead of branded Price
+        image: item.image as string || '',
+        slug: item.slug as string,
+      };
+      wishlistActions.addToWishlist(wishlistStoreItem);
       
       // Simulate server sync
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -42,17 +50,26 @@ export function useAddToWishlist() {
       const previousWishlist = wishlist.items;
 
       // Optimistically update
+      // Convert branded types to simple types for store compatibility
+      const storeItem = {
+        id: newItem.id as string,
+        name: newItem.name,
+        price: newItem.displayPrice,
+        image: newItem.image as string || '',
+        slug: newItem.slug as string,
+      };
+      
       useStore.setState((state) => ({
         wishlist: {
           ...state.wishlist,
-          items: [...state.wishlist.items, newItem],
+          items: [...state.wishlist.items, storeItem],
         },
       }));
 
       // Return a context with the previous and new data
       return { previousWishlist };
     },
-    onError: (err, newItem, context) => {
+    onError: (err, _newItem, context) => {
       // If the mutation fails, use the context to roll back
       if (context?.previousWishlist) {
         useStore.setState((state) => ({
@@ -76,7 +93,7 @@ export function useAddToWishlist() {
         });
       }
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       toast({
         title: 'Added to wishlist',
         description: `${variables.name} added to wishlist`,
@@ -116,7 +133,7 @@ export function useRemoveFromWishlist() {
 
       return { previousWishlist, removedItem };
     },
-    onError: (err, productId, context) => {
+    onError: (_err, _productId, context) => {
       if (context?.previousWishlist) {
         useStore.setState((state) => ({
           wishlist: {
@@ -132,7 +149,7 @@ export function useRemoveFromWishlist() {
         variant: 'destructive',
       });
     },
-    onSuccess: (data, productId, context) => {
+    onSuccess: (_data, _productId, context) => {
       if (context?.removedItem) {
         toast({
           title: 'Removed from wishlist',
@@ -173,7 +190,7 @@ export function useClearWishlist() {
 
       return { previousWishlist };
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       if (context?.previousWishlist) {
         useStore.setState((state) => ({
           wishlist: {

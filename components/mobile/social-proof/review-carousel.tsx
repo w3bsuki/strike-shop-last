@@ -211,7 +211,7 @@ export function ReviewCarousel({
                 content={review.content}
                 rating={review.rating}
                 date={review.date}
-                product={review.product}
+                {...(review.product && { product: review.product })}
                 variant={variant}
                 className="h-full"
               />
