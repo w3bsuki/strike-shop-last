@@ -251,6 +251,8 @@ body {
   overflow-x: hidden;
   width: 100%;
   position: relative;
+  /* Global touch action for better scroll performance */
+  touch-action: pan-y;
 }
 
 /* Mobile-First Text Sizing with Responsive Clamp */
@@ -278,6 +280,26 @@ body {
     -webkit-overflow-scrolling: touch;
     /* Minimum font size for readability */
     font-size: var(--text-base);
+    /* Enhanced touch optimization */
+    touch-action: pan-y;
+    -webkit-touch-callout: none;
+  }
+
+  /* Prevent text selection on touch devices where it's not needed */
+  .product-card,
+  .category-card,
+  .navigation-item {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Allow text selection in content areas */
+  .product-description,
+  .article-content,
+  .user-content {
+    -webkit-user-select: text;
+    user-select: text;
   }
 
   /* Ensure minimum font sizes on mobile */
@@ -321,6 +343,325 @@ body {
   [role='button'] {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
     touch-action: manipulation;
+  }
+}
+
+/* ==========================================================================
+   COMPREHENSIVE TOUCH ACTION OPTIMIZATION
+   ========================================================================== */
+
+/* Global touch-action policies for optimal mobile performance */
+html {
+  /* Allow vertical scrolling only */
+  touch-action: pan-y;
+}
+
+/* Interactive elements should use manipulation for fastest response */
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+[role="button"],
+[role="tab"],
+[role="menuitem"],
+.button,
+.btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Form inputs need manipulation to prevent zoom while allowing interaction */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+textarea,
+select {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* Prevent iOS zoom on focus by ensuring 16px+ font size */
+  font-size: max(16px, 1rem);
+}
+
+/* Links should allow manipulation for tap gestures */
+a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Scrollable containers need pan gestures */
+.scroll-container,
+.horizontal-scroll,
+.horizontal-scroll-optimized,
+.category-scroll-container {
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Vertical scrollable areas */
+.scroll-y,
+.overflow-y-auto,
+.overflow-y-scroll {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: auto;
+  overscroll-behavior-x: none;
+}
+
+/* Two-axis scrolling for specific cases like maps or large tables */
+.scroll-xy,
+.pan-both {
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent all touch actions for static content */
+.touch-none {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Pinch-zoom enabled areas (images, maps) */
+.pinch-zoom {
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+/* Modal and overlay touch handling */
+.modal-backdrop,
+.overlay {
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+
+.modal-content,
+.dialog-content {
+  touch-action: auto;
+}
+
+/* Drag and drop areas */
+.draggable,
+[draggable="true"] {
+  touch-action: none;
+  -webkit-user-drag: element;
+}
+
+/* Navigation specific touch actions */
+.nav-menu,
+.navigation {
+  touch-action: pan-y;
+}
+
+.nav-hamburger,
+.menu-toggle {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Product card specific optimizations */
+.product-card {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.product-card-image {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Carousel and slider specific */
+.carousel,
+.slider {
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+}
+
+.carousel-item,
+.slide {
+  touch-action: manipulation;
+}
+
+/* Form field containers */
+.form-group,
+.input-group {
+  touch-action: manipulation;
+}
+
+/* Checkbox and radio specific handling */
+input[type="checkbox"],
+input[type="radio"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Range sliders */
+input[type="range"] {
+  touch-action: pan-x;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tabs and accordion */
+.tab-button,
+.accordion-header {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Loading states should prevent interactions */
+.loading,
+.disabled,
+[aria-disabled="true"] {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+
+/* Image galleries and viewers */
+.image-gallery,
+.image-viewer {
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.gallery-thumbnail {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Search components */
+.search-input {
+  touch-action: manipulation;
+  font-size: max(16px, 1rem); /* Prevent iOS zoom */
+}
+
+.search-suggestions {
+  touch-action: pan-y;
+}
+
+.search-suggestion-item {
+  touch-action: manipulation;
+}
+
+/* Footer specific */
+.footer-input {
+  font-size: max(16px, 1rem); /* Prevent iOS zoom */
+  touch-action: manipulation;
+}
+
+/* ==========================================================================
+   iOS AUTO-ZOOM PREVENTION
+   ========================================================================== */
+
+/* Comprehensive iOS zoom prevention for all input types */
+input,
+textarea,
+select,
+.input,
+.form-control {
+  /* Critical: 16px+ font size prevents iOS zoom on focus */
+  font-size: max(16px, 1rem) !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+/* Specific input type targeting */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"] {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+/* Textarea specific */
+textarea {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+  resize: vertical;
+}
+
+/* Select elements */
+select {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Form validation and accessibility maintenance */
+@media screen and (max-width: 768px) {
+  /* Mobile-specific input sizing to prevent zoom */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+    min-height: 44px; /* WCAG touch target size */
+    padding: 12px 16px;
+    border-radius: 0;
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+  }
+  
+  /* Override any competing font sizes on mobile */
+  .text-xs input,
+  .text-sm input,
+  .text-base input,
+  small input {
+    font-size: 16px !important;
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Target iOS Safari specifically */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+    transform: scale(1); /* Prevent iOS scaling issues */
+    -webkit-text-size-adjust: none;
+  }
+  
+  /* Prevent iOS Safari from adding rounded corners */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"] {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0 !important;
+  }
+  
+  /* Fix iOS Safari select styling */
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4z'/><path fill='%23666' d='M0 3h4l-2 2z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px;
+    padding-right: 32px;
   }
 }
 
@@ -372,7 +713,7 @@ body {
   display: none;
 }
 
-/* Mobile-specific scroll optimizations */
+/* Mobile-specific scroll optimizations - Enhanced */
 @media (max-width: 768px) {
   .horizontal-scroll-optimized {
     /* Enhanced mobile touch handling */
@@ -382,7 +723,7 @@ body {
     gap: 0.75rem;
     
     /* Mobile-specific padding with safe area support */
-    padding-left: max(4px, env(safe-area-inset-left));
+    padding-left: max(8px, env(safe-area-inset-left));
     padding-right: max(16px, env(safe-area-inset-right));
     
     /* Prevent rubber band effect */
@@ -390,6 +731,13 @@ body {
     
     /* Improved scroll performance on mobile */
     scroll-behavior: auto; /* Disable smooth scrolling on mobile for better performance */
+    
+    /* Enhanced touch interaction */
+    touch-action: pan-x;
+    -webkit-touch-callout: none;
+    
+    /* Better momentum scrolling */
+    -webkit-momentum-scrolling: touch;
   }
   
   /* Snap alignment for mobile cards */
@@ -900,11 +1248,12 @@ body {
   border: none;
   border-bottom: 1px solid hsl(var(--border));
   border-radius: 0;
-  font-size: 0.875rem;
+  font-size: max(16px, 0.875rem); /* Prevent iOS zoom */
   padding: 0.5rem 0.25rem;
   background-color: transparent;
   transition: border-bottom-color 0.2s ease;
   font-family: 'Typewriter', monospace;
+  touch-action: manipulation;
 }
 
 .input-field:focus {
@@ -922,12 +1271,13 @@ body {
 .search-input {
   border: 1px solid hsl(var(--border));
   border-radius: 0;
-  font-size: 0.875rem;
+  font-size: max(16px, 0.875rem); /* Prevent iOS zoom */
   padding: 0.75rem;
   background-color: hsl(var(--background));
   transition: border-color 0.2s ease;
   font-family: 'Typewriter', monospace;
   width: 100%;
+  touch-action: manipulation;
 }
 
 .search-input:focus {
@@ -944,11 +1294,12 @@ body {
 .footer-input {
   border: 1px solid hsl(var(--border));
   border-radius: 0;
-  font-size: 0.75rem;
+  font-size: max(16px, 0.75rem); /* Prevent iOS zoom */
   padding: 0.75rem;
   background-color: hsl(var(--background));
   transition: border-color 0.2s ease;
   font-family: 'Typewriter', monospace;
+  touch-action: manipulation;
 }
 
 .footer-input:focus {
@@ -1248,6 +1599,100 @@ body {
 }
 
 /* ==========================================================================
+   Hero Layout Stability & Mobile Scroll Optimizations
+   ========================================================================== */
+
+/* Prevent hero zoom/extension effects on mobile scroll */
+.hero-container {
+  /* CSS containment for layout stability */
+  contain: layout style size paint;
+  isolation: isolate;
+  will-change: auto;
+  
+  /* Prevent mobile scroll bounce effects */
+  -webkit-overflow-scrolling: auto;
+  overscroll-behavior: none;
+  
+  /* GPU acceleration without triggering zoom */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.hero-image-wrapper {
+  /* Image container stability */
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  
+  /* Advanced containment */
+  contain: layout style size paint;
+  isolation: isolate;
+}
+
+.hero-image-stable {
+  /* Prevent image zoom during scroll */
+  object-fit: cover;
+  object-position: center;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  
+  /* Mobile-specific touch handling */
+  touch-action: pan-y;
+  -webkit-transform: translateZ(0);
+}
+
+/* Mobile-specific hero optimizations */
+@media (max-width: 768px) {
+  .hero-container {
+    /* Enhanced mobile containment */
+    contain: strict;
+    
+    /* Prevent iOS zoom effects */
+    -webkit-text-size-adjust: 100%;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  .hero-image-stable {
+    /* Additional mobile image stability */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Aspect ratio containers with fallbacks */
+.aspect-hero-desktop {
+  aspect-ratio: 16/9;
+  /* Fallback for older browsers */
+  position: relative;
+  min-height: 56.25vw; /* 9/16 * 100 */
+}
+
+.aspect-hero-mobile {
+  aspect-ratio: 4/5;
+  /* Fallback for older browsers */
+  position: relative;
+  min-height: 125vw; /* 5/4 * 100 */
+}
+
+/* Enhanced browser support */
+@supports not (aspect-ratio: 1) {
+  .aspect-hero-desktop::before {
+    content: '';
+    display: block;
+    padding-top: 56.25%; /* 9/16 * 100 */
+  }
+  
+  .aspect-hero-mobile::before {
+    content: '';
+    display: block;
+    padding-top: 125%; /* 5/4 * 100 */
+  }
+}
+
+/* ==========================================================================
    Custom Utility Classes
    ========================================================================== */
 
@@ -1444,10 +1889,49 @@ body {
     @apply border-destructive focus:ring-destructive;
   }
 
-  /* Touch Optimization */
+  /* Touch Optimization - Enhanced */
   .touch-manipulation {
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Enhanced touch targets for better mobile UX */
+  .touch-target-enhanced {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 8px;
+    margin: 4px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+
+  /* Touch feedback animation */
+  .touch-feedback {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .touch-feedback::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+    pointer-events: none;
+  }
+
+  .touch-feedback:active::after {
+    width: 200px;
+    height: 200px;
   }
 
   /* Scrollbar Hide Utility */
@@ -1468,17 +1952,39 @@ body {
     overscroll-behavior-y: none;
   }
 
-  /* Perfect Snap Scrolling */
+  /* Perfect Snap Scrolling - Enhanced */
   .snap-x-mandatory {
     scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+  }
+
+  .snap-x-proximity {
+    scroll-snap-type: x proximity; /* Less aggressive snapping for better mobile UX */
   }
 
   .snap-start {
     scroll-snap-align: start;
+    scroll-snap-stop: normal;
   }
 
   .snap-center {
     scroll-snap-align: center;
+    scroll-snap-stop: normal;
+  }
+
+  /* Enhanced mobile scroll optimization */
+  .mobile-scroll-optimized {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: none;
+  }
+
+  @media (max-width: 768px) {
+    .mobile-scroll-optimized {
+      scroll-behavior: auto; /* Disable smooth scrolling on mobile for better performance */
+      scroll-snap-type: x proximity;
+    }
   }
 
   /* Mobile viewport utilities */
@@ -1520,6 +2026,78 @@ body {
 
   .z-tooltip {
     z-index: var(--z-tooltip);
+  }
+
+  /* CSS Containment Utilities */
+  .contain-layout {
+    contain: layout;
+  }
+
+  .contain-style {
+    contain: style;
+  }
+
+  .contain-paint {
+    contain: paint;
+  }
+
+  .contain-size {
+    contain: size;
+  }
+
+  .contain-strict {
+    contain: strict;
+  }
+
+  .contain-layout-style {
+    contain: layout style;
+  }
+
+  .contain-layout-style-paint {
+    contain: layout style paint;
+  }
+
+  /* Transform GPU Utilities */
+  .transform-gpu {
+    transform: translateZ(0);
+  }
+
+  .backface-visibility-hidden {
+    backface-visibility: hidden;
+  }
+
+  /* Mobile Scroll Optimization Utilities */
+  .mobile-scroll-optimized {
+    -webkit-overflow-scrolling: auto;
+    overscroll-behavior: none;
+    touch-action: pan-y;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Hero-specific utilities */
+  .hero-stable {
+    contain: layout style size paint;
+    isolation: isolate;
+    will-change: auto;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  .hero-image-fixed {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    contain: layout style paint;
+  }
+
+  /* Prevent zoom effects */
+  .no-zoom {
+    touch-action: pan-y;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   /* Stacking context management */

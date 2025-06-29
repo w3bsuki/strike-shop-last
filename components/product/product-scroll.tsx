@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const productScrollVariants = cva(
-  "flex overflow-x-auto overflow-y-visible gap-3 md:gap-4 pb-1 horizontal-scroll-optimized",
+  "flex overflow-x-auto overflow-y-visible gap-3 md:gap-4 pb-1 horizontal-scroll-optimized scrollbar-hide",
   {
     variants: {
       gap: {
@@ -72,7 +72,13 @@ const ProductScroll = React.forwardRef<HTMLDivElement, ProductScrollProps>(
             }
           }}
           className={cn(productScrollVariants({ gap }), className)}
-          style={{ maxWidth: "100%" }}
+          style={{ 
+            maxWidth: "100%",
+            touchAction: "pan-x", // Only allow horizontal scroll on touch
+            overscrollBehaviorX: "contain",
+            overscrollBehaviorY: "none",
+            WebkitOverflowScrolling: "touch" // iOS momentum scrolling
+          }}
           onScroll={checkScrollability}
           {...props}
         >
@@ -88,12 +94,13 @@ const ProductScroll = React.forwardRef<HTMLDivElement, ProductScrollProps>(
                 size="icon"
                 onClick={() => scroll("left")}
                 className={cn(
-                  "absolute top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity",
+                  "absolute top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity min-h-[44px] min-w-[44px] touch-manipulation",
                   controlsPosition === "inside" ? "left-2" : "-left-4"
                 )}
                 aria-label="Scroll left"
+                onTouchStart={(e) => e.stopPropagation()}
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-5 w-5" />
               </Button>
             )}
             {canScrollRight && (
@@ -102,12 +109,13 @@ const ProductScroll = React.forwardRef<HTMLDivElement, ProductScrollProps>(
                 size="icon"
                 onClick={() => scroll("right")}
                 className={cn(
-                  "absolute top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity",
+                  "absolute top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity min-h-[44px] min-w-[44px] touch-manipulation",
                   controlsPosition === "inside" ? "right-2" : "-right-4"
                 )}
                 aria-label="Scroll right"
+                onTouchStart={(e) => e.stopPropagation()}
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-5 w-5" />
               </Button>
             )}
           </>

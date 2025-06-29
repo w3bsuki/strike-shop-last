@@ -97,7 +97,7 @@ export function CategoryProducts({
         <Button
           onClick={clearFilters}
           variant="outline"
-          className="font-typewriter min-h-[44px] px-6"
+          className="font-typewriter min-h-[48px] min-w-[48px] px-6 py-3 touch-manipulation rounded-none"
         >
           Clear All Filters
         </Button>
@@ -111,7 +111,11 @@ export function CategoryProducts({
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6"
+        style={{
+          touchAction: 'pan-y', // Allow vertical scrolling
+          WebkitTouchCallout: 'none'
+        }}
       >
         <AnimatePresence mode="popLayout">
           {products.map((product, index) => (
@@ -124,7 +128,7 @@ export function CategoryProducts({
               <ProductCard 
                 product={product} 
                 priority={index < 10}
-                className="w-full touch-manipulation" 
+                className="w-full touch-manipulation select-none" 
               />
             </motion.div>
           ))}
@@ -143,7 +147,7 @@ export function CategoryProducts({
             <Button 
               onClick={handleLoadMore}
               variant="outline"
-              className="button-secondary min-h-[44px] px-8"
+              className="button-secondary min-h-[48px] min-w-[48px] px-8 py-3 touch-manipulation rounded-none"
               disabled={isLoading}
             >
               Load More

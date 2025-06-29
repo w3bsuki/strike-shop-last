@@ -4,6 +4,7 @@ import { ProductGrid } from './product-grid';
 import { ProductFilters } from './product-filters';
 import { ProductSort } from './product-sort';
 import { ProductCard } from './ProductCard';
+import { EnhancedMobileProductCard } from './enhanced-product-card-mobile';
 import type {
   ProductFilters as FilterType,
   ProductSortOption,
@@ -108,12 +109,24 @@ export async function ProductList({
           />
         </aside>
 
-        {/* Product grid */}
+        {/* Product grid with mobile optimization */}
         <div className="flex-1">
           <ProductGrid>
-            {convertedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {convertedProducts.map((product, index) => {
+              // Use enhanced mobile card for better touch interactions
+              const ProductComponent = typeof window !== 'undefined' && window.innerWidth < 768 
+                ? EnhancedMobileProductCard 
+                : ProductCard;
+              
+              return (
+                <ProductComponent 
+                  key={product.id} 
+                  product={product}
+                  priority={index < 6}
+                  className="touch-manipulation"
+                />
+              );
+            })}
           </ProductGrid>
         </div>
       </div>

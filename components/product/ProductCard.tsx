@@ -197,10 +197,16 @@ export const ProductCard = React.memo(({
 
   return (
     <article 
-      className={`product-card group ${className} transform transition-transform hover:scale-[1.02] active:scale-[0.98] focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 touch-manipulation`}
+      className={`product-card group ${className} transform transition-transform hover:scale-[1.02] active:scale-[0.98] focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 touch-manipulation select-none`}
       role="group"
       aria-labelledby={`product-title-${product.id}`}
       aria-describedby={`product-description-${product.id}`}
+      style={{ 
+        touchAction: 'pan-y', // Allow vertical scrolling but prevent horizontal interference
+        WebkitTouchCallout: 'none', // Prevent callout on iOS
+        WebkitUserSelect: 'none',
+        userSelect: 'none'
+      }}
     >
       {/* Screen reader description */}
       <div id={`product-description-${product.id}`} className="sr-only">
@@ -247,13 +253,14 @@ export const ProductCard = React.memo(({
         )}
 
         {/* Action Buttons - Bottom Center */}
-        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 z-20">
+        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 z-20">
           {/* Quick View Button */}
           <AccessibleButton
-            className="h-11 w-11 flex items-center justify-center bg-black/80 hover:bg-black text-white backdrop-blur-sm border-0 transition-all duration-200 hover:scale-110 active:scale-95 min-h-[44px] min-w-[44px]"
+            className="h-12 w-12 flex items-center justify-center bg-black/80 hover:bg-black text-white backdrop-blur-sm border-0 transition-all duration-200 hover:scale-105 active:scale-95 min-h-[48px] min-w-[48px] touch-manipulation rounded-none"
             onClick={handleQuickView}
             variant="ghost"
             description={`Opens a quick preview of ${product.name} in a modal dialog`}
+            onTouchStart={(e) => e.stopPropagation()}
           >
             <Eye className="h-4 w-4" aria-hidden="true" />
             <span className="sr-only">Quick view {product.name}</span>
@@ -261,11 +268,12 @@ export const ProductCard = React.memo(({
 
           {/* Add to Cart Button */}
           <AccessibleButton
-            className="h-11 w-11 flex items-center justify-center bg-black/80 hover:bg-black text-white backdrop-blur-sm border-0 transition-all duration-200 hover:scale-110 active:scale-95 min-h-[44px] min-w-[44px] disabled:opacity-50"
+            className="h-12 w-12 flex items-center justify-center bg-black/80 hover:bg-black text-white backdrop-blur-sm border-0 transition-all duration-200 hover:scale-105 active:scale-95 min-h-[48px] min-w-[48px] disabled:opacity-50 touch-manipulation rounded-none"
             onClick={handleAddToCart}
             disabled={isAddingItem || product.soldOut}
             variant="ghost"
             description={`Add ${product.name} to your shopping cart`}
+            onTouchStart={(e) => e.stopPropagation()}
           >
             <ShoppingBag className={`h-4 w-4 ${isAddingItem ? 'animate-pulse' : ''}`} aria-hidden="true" />
             <span className="sr-only">Add {product.name} to cart</span>
@@ -274,13 +282,14 @@ export const ProductCard = React.memo(({
 
         {/* Wishlist Button - Top Right */}
         <AccessibleButton
-          className={`absolute top-2 right-2 h-11 w-11 flex items-center justify-center bg-white/80 hover:bg-white/90 backdrop-blur-sm border-0 touch-manipulation z-30 transition-all duration-200 hover:scale-110 active:scale-95 min-h-[44px] min-w-[44px] rounded-full ${
+          className={`absolute top-2 right-2 h-12 w-12 flex items-center justify-center bg-white/80 hover:bg-white/90 backdrop-blur-sm border-0 touch-manipulation z-30 transition-all duration-200 hover:scale-105 active:scale-95 min-h-[48px] min-w-[48px] rounded-none ${
             isWishlisted ? 'text-red-500' : 'text-black'
           }`}
           onClick={handleWishlistToggle}
           pressed={isWishlisted}
           variant="ghost"
           description={`${isWishlisted ? 'Remove from' : 'Add to'} your wishlist for easy access later`}
+          onTouchStart={(e) => e.stopPropagation()}
         >
           <Heart
             className={`h-4 w-4 transition-all duration-200 ${

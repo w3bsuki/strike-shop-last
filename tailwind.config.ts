@@ -63,9 +63,14 @@ const config: Config = {
         '16': '4rem',      // 64px
         '20': '5rem',      // 80px
         '24': '6rem',      // 96px
-        // Mobile-specific touch targets
-        'touch': '2.75rem', // 44px - minimum touch target
-        'touch-lg': '3rem', // 48px - comfortable touch target
+        // Mobile-specific touch targets - Enhanced for better UX
+        'touch': '3rem', // 48px - comfortable minimum touch target
+        'touch-sm': '2.75rem', // 44px - absolute minimum touch target
+        'touch-lg': '3.25rem', // 52px - large touch target
+        'touch-xl': '3.5rem', // 56px - extra large touch target
+        // Touch spacing for WCAG compliance
+        'touch-gap': '0.5rem', // 8px - minimum spacing between touch targets
+        'touch-gap-lg': '0.75rem', // 12px - comfortable spacing
       },
       
       // Letter spacing

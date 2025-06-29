@@ -102,10 +102,10 @@ export const metadata: Metadata = {
 
 export const viewport = {
   width: 'device-width',
-  initialScale: 1,
-  maximumScale: 5, // Allow zooming for accessibility
-  userScalable: true, // Allow zooming for accessibility
-  viewportFit: 'cover', // Enable safe area support for notched devices
+  initialScale: 1.0,
+  maximumScale: 1.0,
+  userScalable: false,
+  viewportFit: 'cover',
   colorScheme: 'light dark',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
@@ -126,11 +126,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="font-typewriter">
       <head>
-        {/* CRITICAL: Optimized viewport for perfect mobile performance */}
-        <meta 
-          name="viewport" 
-          content="width=device-width, initial-scale=1, viewport-fit=cover, minimum-scale=1, maximum-scale=5" 
-        />
+        {/* CRITICAL: Optimized viewport for perfect mobile performance - handled by Next.js viewport export */}
         
         {/* ACCESSIBILITY: Theme and color scheme support */}
         <meta name="color-scheme" content="light dark" />

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const productGridVariants = cva(
-  "grid gap-4 md:gap-6",
+  "grid gap-4 md:gap-6 select-none",
   {
     variants: {
       cols: {
@@ -54,6 +54,12 @@ const ProductGrid = React.forwardRef<HTMLDivElement, ProductGridProps>(
       <div
         ref={ref}
         className={cn(productGridVariants({ cols, gap }), className)}
+        style={{
+          touchAction: 'pan-y', // Allow vertical scrolling
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+          userSelect: 'none'
+        }}
         {...props}
       >
         {children}

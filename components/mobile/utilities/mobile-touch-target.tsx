@@ -9,6 +9,9 @@ interface MobileTouchTargetProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   expand?: boolean; // Expand touch target beyond visual bounds
   preventDoubleTap?: boolean;
+  spacing?: 'tight' | 'normal' | 'loose'; // Controls spacing between touch targets
+  onTouchStart?: (e: React.TouchEvent) => void;
+  onTouchEnd?: (e: React.TouchEvent) => void;
 }
 
 export function MobileTouchTarget({
@@ -17,12 +20,21 @@ export function MobileTouchTarget({
   size = 'md',
   expand = false,
   preventDoubleTap = true,
+  spacing = 'normal',
+  onTouchStart,
+  onTouchEnd,
 }: MobileTouchTargetProps) {
   const sizeClasses = {
-    sm: 'min-h-[36px] min-w-[36px]',
-    md: 'min-h-[44px] min-w-[44px]', // Apple HIG recommended minimum
-    lg: 'min-h-[48px] min-w-[48px]',
+    sm: 'min-h-[40px] min-w-[40px]', // Increased from 36px for better accessibility
+    md: 'min-h-[48px] min-w-[48px]', // Increased from 44px for comfortable mobile use
+    lg: 'min-h-[52px] min-w-[52px]',
     xl: 'min-h-[56px] min-w-[56px]',
+  };
+
+  const spacingClasses = {
+    tight: 'm-1', // 4px spacing
+    normal: 'm-2', // 8px spacing (WCAG minimum)
+    loose: 'm-3', // 12px spacing
   };
 
   const expandClasses = expand && 'relative before:absolute before:-inset-2 before:content-[""]';
@@ -33,11 +45,20 @@ export function MobileTouchTarget({
     <div
       className={cn(
         sizeClasses[size],
+        spacingClasses[spacing],
         expandClasses,
         doubleTapStyles,
-        'inline-flex items-center justify-center',
+        'inline-flex items-center justify-center select-none',
         className
       )}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      style={{
+        touchAction: 'manipulation',
+        WebkitTouchCallout: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none'
+      }}
     >
       {children}
     </div>

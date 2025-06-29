@@ -37,30 +37,66 @@ const OptimizedHeroImage = React.forwardRef<HTMLDivElement, OptimizedHeroImagePr
     const { src: imageSrc, blurDataURL: placeholderDataURL } = generateSrcSet();
 
     return (
-      <div ref={ref} className={cn("absolute inset-0", className)} {...props}>
-        <Image
-          src={imageSrc}
-          alt={alt}
-          fill
-          className="object-cover"
-          priority={priority}
-          sizes="100vw"
-          quality={90}
-          placeholder={placeholderDataURL ? "blur" : "empty"}
-          {...(placeholderDataURL && { blurDataURL: placeholderDataURL })}
-          {...(!priority && { loading: "lazy" })}
-          {...(priority ? { fetchPriority: "high" } : { fetchPriority: "auto" })}
-        />
+      <div 
+        ref={ref} 
+        className={cn(
+          "relative w-full h-full overflow-hidden",
+          // Enhanced containment for optimized hero
+          "contain-layout contain-style contain-paint",
+          className
+        )} 
+        style={{
+          // Advanced layout stability
+          contain: 'layout style size paint',
+          isolation: 'isolate',
+          willChange: 'auto',
+          // Prevent mobile zoom effects
+          WebkitOverflowScrolling: 'auto',
+          overscrollBehavior: 'none'
+        }}
+        {...props}
+      >
+        <div className="absolute inset-0 w-full h-full">
+          <Image
+            src={imageSrc}
+            alt={alt}
+            fill
+            className="object-cover object-center"
+            priority={priority}
+            sizes="(max-width: 768px) 100vw, 100vw"
+            quality={90}
+            placeholder={placeholderDataURL ? "blur" : "empty"}
+            {...(placeholderDataURL && { blurDataURL: placeholderDataURL })}
+            {...(!priority && { loading: "lazy" })}
+            {...(priority ? { fetchPriority: "high" } : { fetchPriority: "auto" })}
+            style={{
+              objectFit: 'cover',
+              objectPosition: 'center',
+              // Prevent zoom effects during scroll
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden',
+              // Mobile-specific optimizations
+              touchAction: 'pan-y',
+              WebkitTransform: 'translateZ(0)'
+            }}
+          />
+        </div>
         {overlay !== "none" && (
           <div
             className={cn(
-              "absolute inset-0",
+              "absolute inset-0 z-10",
               heroOverlayClasses[overlay]
             )}
             aria-hidden="true"
+            style={{
+              contain: 'layout style',
+              isolation: 'isolate'
+            }}
           />
         )}
-        {children}
+        <div className="relative z-20">
+          {children}
+        </div>
       </div>
     );
   }
