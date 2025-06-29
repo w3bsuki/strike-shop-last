@@ -54,7 +54,8 @@ export function MobileTouchTarget({
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       style={{
-        touchAction: 'manipulation',
+        // Only prevent double-tap zoom, allow scrolling
+        touchAction: preventDoubleTap ? 'manipulation' : 'auto',
         WebkitTouchCallout: 'none',
         WebkitUserSelect: 'none',
         userSelect: 'none'

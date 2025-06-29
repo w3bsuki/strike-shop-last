@@ -156,10 +156,7 @@ export const MobileNav = dynamic(
   { ssr: false, loading: DefaultLoading }
 );
 
-export const MobileMenu = dynamic(
-  () => import('@/components/mobile/utilities/mobile-drawer').then(mod => ({ default: mod.MobileDrawer })),
-  { ssr: false, loading: DefaultLoading }
-);
+// Mobile drawer removed - no longer needed
 
 // Search components
 export const SearchModal = dynamic(

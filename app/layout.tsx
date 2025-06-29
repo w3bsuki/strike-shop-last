@@ -103,8 +103,8 @@ export const metadata: Metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1.0,
-  maximumScale: 1.0,
-  userScalable: false,
+  maximumScale: 5.0, // Allow zoom for accessibility
+  userScalable: true, // Allow user scaling for accessibility
   viewportFit: 'cover',
   colorScheme: 'light dark',
   themeColor: [

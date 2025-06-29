@@ -22,19 +22,9 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
         ref={ref}
         className={cn(
           "relative w-full overflow-hidden",
-          // CSS containment for layout stability
-          "contain-layout contain-style",
-          // Prevent zoom effects on mobile
-          "transform-gpu backface-visibility-hidden",
           heroSizeClasses[size],
           className
         )}
-        style={{
-          // Prevent layout shifts and zoom effects
-          contain: 'layout style size',
-          isolation: 'isolate',
-          willChange: 'auto'
-        }}
         {...containerProps}
       >
         {children}

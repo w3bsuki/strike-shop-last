@@ -63,14 +63,9 @@ const config: Config = {
         '16': '4rem',      // 64px
         '20': '5rem',      // 80px
         '24': '6rem',      // 96px
-        // Mobile-specific touch targets - Enhanced for better UX
-        'touch': '3rem', // 48px - comfortable minimum touch target
-        'touch-sm': '2.75rem', // 44px - absolute minimum touch target
-        'touch-lg': '3.25rem', // 52px - large touch target
-        'touch-xl': '3.5rem', // 56px - extra large touch target
-        // Touch spacing for WCAG compliance
-        'touch-gap': '0.5rem', // 8px - minimum spacing between touch targets
-        'touch-gap-lg': '0.75rem', // 12px - comfortable spacing
+        // Touch targets
+        'touch': '2.75rem', // 44px - minimum touch target
+        'touch-lg': '3rem', // 48px - comfortable touch target
       },
       
       // Letter spacing
@@ -203,20 +198,7 @@ const config: Config = {
         'tooltip': '1070',
       },
       
-      // Safe area padding utilities
-      padding: {
-        'safe-top': 'env(safe-area-inset-top)',
-        'safe-right': 'env(safe-area-inset-right)',
-        'safe-bottom': 'env(safe-area-inset-bottom)',
-        'safe-left': 'env(safe-area-inset-left)',
-      },
-      
-      margin: {
-        'safe-top': 'env(safe-area-inset-top)',
-        'safe-right': 'env(safe-area-inset-right)',
-        'safe-bottom': 'env(safe-area-inset-bottom)',
-        'safe-left': 'env(safe-area-inset-left)',
-      },
+      // Safe area utilities handled by plugin below
       
       // Animations
       keyframes: {
@@ -262,89 +244,17 @@ const config: Config = {
   },
   plugins: [
     require('tailwindcss-animate'),
-    // Safe area utilities plugin
+    // Minimal safe area utilities
     function({ addUtilities }) {
-      const safeAreaUtilities = {
-        '.pt-safe': {
-          paddingTop: 'env(safe-area-inset-top)',
-        },
-        '.pr-safe': {
-          paddingRight: 'env(safe-area-inset-right)',
-        },
+      addUtilities({
         '.pb-safe': {
           paddingBottom: 'env(safe-area-inset-bottom)',
         },
-        '.pl-safe': {
-          paddingLeft: 'env(safe-area-inset-left)',
-        },
-        '.p-safe': {
-          paddingTop: 'env(safe-area-inset-top)',
-          paddingRight: 'env(safe-area-inset-right)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          paddingLeft: 'env(safe-area-inset-left)',
-        },
-        '.mt-safe': {
-          marginTop: 'env(safe-area-inset-top)',
-        },
-        '.mr-safe': {
-          marginRight: 'env(safe-area-inset-right)',
-        },
-        '.mb-safe': {
-          marginBottom: 'env(safe-area-inset-bottom)',
-        },
-        '.ml-safe': {
-          marginLeft: 'env(safe-area-inset-left)',
-        },
-        '.m-safe': {
-          marginTop: 'env(safe-area-inset-top)',
-          marginRight: 'env(safe-area-inset-right)',
-          marginBottom: 'env(safe-area-inset-bottom)',
-          marginLeft: 'env(safe-area-inset-left)',
-        },
-        // Combined utilities with additional padding
-        '.pt-safe-4': {
-          paddingTop: 'calc(1rem + env(safe-area-inset-top))',
-        },
-        '.pr-safe-4': {
-          paddingRight: 'calc(1rem + env(safe-area-inset-right))',
-        },
-        '.pb-safe-4': {
-          paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
-        },
-        '.pl-safe-4': {
-          paddingLeft: 'calc(1rem + env(safe-area-inset-left))',
-        },
-        '.pt-safe-8': {
-          paddingTop: 'calc(2rem + env(safe-area-inset-top))',
-        },
-        '.pr-safe-8': {
-          paddingRight: 'calc(2rem + env(safe-area-inset-right))',
-        },
-        '.pb-safe-8': {
-          paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))',
-        },
-        '.pl-safe-8': {
-          paddingLeft: 'calc(2rem + env(safe-area-inset-left))',
-        },
-        // Landscape-specific utilities
         '.px-safe': {
           paddingLeft: 'env(safe-area-inset-left)',
           paddingRight: 'env(safe-area-inset-right)',
         },
-        '.py-safe': {
-          paddingTop: 'env(safe-area-inset-top)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-        },
-        '.px-safe-4': {
-          paddingLeft: 'calc(1rem + env(safe-area-inset-left))',
-          paddingRight: 'calc(1rem + env(safe-area-inset-right))',
-        },
-        '.py-safe-4': {
-          paddingTop: 'calc(1rem + env(safe-area-inset-top))',
-          paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
-        },
-      };
-      addUtilities(safeAreaUtilities);
+      });
     },
   ],
 };

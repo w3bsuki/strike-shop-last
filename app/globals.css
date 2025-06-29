@@ -251,560 +251,105 @@ body {
   overflow-x: hidden;
   width: 100%;
   position: relative;
-  /* Global touch action for better scroll performance */
-  touch-action: pan-y;
+  /* Allow all scrolling on body */
+  touch-action: auto;
 }
 
-/* Mobile-First Text Sizing with Responsive Clamp */
+/* Typography - using design system variables */
 :root {
-  /* Responsive font sizes using clamp() */
-  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
-  --text-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);
-  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-  --text-lg: clamp(1.125rem, 1.075rem + 0.25vw, 1.25rem);
-  --text-xl: clamp(1.25rem, 1.2rem + 0.25vw, 1.5rem);
-  --text-2xl: clamp(1.5rem, 1.4rem + 0.5vw, 1.875rem);
-  --text-3xl: clamp(1.875rem, 1.775rem + 0.5vw, 2.25rem);
-  --text-4xl: clamp(2.25rem, 2.1rem + 0.75vw, 3rem);
-  --text-5xl: clamp(3rem, 2.8rem + 1vw, 3.75rem);
+  /* Font sizes handled by design-system.css */
 }
 
-/* Mobile text rendering optimization */
+/* Essential mobile text optimization */
 @media (max-width: 640px) {
   body {
     -webkit-text-size-adjust: 100%;
-    text-rendering: optimizeLegibility;
-    /* Prevent horizontal scrolling on mobile */
     overflow-x: hidden;
-    /* Optimize scrolling performance */
     -webkit-overflow-scrolling: touch;
-    /* Minimum font size for readability */
-    font-size: var(--text-base);
-    /* Enhanced touch optimization */
-    touch-action: pan-y;
-    -webkit-touch-callout: none;
   }
 
-  /* Prevent text selection on touch devices where it's not needed */
-  .product-card,
-  .category-card,
-  .navigation-item {
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-  }
-
-  /* Allow text selection in content areas */
-  .product-description,
-  .article-content,
-  .user-content {
-    -webkit-user-select: text;
-    user-select: text;
-  }
-
-  /* Ensure minimum font sizes on mobile */
-  .text-xs { font-size: var(--text-xs); }
-  .text-sm { font-size: var(--text-sm); }
-  .text-base { font-size: var(--text-base); }
-  .text-lg { font-size: var(--text-lg); }
-  .text-xl { font-size: var(--text-xl); }
-  .text-2xl { font-size: var(--text-2xl); }
-  .text-3xl { font-size: var(--text-3xl); }
-  .text-4xl { font-size: var(--text-4xl); }
-  .text-5xl { font-size: var(--text-5xl); }
-
-  /* Ensure all text is at least 16px on mobile */
-  p, span, div, li, td, th {
-    font-size: max(1rem, inherit);
-  }
-
-  /* Buttons and form elements minimum size */
-  button, input, select, textarea {
-    font-size: max(1rem, inherit);
-    min-height: 48px;
-  }
-
-  /* Links minimum size */
-  a {
+  /* Prevent iOS zoom on form inputs */
+  input, textarea, select {
+    font-size: 16px !important;
     min-height: 44px;
-    display: inline-flex;
-    align-items: center;
   }
 
-  /* Prevent text inflation on mobile */
-  * {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-
-  /* Optimize touch interactions */
-  button,
-  a,
-  [role='button'] {
+  /* Essential touch targets */
+  button, a, [role='button'] {
+    min-height: 44px;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
     touch-action: manipulation;
   }
 }
 
 /* ==========================================================================
-   COMPREHENSIVE TOUCH ACTION OPTIMIZATION
+   ESSENTIAL TOUCH OPTIMIZATIONS
    ========================================================================== */
 
-/* Global touch-action policies for optimal mobile performance */
-html {
-  /* Allow vertical scrolling only */
-  touch-action: pan-y;
-}
-
-/* Interactive elements should use manipulation for fastest response */
-button,
-input[type="button"],
-input[type="submit"],
-input[type="reset"],
-[role="button"],
-[role="tab"],
-[role="menuitem"],
-.button,
-.btn {
+/* Basic touch optimizations for interactive elements */
+button, [role="button"], a {
   touch-action: manipulation;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
 }
 
-/* Form inputs need manipulation to prevent zoom while allowing interaction */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="search"],
-input[type="tel"],
-input[type="url"],
-input[type="number"],
-textarea,
-select {
+/* Form inputs - prevent zoom */
+input, textarea, select {
   touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  /* Prevent iOS zoom on focus by ensuring 16px+ font size */
   font-size: max(16px, 1rem);
 }
 
-/* Links should allow manipulation for tap gestures */
-a {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-}
-
-/* Scrollable containers need pan gestures */
-.scroll-container,
-.horizontal-scroll,
-.horizontal-scroll-optimized,
-.category-scroll-container {
-  touch-action: pan-x;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-/* Vertical scrollable areas */
-.scroll-y,
-.overflow-y-auto,
-.overflow-y-scroll {
-  touch-action: pan-y;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: auto;
-  overscroll-behavior-x: none;
-}
-
-/* Two-axis scrolling for specific cases like maps or large tables */
-.scroll-xy,
-.pan-both {
-  touch-action: pan-x pan-y;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Prevent all touch actions for static content */
-.touch-none {
-  touch-action: none;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-/* Pinch-zoom enabled areas (images, maps) */
-.pinch-zoom {
-  touch-action: pan-x pan-y pinch-zoom;
-}
-
-/* Modal and overlay touch handling */
-.modal-backdrop,
-.overlay {
-  touch-action: none;
-  -webkit-touch-callout: none;
-}
-
-.modal-content,
-.dialog-content {
-  touch-action: auto;
-}
-
-/* Drag and drop areas */
-.draggable,
-[draggable="true"] {
-  touch-action: none;
-  -webkit-user-drag: element;
-}
-
-/* Navigation specific touch actions */
-.nav-menu,
-.navigation {
-  touch-action: pan-y;
-}
-
-.nav-hamburger,
-.menu-toggle {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-}
-
-/* Product card specific optimizations */
-.product-card {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.product-card-image {
-  touch-action: manipulation;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-/* Carousel and slider specific */
-.carousel,
-.slider {
+/* Scrollable areas */
+.horizontal-scroll {
   touch-action: pan-x;
   -webkit-overflow-scrolling: touch;
 }
 
-.carousel-item,
-.slide {
-  touch-action: manipulation;
-}
-
-/* Form field containers */
-.form-group,
-.input-group {
-  touch-action: manipulation;
-}
-
-/* Checkbox and radio specific handling */
-input[type="checkbox"],
-input[type="radio"] {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-}
-
-/* Range sliders */
-input[type="range"] {
-  touch-action: pan-x;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Tabs and accordion */
-.tab-button,
-.accordion-header {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-}
-
-/* Loading states should prevent interactions */
-.loading,
-.disabled,
-[aria-disabled="true"] {
-  touch-action: none;
-  -webkit-touch-callout: none;
-  pointer-events: none;
-}
-
-/* Image galleries and viewers */
-.image-gallery,
-.image-viewer {
-  touch-action: pan-x pan-y pinch-zoom;
-}
-
-.gallery-thumbnail {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-}
-
-/* Search components */
-.search-input {
-  touch-action: manipulation;
-  font-size: max(16px, 1rem); /* Prevent iOS zoom */
-}
-
-.search-suggestions {
+.scroll-y {
   touch-action: pan-y;
-}
-
-.search-suggestion-item {
-  touch-action: manipulation;
-}
-
-/* Footer specific */
-.footer-input {
-  font-size: max(16px, 1rem); /* Prevent iOS zoom */
-  touch-action: manipulation;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ==========================================================================
-   iOS AUTO-ZOOM PREVENTION
+   iOS ZOOM PREVENTION - SIMPLIFIED
    ========================================================================== */
 
-/* Comprehensive iOS zoom prevention for all input types */
-input,
-textarea,
-select,
-.input,
-.form-control {
-  /* Critical: 16px+ font size prevents iOS zoom on focus */
-  font-size: max(16px, 1rem) !important;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  touch-action: manipulation;
-}
-
-/* Specific input type targeting */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="search"],
-input[type="tel"],
-input[type="url"],
-input[type="number"],
-input[type="date"],
-input[type="time"],
-input[type="datetime-local"],
-input[type="month"],
-input[type="week"] {
+/* Prevent iOS zoom on form inputs */
+input, textarea, select {
   font-size: 16px !important;
   -webkit-text-size-adjust: none;
-  text-size-adjust: none;
 }
 
-/* Textarea specific */
-textarea {
-  font-size: 16px !important;
-  -webkit-text-size-adjust: none;
-  text-size-adjust: none;
-  resize: vertical;
-}
-
-/* Select elements */
-select {
-  font-size: 16px !important;
-  -webkit-text-size-adjust: none;
-  text-size-adjust: none;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-/* Form validation and accessibility maintenance */
-@media screen and (max-width: 768px) {
-  /* Mobile-specific input sizing to prevent zoom */
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-  textarea,
-  select {
-    font-size: 16px !important;
-    min-height: 44px; /* WCAG touch target size */
-    padding: 12px 16px;
-    border-radius: 0;
-    -webkit-text-size-adjust: none;
-    text-size-adjust: none;
-  }
-  
-  /* Override any competing font sizes on mobile */
-  .text-xs input,
-  .text-sm input,
-  .text-base input,
-  small input {
-    font-size: 16px !important;
-  }
-}
-
-/* iOS Safari specific fixes */
+/* iOS Safari fixes */
 @supports (-webkit-touch-callout: none) {
-  /* Target iOS Safari specifically */
-  input,
-  textarea,
-  select {
-    font-size: 16px !important;
-    transform: scale(1); /* Prevent iOS scaling issues */
-    -webkit-text-size-adjust: none;
-  }
-  
-  /* Prevent iOS Safari from adding rounded corners */
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="search"] {
+  input, textarea, select {
     -webkit-appearance: none;
-    appearance: none;
     border-radius: 0 !important;
-  }
-  
-  /* Fix iOS Safari select styling */
-  select {
-    -webkit-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4z'/><path fill='%23666' d='M0 3h4l-2 2z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 12px;
-    padding-right: 32px;
   }
 }
 
 .horizontal-scroll {
   -ms-overflow-style: none;
   scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
 }
 
 .horizontal-scroll::-webkit-scrollbar {
   display: none;
 }
 
-/* Enhanced Mobile Product Scroll - PERFORMANCE OPTIMIZED */
-.horizontal-scroll-optimized {
-  /* Perfect snap scrolling for mobile */
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  
-  /* GPU acceleration for smooth performance */
-  will-change: scroll-position;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  
-  /* iOS momentum scrolling */
-  -webkit-momentum-scrolling: touch;
-  
-  /* Hide scrollbar completely */
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  
-  /* Optimal scroll padding for edge visibility */
-  scroll-padding-left: 16px;
-  scroll-padding-right: 16px;
-  
-  /* Mobile touch optimization */
-  touch-action: pan-x;
-  overscroll-behavior-x: contain;
-  overscroll-behavior-y: none;
-  
-  /* Prevent content shifting during scroll */
-  min-width: 100%;
-  
-  /* Better mobile performance */
-  contain: layout style paint;
-}
-
-.horizontal-scroll-optimized::-webkit-scrollbar {
-  display: none;
-}
-
-/* Mobile-specific scroll optimizations - Enhanced */
-@media (max-width: 768px) {
-  .horizontal-scroll-optimized {
-    /* Enhanced mobile touch handling */
-    scroll-snap-type: x proximity; /* Less aggressive snapping on mobile */
-    
-    /* Better gap for mobile viewing */
-    gap: 0.75rem;
-    
-    /* Mobile-specific padding with safe area support */
-    padding-left: max(8px, env(safe-area-inset-left));
-    padding-right: max(16px, env(safe-area-inset-right));
-    
-    /* Prevent rubber band effect */
-    overscroll-behavior: contain;
-    
-    /* Improved scroll performance on mobile */
-    scroll-behavior: auto; /* Disable smooth scrolling on mobile for better performance */
-    
-    /* Enhanced touch interaction */
-    touch-action: pan-x;
-    -webkit-touch-callout: none;
-    
-    /* Better momentum scrolling */
-    -webkit-momentum-scrolling: touch;
-  }
-  
-  /* Snap alignment for mobile cards */
-  .horizontal-scroll-optimized .snap-start {
-    scroll-snap-align: start;
-    scroll-snap-stop: normal;
-  }
-  
-  /* Enhanced mobile product sections */
-  .section-padding {
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
-  }
-}
-
-.category-scroll-container {
-  /* Perfect horizontal layout */
-  scroll-snap-type: x mandatory;
-  /* Smooth momentum on mobile */
-  -webkit-overflow-scrolling: touch;
-  /* Performance optimization */
-  will-change: transform;
-  /* Prevent content jumping */
-  min-width: 100%;
-}
-
-.category-scroll-container .snap-start {
+.horizontal-scroll .snap-start {
   scroll-snap-align: start;
-  scroll-snap-stop: normal;
 }
 
-/* Mobile-specific optimizations */
+/* Mobile scroll optimizations */
 @media (max-width: 768px) {
-  .horizontal-scroll-optimized {
-    /* Better touch handling */
-    touch-action: pan-x;
-    /* Prevent vertical scrolling within horizontal scroll */
-    overscroll-behavior-x: contain;
-    overscroll-behavior-y: none;
-    /* Enhanced momentum */
-    scroll-behavior: smooth;
+  .horizontal-scroll {
+    scroll-snap-type: x proximity;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
-  
-  .category-scroll-container {
-    /* Tighter gap on mobile for better fit */
-    gap: 0.75rem;
-    /* Add padding for edge cards */
-    padding-left: 4px;
-    padding-right: 16px;
-  }
-  
-  /* Enhanced touch feedback */
-  .category-card:active {
-    transform: scale(0.95);
-    transition: transform 0.1s ease-out;
-  }
-}
-
-/* Fallback for older browsers */
-.category-scroll-mobile {
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-}
-
-.category-scroll-mobile > * {
-  scroll-snap-align: start;
 }
 
 /* Navigation Links */
@@ -863,16 +408,11 @@ select {
   }
 }
 
-/* Card Styling - Mobile-First Optimized */
+/* Card Styling */
 .product-card {
   background-color: hsl(var(--card));
   position: relative;
-  /* Mobile performance optimizations */
-  will-change: transform;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-  /* Enhanced touch feedback */
-  transition: transform 0.15s ease-out;
+  transition: transform 0.2s ease;
 }
 
 .product-card:active {
@@ -1039,63 +579,22 @@ select {
   background-color: hsl(var(--background));
 }
 
-/* Mobile-specific responsive sizes and optimizations */
+/* Responsive product card sizes */
 @media (max-width: 640px) {
   .product-card {
-    /* Optimal mobile width for 2.5 cards visible in scroll */
     min-width: 176px;
-    max-width: 176px;
-    /* Enhanced performance for mobile scrolling */
-    contain: layout style;
-    will-change: transform;
-  }
-  
-  .product-card-title {
-    font-size: 0.7rem;
-    /* Better mobile line height */
-    line-height: 1.1;
-  }
-  
-  .product-card-price {
-    font-size: 0.7rem;
-    line-height: 1;
-  }
-  
-  /* Reduce image transform on mobile for better performance */
-  .product-card:hover .product-card-image {
-    transform: scale(1.02);
-  }
-  
-  /* Optimize touch targets on mobile */
-  .product-card .quick-view-btn,
-  .product-card .wishlist-btn {
-    min-height: 48px;
-    min-width: 48px;
-    padding: 12px;
   }
 }
 
 @media (min-width: 641px) and (max-width: 768px) {
   .product-card {
-    /* Tablet sizing */
     min-width: 192px;
-    max-width: 192px;
   }
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 769px) {
   .product-card {
-    /* Small desktop sizing */
     min-width: 208px;
-    max-width: 208px;
-  }
-}
-
-@media (min-width: 1025px) {
-  .product-card {
-    /* Large desktop sizing */
-    min-width: 240px;
-    max-width: 240px;
   }
 }
 
@@ -1697,52 +1196,10 @@ select {
    ========================================================================== */
 
 @layer utilities {
-  /* Typography Utilities */
-  .font-typewriter {
-    font-family: 'Typewriter', 'Courier Prime', ui-monospace, monospace;
-  }
-
-  .font-display {
-    font-family: 'Typewriter', 'Courier Prime', ui-monospace, monospace;
-  }
-
-  .font-mono {
-    font-family: 'Typewriter', 'Courier Prime', ui-monospace, monospace;
-  }
-
-  .font-sans {
-    font-family: 'Typewriter', 'Courier Prime', ui-monospace, monospace;
-  }
-
-  .text-strike-xs {
-    font-size: 0.625rem;
-    line-height: 0.875rem;
-    letter-spacing: 0.1em;
-    font-weight: 700;
-  }
-
-  .text-strike-sm {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    letter-spacing: 0.1em;
-    font-weight: 700;
-  }
-
-  .text-strike-base {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    letter-spacing: 0.05em;
-    font-weight: 500;
-  }
-
-  /* Layout Utilities - Mobile-First Responsive Grid */
-  .strike-grid {
-    @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6;
-  }
-  
-  /* Product-specific mobile-optimized grid */
+  /* Essential custom utilities only */
   .product-grid-mobile {
-    @apply grid gap-3 sm:gap-4;
+    display: grid;
+    gap: 0.75rem;
     grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
   }
   
@@ -1757,184 +1214,7 @@ select {
       grid-template-columns: repeat(auto-fill, minmax(208px, 1fr));
     }
   }
-  
-  @media (min-width: 1025px) {
-    .product-grid-mobile {
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    }
-  }
 
-  /* Button Utilities */
-  .strike-button {
-    @apply inline-flex items-center justify-center 
-           font-medium transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-offset-2
-           disabled:opacity-50 disabled:cursor-not-allowed
-           min-h-[44px] min-w-[44px]; /* Accessibility: minimum touch target */
-  }
-
-  .strike-button-primary {
-    @apply strike-button
-           bg-primary text-primary-foreground
-           hover:bg-primary/90 
-           focus:ring-primary;
-  }
-
-  .strike-button-secondary {
-    @apply strike-button
-           bg-secondary text-secondary-foreground
-           hover:bg-secondary/80
-           focus:ring-secondary;
-  }
-
-  .strike-button-outline {
-    @apply strike-button
-           border border-input bg-background
-           hover:bg-accent hover:text-accent-foreground
-           focus:ring-accent;
-  }
-
-  /* Card Utilities */
-  .strike-card {
-    @apply bg-card text-card-foreground 
-           rounded-none border shadow-sm
-           transition-shadow duration-200;
-  }
-
-  .strike-card-hover {
-    @apply hover:shadow-md;
-  }
-
-  /* Form Utilities */
-  .strike-input {
-    @apply w-full rounded-none border border-input
-           bg-background px-3 py-2
-           text-sm placeholder:text-muted-foreground
-           focus:outline-none focus:ring-2 
-           focus:ring-ring focus:ring-offset-2
-           disabled:cursor-not-allowed disabled:opacity-50
-           min-h-[44px]; /* Accessibility: minimum touch target */
-  }
-
-  .strike-label {
-    @apply text-sm font-medium leading-none
-           peer-disabled:cursor-not-allowed 
-           peer-disabled:opacity-70;
-  }
-
-  /* Loading States */
-  .strike-skeleton {
-    @apply animate-pulse bg-muted rounded-none;
-  }
-
-  /* Accessibility Utilities */
-  .strike-focus-visible {
-    @apply focus-visible:outline-none 
-           focus-visible:ring-2 
-           focus-visible:ring-ring 
-           focus-visible:ring-offset-2
-           focus-visible:ring-offset-background;
-  }
-
-  .strike-sr-only {
-    @apply absolute w-px h-px p-0 -m-px 
-           overflow-hidden whitespace-nowrap 
-           border-0;
-  }
-
-  /* Animation Utilities */
-  .strike-transition {
-    @apply transition-all duration-200 ease-in-out;
-  }
-
-  .strike-transition-fast {
-    @apply transition-all duration-150 ease-in-out;
-  }
-
-  .strike-transition-slow {
-    @apply transition-all duration-300 ease-in-out;
-  }
-
-  /* Responsive Utilities */
-  .strike-mobile-only {
-    @apply block md:hidden;
-  }
-
-  .strike-desktop-only {
-    @apply hidden md:block;
-  }
-
-  /* Product Specific */
-  .strike-product-badge {
-    @apply absolute top-2 left-2
-           px-2 py-1 text-xs font-bold
-           rounded-none uppercase tracking-wider;
-    z-index: var(--z-dropdown);
-  }
-
-  .strike-price {
-    @apply font-typewriter font-bold;
-  }
-
-  .strike-price-original {
-    @apply text-muted-foreground line-through;
-  }
-
-  /* Error States */
-  .strike-error {
-    @apply text-destructive text-sm mt-1;
-  }
-
-  .strike-input-error {
-    @apply border-destructive focus:ring-destructive;
-  }
-
-  /* Touch Optimization - Enhanced */
-  .touch-manipulation {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-  }
-
-  /* Enhanced touch targets for better mobile UX */
-  .touch-target-enhanced {
-    min-height: 48px;
-    min-width: 48px;
-    padding: 8px;
-    margin: 4px;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-    position: relative;
-  }
-
-  /* Touch feedback animation */
-  .touch-feedback {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .touch-feedback::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease, height 0.3s ease;
-    pointer-events: none;
-  }
-
-  .touch-feedback:active::after {
-    width: 200px;
-    height: 200px;
-  }
-
-  /* Scrollbar Hide Utility */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -1944,196 +1224,8 @@ select {
     display: none;
   }
 
-  /* Horizontal Scroll Only */
-  .scroll-x-only {
-    overflow-x: auto;
-    overflow-y: hidden;
-    overscroll-behavior-x: contain;
-    overscroll-behavior-y: none;
-  }
-
-  /* Perfect Snap Scrolling - Enhanced */
-  .snap-x-mandatory {
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-  }
-
-  .snap-x-proximity {
-    scroll-snap-type: x proximity; /* Less aggressive snapping for better mobile UX */
-  }
-
   .snap-start {
     scroll-snap-align: start;
-    scroll-snap-stop: normal;
-  }
-
-  .snap-center {
-    scroll-snap-align: center;
-    scroll-snap-stop: normal;
-  }
-
-  /* Enhanced mobile scroll optimization */
-  .mobile-scroll-optimized {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-    overscroll-behavior-x: contain;
-    overscroll-behavior-y: none;
-  }
-
-  @media (max-width: 768px) {
-    .mobile-scroll-optimized {
-      scroll-behavior: auto; /* Disable smooth scrolling on mobile for better performance */
-      scroll-snap-type: x proximity;
-    }
-  }
-
-  /* Mobile viewport utilities */
-  .mobile-safe-area {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
-
-  /* Z-index utility classes */
-  .z-base {
-    z-index: var(--z-base);
-  }
-
-  .z-dropdown {
-    z-index: var(--z-dropdown);
-  }
-
-  .z-sticky {
-    z-index: var(--z-sticky);
-  }
-
-  .z-fixed {
-    z-index: var(--z-fixed);
-  }
-
-  .z-modal-backdrop {
-    z-index: var(--z-modal-backdrop);
-  }
-
-  .z-modal {
-    z-index: var(--z-modal);
-  }
-
-  .z-notification {
-    z-index: var(--z-notification);
-  }
-
-  .z-tooltip {
-    z-index: var(--z-tooltip);
-  }
-
-  /* CSS Containment Utilities */
-  .contain-layout {
-    contain: layout;
-  }
-
-  .contain-style {
-    contain: style;
-  }
-
-  .contain-paint {
-    contain: paint;
-  }
-
-  .contain-size {
-    contain: size;
-  }
-
-  .contain-strict {
-    contain: strict;
-  }
-
-  .contain-layout-style {
-    contain: layout style;
-  }
-
-  .contain-layout-style-paint {
-    contain: layout style paint;
-  }
-
-  /* Transform GPU Utilities */
-  .transform-gpu {
-    transform: translateZ(0);
-  }
-
-  .backface-visibility-hidden {
-    backface-visibility: hidden;
-  }
-
-  /* Mobile Scroll Optimization Utilities */
-  .mobile-scroll-optimized {
-    -webkit-overflow-scrolling: auto;
-    overscroll-behavior: none;
-    touch-action: pan-y;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-  }
-
-  /* Hero-specific utilities */
-  .hero-stable {
-    contain: layout style size paint;
-    isolation: isolate;
-    will-change: auto;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-  }
-
-  .hero-image-fixed {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    contain: layout style paint;
-  }
-
-  /* Prevent zoom effects */
-  .no-zoom {
-    touch-action: pan-y;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-
-  /* Stacking context management */
-  .isolate {
-    isolation: var(--stacking-isolation);
-  }
-
-  .stacking-context {
-    position: relative;
-    z-index: 0;
-    isolation: var(--stacking-isolation);
-  }
-
-  /* Common stacking patterns */
-  .modal-container {
-    position: fixed;
-    inset: 0;
-    z-index: var(--z-modal);
-    isolation: var(--stacking-isolation);
-  }
-
-  .dropdown-container {
-    position: relative;
-    z-index: var(--z-dropdown);
-  }
-
-  .sticky-header {
-    position: sticky;
-    top: 0;
-    z-index: var(--z-sticky);
-    backdrop-filter: blur(8px);
-  }
-
-  .fixed-nav {
-    position: fixed;
-    z-index: var(--z-fixed);
   }
 }
 
@@ -2201,577 +1293,96 @@ select {
 }
 
 /* ==========================================================================
-   WCAG 2.1 AA ACCESSIBILITY COMPLIANCE
+   ACCESSIBILITY - SIMPLIFIED
    ========================================================================== */
 
-/* WCAG-compliant color contrast ratios */
-:root {
-  /* High contrast text colors - guaranteed WCAG AA compliance */
-  --text-primary: hsl(0 0% 0%);     /* 21:1 contrast on white */
-  --text-secondary: hsl(0 0% 29%);  /* 7:1 contrast on white */
-  --text-muted: hsl(0 0% 25%);      /* 7:1 contrast on white */
-  --text-on-dark: hsl(0 0% 100%);   /* 21:1 contrast on black */
-  
-  /* Accessible interactive colors */
-  --link-color: hsl(0 0% 0%);       /* 21:1 contrast on white */
-  --link-hover: hsl(0 0% 20%);      /* 13.1:1 contrast on white */
-  --focus-ring-color: hsl(0 0% 0%); /* High visibility focus indicator */
-  --focus-ring-offset-color: hsl(0 0% 100%);
-  
-  /* Error states with proper contrast */
-  --error-bg: hsl(0 86% 97%);       /* Light red background */
-  --error-text: hsl(0 60% 30%);     /* 9.5:1 contrast on error-bg */
-  --error-border: hsl(0 84% 40%);   /* Dark red border */
-  
-  /* Success states with proper contrast */
-  --success-bg: hsl(122 39% 94%);   /* Light green background */
-  --success-text: hsl(122 39% 21%); /* 9.2:1 contrast on success-bg */
-  --success-border: hsl(122 39% 35%); /* Dark green border */
-  
-  /* Warning states with proper contrast */
-  --warning-bg: hsl(48 100% 96%);   /* Light yellow background */
-  --warning-text: hsl(48 100% 20%); /* 10.3:1 contrast on warning-bg */
-  --warning-border: hsl(48 100% 35%); /* Dark yellow border */
-}
-
-.dark {
-  /* Dark mode high contrast colors */
-  --text-primary: hsl(0 0% 100%);   /* 18.1:1 contrast on dark bg */
-  --text-secondary: hsl(0 0% 75%);  /* 9.6:1 contrast on dark bg */
-  --text-muted: hsl(0 0% 75%);      /* 9.6:1 contrast on dark bg */
-  --text-on-dark: hsl(0 0% 9%);     /* For light backgrounds in dark mode */
-  
-  /* Dark mode interactive colors */
-  --link-color: hsl(0 0% 100%);     /* 18.1:1 contrast on dark bg */
-  --link-hover: hsl(0 0% 85%);      /* 12.6:1 contrast on dark bg */
-  --focus-ring-color: hsl(0 0% 100%);
-  --focus-ring-offset-color: hsl(0 0% 9%);
-  
-  /* Dark mode error states */
-  --error-bg: hsl(0 60% 20%);       /* Dark red background */
-  --error-text: hsl(0 100% 85%);    /* 9.1:1 contrast */
-  --error-border: hsl(0 84% 70%);
-  
-  /* Dark mode success states */
-  --success-bg: hsl(122 39% 20%);   /* Dark green background */
-  --success-text: hsl(122 39% 85%); /* 9.3:1 contrast */
-  --success-border: hsl(122 39% 65%);
-  
-  /* Dark mode warning states */
-  --warning-bg: hsl(48 100% 20%);   /* Dark yellow background */
-  --warning-text: hsl(48 100% 85%); /* 9.5:1 contrast */
-  --warning-border: hsl(48 100% 60%);
-}
-
-/* Enhanced Focus States for Perfect Keyboard Navigation */
-.keyboard-user *:focus,
-.keyboard-user *:focus-visible {
-  outline: 3px solid var(--focus-ring-color);
-  outline-offset: 2px;
-  border-radius: 0; /* Maintain sharp edges */
-}
-
-/* Remove focus outline for mouse users */
-:not(.keyboard-user) *:focus {
-  outline: none;
-}
-
-/* Universal focus-visible styles for all interactive elements */
+/* Focus states */
 button:focus-visible,
 [role="button"]:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible,
-[tabindex]:focus-visible {
-  outline: 3px solid var(--focus-ring-color);
+textarea:focus-visible {
+  outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
-  box-shadow: 0 0 0 2px var(--focus-ring-offset-color),
-              0 0 0 5px var(--focus-ring-color);
-  border-radius: 0;
-  z-index: var(--z-tooltip);
 }
 
-/* High contrast focus for dark mode */
-.dark button:focus-visible,
-.dark [role="button"]:focus-visible,
-.dark a:focus-visible,
-.dark input:focus-visible,
-.dark select:focus-visible,
-.dark textarea:focus-visible,
-.dark [tabindex]:focus-visible {
-  outline: 3px solid var(--focus-ring-color);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px var(--focus-ring-offset-color),
-              0 0 0 5px var(--focus-ring-color);
-}
-
-/* WCAG-compliant minimum touch target sizes */
-button, 
-[role="button"],
-a[role="button"],
-input[type="button"],
-input[type="submit"],
-input[type="checkbox"],
-input[type="radio"],
-.touch-target {
+/* Touch targets */
+button, [role="button"], a, input, select, textarea {
   min-height: 44px;
   min-width: 44px;
-  /* Ensure adequate spacing between touch targets */
-  margin: 2px;
-  position: relative;
 }
 
-/* Ensure checkbox and radio buttons have proper touch targets */
-input[type="checkbox"],
-input[type="radio"] {
-  width: 44px;
-  height: 44px;
-  cursor: pointer;
-}
-
-/* Custom checkbox/radio styling with proper sizing */
-input[type="checkbox"]:before,
-input[type="radio"]:before {
-  content: '';
-  display: block;
-  width: 18px;
-  height: 18px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border: 2px solid currentColor;
-  background: transparent;
-}
-
-input[type="radio"]:before {
-  border-radius: 50%;
-}
-
-input[type="checkbox"]:checked:before,
-input[type="radio"]:checked:before {
-  background: currentColor;
-}
-
-/* Touch-friendly interactions for mobile devices */
 @media (hover: none) and (pointer: coarse) {
-  /* Ensure all interactive elements meet touch target requirements */
-  button, 
-  [role="button"],
-  a,
-  input[type="checkbox"],
-  input[type="radio"],
-  select,
-  .interactive-element {
-    min-height: 48px; /* Larger on mobile for better usability */
+  button, [role="button"], a, input, select, textarea {
+    min-height: 48px;
     min-width: 48px;
-    padding: 12px 16px;
-  }
-
-  /* Remove hover states on touch devices to prevent sticky hover */
-  *:hover {
-    transition: none !important;
-  }
-  
-  /* Enhanced feedback for touch interactions */
-  button:active,
-  [role="button"]:active,
-  a:active {
-    transform: scale(0.98);
-    background-color: rgba(0, 0, 0, 0.05);
   }
 }
 
-/* Smooth scroll behavior */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Reduce motion for users who prefer it */
+/* Motion preferences */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-
-  .transform {
-    transform: none !important;
   }
 }
 
-/* Enhanced Loading States */
+/* Loading states */
 .skeleton-shimmer {
-  position: relative;
-  overflow: hidden;
-  background-color: #f3f4f6;
+  background-color: hsl(var(--muted));
+  animation: pulse 2s infinite;
 }
 
-.skeleton-shimmer::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0,
-    rgba(255, 255, 255, 0.2) 20%,
-    rgba(255, 255, 255, 0.5) 60%,
-    rgba(255, 255, 255, 0)
-  );
-  animation: shimmer 2s infinite;
-  content: '';
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-/* Enhanced Button Interactions */
-.button-enhanced {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.2s ease;
-}
-
-.button-enhanced:active {
-  transform: scale(0.98);
-}
-
-.button-enhanced::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.3s, height 0.3s;
-}
-
-.button-enhanced:active::after {
-  width: 300px;
-  height: 300px;
-}
-
-/* Improved Product Card Interactions */
-.product-card {
-  will-change: transform;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-}
-
-/* Enhanced Modal Animations */
-.modal-backdrop {
-  animation: fadeIn 0.2s ease-out;
-}
-
-.modal-content {
-  animation: slideInUp 0.3s ease-out;
-}
-
+/* Modal animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 @keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Perfect Mobile Safe Areas */
-@supports (padding: max(0px)) {
-  .mobile-safe-area {
-    padding-left: max(16px, env(safe-area-inset-left));
-    padding-right: max(16px, env(safe-area-inset-right));
-  }
-  
-  .mobile-safe-area-bottom {
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
-  }
-}
+.modal-backdrop { animation: fadeIn 0.2s ease-out; }
+.modal-content { animation: slideInUp 0.3s ease-out; }
 
-/* High-contrast mode support */
-@media (prefers-contrast: high) {
-  * {
-    border-color: currentColor !important;
-  }
-  
-  .bg-subtle {
-    background-color: transparent !important;
-    border: 2px solid currentColor !important;
-  }
-}
-
-/* ==========================================================================
-   WCAG 2.1 AA ADDITIONAL COMPLIANCE FEATURES
-   ========================================================================== */
-
-/* Screen reader only content */
+/* Screen reader content */
 .sr-only {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-}
-
-/* Show screen reader content when focused */
-.sr-only:focus {
-  position: static !important;
-  width: auto !important;
-  height: auto !important;
-  padding: 0.5rem !important;
-  margin: 0 !important;
-  overflow: visible !important;
-  clip: auto !important;
-  white-space: normal !important;
-  background: var(--background) !important;
-  color: var(--foreground) !important;
-  border: 2px solid var(--focus-ring-color) !important;
-}
-
-/* Enhanced error states with WCAG compliance */
-.error-state {
-  border-color: var(--error-border) !important;
-  background-color: var(--error-bg) !important;
-  color: var(--error-text) !important;
-}
-
-.error-message {
-  color: var(--error-text);
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.error-message::before {
-  content: "⚠️";
-  flex-shrink: 0;
-}
-
-/* Success states with WCAG compliance */
-.success-state {
-  border-color: var(--success-border) !important;
-  background-color: var(--success-bg) !important;
-  color: var(--success-text) !important;
-}
-
-.success-message {
-  color: var(--success-text);
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.success-message::before {
-  content: "✅";
-  flex-shrink: 0;
-}
-
-/* Warning states with WCAG compliance */
-.warning-state {
-  border-color: var(--warning-border) !important;
-  background-color: var(--warning-bg) !important;
-  color: var(--warning-text) !important;
-}
-
-.warning-message {
-  color: var(--warning-text);
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.warning-message::before {
-  content: "⚠️";
-  flex-shrink: 0;
-}
-
-/* Enhanced skip links */
-.skip-link {
   position: absolute;
-  top: -40px;
-  left: 6px;
-  background: var(--background);
-  color: var(--foreground);
-  padding: 8px;
-  text-decoration: none;
-  font-weight: bold;
-  border: 2px solid var(--focus-ring-color);
-  border-radius: 4px;
-  z-index: 9999;
-  transition: top 0.3s;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.skip-link:focus {
-  top: 6px;
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0.5rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
 }
 
-/* Keyboard navigation indicators */
-.keyboard-user {
-  --focus-ring-visible: 1;
-}
-
-/* Mouse user hides focus rings for cleaner UI */
-.mouse-user *:focus:not(:focus-visible) {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Ensure adequate color contrast for all text */
-body {
-  color: var(--text-primary);
-  background: var(--background);
-}
-
-h1, h2, h3, h4, h5, h6 {
-  color: var(--text-primary);
-  margin-bottom: 0.5em;
-  line-height: 1.2;
-}
-
-p {
-  color: var(--text-primary);
-  line-height: 1.6;
-  margin-bottom: 1em;
-}
-
-/* Links with proper contrast and focus states */
-a {
-  color: var(--link-color);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-}
-
-a:hover {
-  color: var(--link-hover);
-  text-decoration-thickness: 2px;
-}
-
-a:focus-visible {
-  outline: 2px solid var(--focus-ring-color);
-  outline-offset: 2px;
-  text-decoration: none;
-}
-
-/* Form elements with enhanced accessibility */
-input, select, textarea {
-  border: 2px solid var(--border);
-  background: var(--background);
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: var(--focus-ring-color);
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
-}
-
-/* Label association and styling */
-label {
-  color: var(--text-primary);
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-  display: block;
-}
-
-/* Required field indicators */
-.required::after {
-  content: " *";
-  color: var(--error-text);
-  font-weight: bold;
-}
-
-/* Fieldset and legend styling */
-fieldset {
-  border: 2px solid var(--border);
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 4px;
-}
-
-legend {
-  color: var(--text-primary);
-  font-weight: bold;
-  padding: 0 0.5rem;
-}
-
-/* Print styles with accessibility considerations */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  
-  /* Ensure sufficient contrast for printing */
-  * {
-    color: #000 !important;
-    background: #fff !important;
-  }
-  
-  a::after {
-    content: " (" attr(href) ")";
-    font-size: 0.8em;
-    color: #666;
-  }
-  
-  /* Remove focus styles in print */
-  *:focus {
-    outline: none !important;
-    box-shadow: none !important;
-  }
-}
-
-/* Perfect Scrollbar Styling */
+/* Clean scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-.glitch:hover {
-  animation: glitch 0.3s ease-in-out;
 }

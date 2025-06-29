@@ -81,7 +81,6 @@ const EnhancedMobileProductCardComponent = React.memo(({
   product: rawProduct, 
   className = '', 
   priority = false,
-  enableTouchFeedback = true,
   showMobileActions = true
 }: EnhancedMobileProductCardProps) => {
   // Normalize product data
@@ -223,7 +222,7 @@ const EnhancedMobileProductCardComponent = React.memo(({
         'transform transition-all duration-200 ease-out',
         'focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2',
         'select-none',
-        enableTouchFeedback && 'touch-feedback',
+        // Remove touch-feedback to prevent scroll interference
         isPressed && 'scale-[0.98]',
         className
       )}
@@ -231,7 +230,7 @@ const EnhancedMobileProductCardComponent = React.memo(({
       aria-labelledby={`product-title-${product.id}`}
       aria-describedby={`product-description-${product.id}`}
       style={{ 
-        touchAction: 'pan-y',
+        touchAction: 'pan-y', // Allow vertical scrolling
         WebkitTouchCallout: 'none',
         WebkitUserSelect: 'none',
         userSelect: 'none',
@@ -327,7 +326,9 @@ const EnhancedMobileProductCardComponent = React.memo(({
                 size="lg"
                 spacing="tight"
                 className="bg-black/80 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black"
-                onTouchStart={(e) => e.stopPropagation()}
+                onTouchStart={() => {
+                  // Don't stop propagation to allow scroll
+                }}
               >
                 <AccessibleButton
                   className="w-full h-full flex items-center justify-center"
@@ -348,7 +349,9 @@ const EnhancedMobileProductCardComponent = React.memo(({
                   'bg-black/80 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black',
                   (isAddingItem || product.soldOut) && 'opacity-50'
                 )}
-                onTouchStart={(e) => e.stopPropagation()}
+                onTouchStart={() => {
+                  // Don't stop propagation to allow scroll
+                }}
               >
                 <AccessibleButton
                   className="w-full h-full flex items-center justify-center"

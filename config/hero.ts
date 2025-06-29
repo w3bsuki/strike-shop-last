@@ -54,9 +54,9 @@ export const heroPresets = {
 } as const;
 
 export const heroSizeClasses = {
-  sm: "h-[40vh] md:h-[50vh]",
-  default: "h-[65vh] md:h-[70vh]",
-  lg: "h-[80vh] md:h-[85vh]",
+  sm: "h-[35vh] md:h-[45vh]",
+  default: "h-[50vh] md:h-[60vh]",
+  lg: "h-[65vh] md:h-[70vh]",
   full: "h-screen",
 } as const;
 

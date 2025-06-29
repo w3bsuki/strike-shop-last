@@ -79,7 +79,7 @@ export default function HomePageClient({
     <QuickViewProvider>
       <main className="bg-white">
 
-        <Hero size="lg">
+        <Hero size="default">
           <HeroImage 
             src="/images/hero/strike-ss25-hero.jpg" 
             alt="STRIKE SS25" 
