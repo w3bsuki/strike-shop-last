@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/compone
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { useEffect, useState, use } from 'react';
 import { ProductQuickView } from '@/components/product/quick-view';
-import { MedusaProductService } from '@/lib/medusa-service-refactored';
+import { ShopifyService } from '@/lib/shopify/services';
 
 interface ProductModalProps {
   params: Promise<{
@@ -24,43 +24,29 @@ export default function ProductModal({ params }: ProductModalProps) {
   useEffect(() => {
     async function fetchProduct() {
       try {
-        // Try to fetch real product from Medusa
-        const products = await MedusaProductService.getProducts({ limit: 100 });
+        // Try to fetch real product from Shopify
+        const shopifyProduct = await ShopifyService.getProductBySlug(resolvedParams.slug);
         
-        if (products.products && products.products.length > 0) {
-          const medusaProduct = products.products[0];
-          
-          if (!medusaProduct) {
-            throw new Error('Product not found');
-          }
-          
-          // Transform Medusa product to expected format
-          const lowestPrice = MedusaProductService.getLowestPrice(medusaProduct);
+        if (shopifyProduct) {
+          // Transform Shopify product to expected format
           const transformedProduct = {
-            id: medusaProduct.id,
-            name: medusaProduct.title || resolvedParams.slug.split('-').map(word => word.toUpperCase()).join(' '),
-            price: MedusaProductService.formatPrice(
-              lowestPrice?.amount || 0,
-              lowestPrice?.currency || 'GBP'
-            ),
-            originalPrice: medusaProduct.metadata?.originalPrice ? 
-              MedusaProductService.formatPrice(
-                parseInt(medusaProduct.metadata.originalPrice as string),
-                lowestPrice?.currency || 'GBP'
-              ) : undefined,
-            discount: medusaProduct.metadata?.discount as string || undefined,
-            image: medusaProduct.thumbnail || medusaProduct.images?.[0]?.url || '/placeholder.svg?height=800&width=600',
-            images: medusaProduct.images?.map(img => img.url) || [
-              medusaProduct.thumbnail || '/placeholder.svg?height=800&width=600'
+            id: shopifyProduct.id,
+            name: shopifyProduct.content?.name || resolvedParams.slug.split('-').map(word => word.toUpperCase()).join(' '),
+            price: shopifyProduct.pricing?.displayPrice || '£299',
+            originalPrice: shopifyProduct.pricing?.displaySalePrice,
+            discount: shopifyProduct.pricing?.discount?.percentage ? `-${shopifyProduct.pricing.discount.percentage}%` : undefined,
+            image: shopifyProduct.content?.images?.[0]?.url || '/placeholder.svg?height=800&width=600',
+            images: shopifyProduct.content?.images?.map(img => typeof img === 'string' ? img : img.url) || [
+              shopifyProduct.content?.images?.[0]?.url || '/placeholder.svg?height=800&width=600'
             ],
-            isNew: medusaProduct.metadata?.isNew === true,
-            soldOut: medusaProduct.variants?.every(v => v.inventory_quantity === 0) || false,
-            slug: resolvedParams.slug,
-            colors: medusaProduct.variants?.length || 1,
-            description: medusaProduct.description || 'Premium quality product with exceptional design and craftsmanship.',
-            sizes: medusaProduct.options?.find(o => o.title.toLowerCase() === 'size')?.values.map(v => v.value) || ['XS', 'S', 'M', 'L', 'XL'],
-            sku: medusaProduct.variants?.[0]?.sku || `SKU-${resolvedParams.slug.toUpperCase()}`,
-            variants: medusaProduct.variants?.map(v => ({
+            isNew: shopifyProduct.badges?.isNew === true,
+            soldOut: shopifyProduct.badges?.isSoldOut === true,
+            slug: shopifyProduct.slug,
+            colors: shopifyProduct.commerce?.variants?.length || 1,
+            description: shopifyProduct.content?.description || 'Premium quality product with exceptional design and craftsmanship.',
+            sizes: shopifyProduct.commerce?.variants?.map(v => v.options?.size).filter(Boolean) || ['XS', 'S', 'M', 'L', 'XL'],
+            sku: shopifyProduct.commerce?.variants?.[0]?.sku || `SKU-${resolvedParams.slug.toUpperCase()}`,
+            variants: shopifyProduct.commerce?.variants?.map(v => ({
               id: v.id,
               title: v.title || 'Default',
               sku: v.sku,
@@ -131,7 +117,6 @@ export default function ProductModal({ params }: ProductModalProps) {
           ],
         };
         setProduct(mockProduct);
-      } finally {
       }
     }
     

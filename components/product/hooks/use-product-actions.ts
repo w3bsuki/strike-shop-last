@@ -5,7 +5,7 @@ import { useWishlistActions } from '@/lib/stores';
 import type { WishlistItem } from '@/lib/wishlist-store';
 import { useQuickView } from '@/contexts/QuickViewContext';
 import { useAria } from '@/components/accessibility/aria-helpers';
-import { useCart } from '@/hooks/use-cart';
+import { useCartActions } from '@/hooks/use-cart';
 import { toast } from '@/hooks/use-toast';
 import type { SimpleProduct } from '../types';
 import type { IntegratedProduct } from '@/types/integrated';
@@ -27,7 +27,7 @@ export function useProductActions(
   const { addToWishlist, removeFromWishlist } = useWishlistActions();
   const { openQuickView } = useQuickView();
   const { announceToScreenReader } = useAria();
-  const { addItem } = useCart();
+  const { addItem } = useCartActions();
 
   // Wishlist item for add operation
   const wishlistItem: WishlistItem = useMemo(() => ({
@@ -75,11 +75,7 @@ export function useProductActions(
         
         if (defaultVariant) {
           try {
-            await addItem({
-              productId: rawProduct.id,
-              variantId: defaultVariant.id,
-              quantity: 1
-            });
+            await addItem(rawProduct.id, defaultVariant.id, 1);
           announceToScreenReader(`${product.name} added to cart`, 'polite');
           toast({
             title: 'Added to cart',

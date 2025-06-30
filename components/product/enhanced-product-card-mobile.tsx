@@ -8,7 +8,7 @@ import { useIsWishlisted, useWishlistActions } from '@/lib/stores';
 import type { WishlistItem } from '@/lib/wishlist-store';
 import { useQuickView } from '@/contexts/QuickViewContext';
 import { useAria, AccessibleButton } from '@/components/accessibility/aria-helpers';
-import { useCart } from '@/hooks/use-cart';
+import { useCart, useCartActions } from '@/hooks/use-cart';
 import type { IntegratedProduct } from '@/types/integrated';
 import { toast } from '@/hooks/use-toast';
 import type { SimpleProduct } from './types';
@@ -91,7 +91,9 @@ const EnhancedMobileProductCardComponent = React.memo(({
   const { addToWishlist, removeFromWishlist } = useWishlistActions();
   const { openQuickView } = useQuickView();
   const { announceToScreenReader } = useAria();
-  const { addItem, isAddingItem } = useCart();
+  const { cart } = useCart();
+  const { addItem } = useCartActions();
+  const isAddingItem = cart.isLoading;
   
   // Touch interaction state
   const [isPressed, setIsPressed] = useState(false);
@@ -171,11 +173,7 @@ const EnhancedMobileProductCardComponent = React.memo(({
         return;
       }
       
-      await addItem({
-        productId: product.id,
-        variantId: variantId,
-        quantity: 1
-      });
+      await addItem(product.id, variantId, 1);
       
       announceToScreenReader(`${product.name} added to cart`, 'polite');
       toast({
@@ -203,17 +201,8 @@ const EnhancedMobileProductCardComponent = React.memo(({
     }
   }, [product, addItem, announceToScreenReader]);
 
-  // Generate product description for screen readers
-  const productDescription = [
-    product.name,
-    product.discount && `on sale with ${product.discount} discount`,
-    product.isNew && 'new arrival',
-    product.soldOut && 'currently sold out',
-    product.originalPrice 
-      ? `was ${product.originalPrice}, now ${product.price}`
-      : `priced at ${product.price}`,
-    product.colors && `available in ${product.colors} colors`,
-  ].filter(Boolean).join(', ');
+  // Generate product description for screen readers - simplified to prevent hydration issues
+  const productDescription = `${product.name} - ${product.price}${product.soldOut ? ' - sold out' : ''}`;
 
   return (
     <article 

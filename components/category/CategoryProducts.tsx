@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ProductCard } from '@/components/product/ProductCard';
+import { ProductCard } from '@/components/product/product-card';
 import { motion, AnimatePresence } from '@/lib/dynamic-imports/framer-motion';
 import { Loader2, Package } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';

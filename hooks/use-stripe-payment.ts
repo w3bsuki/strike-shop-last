@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useCart } from './use-cart';
+import { useCart, useCartActions } from './use-cart';
 import { useUser } from '@/lib/supabase/hooks';
 
 interface CreatePaymentIntentData {
@@ -65,7 +65,9 @@ const paymentAPI = {
 
 export function useStripePayment() {
   const [clientSecret, setClientSecret] = useState<string>('');
-  const { cart, totalPrice, clearCart } = useCart();
+  const { cart } = useCart();
+  const { getTotals, clearCart } = useCartActions();
+  const totals = getTotals();
   const { user } = useUser();
 
   const createPaymentIntentMutation = useMutation({
@@ -88,7 +90,7 @@ export function useStripePayment() {
     }
 
     const paymentData: CreatePaymentIntentData = {
-      amount: totalPrice,
+      amount: totals.total,
       currency: 'gbp',
       items: cart.items.map((item: any) => ({
         id: item.id,

@@ -5,7 +5,7 @@ import { X, ShoppingBag, Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/hooks/use-cart';
+import { useCart, useCartActions } from '@/hooks/use-cart';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 interface MiniCartProps {
@@ -15,7 +15,18 @@ interface MiniCartProps {
 }
 
 export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
-  const { cart, totalItems, totalPrice, updateItem, removeItem, isUpdatingItem, isRemovingItem } = useCart();
+  const { cart } = useCart();
+  const { updateItemQuantity, removeItem } = useCartActions();
+  
+  // Calculate totals from cart
+  const totalItems = cart?.items?.reduce((total, item) => total + (item.quantity as any), 0) || 0;
+  const totalPrice = cart?.items?.reduce((total, item) => {
+    const price = item.pricing?.totalPrice as any as number || 0;
+    return total + price;
+  }, 0) || 0;
+  
+  const isUpdatingItem = false; // TODO: Add loading state
+  const isRemovingItem = false; // TODO: Add loading state
   const [localOpen, setLocalOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
@@ -27,27 +38,27 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
     setIsClient(true);
   }, []);
 
-  // Auto-open when items are added
-  useEffect(() => {
-    if (isClient && totalItems > 0 && !open) {
-      const timer = setTimeout(() => setOpen(true), 100);
-      return () => clearTimeout(timer);
-    }
-    return () => {};
-  }, [isClient, totalItems, open, setOpen]);
+  // Don't auto-open cart - let user control when to open
 
   const defaultTrigger = (
     <button className="relative p-2 touch-manipulation" aria-label={`Shopping cart with ${totalItems} items`}>
       <ShoppingBag className="h-6 w-6" />
-      {isClient && totalItems > 0 && (
-        <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-mono">
-          {totalItems > 99 ? '99+' : totalItems}
-        </span>
-      )}
+      <span suppressHydrationWarning>
+        {isClient && totalItems > 0 && (
+          <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-mono">
+            {totalItems > 99 ? '99+' : totalItems}
+          </span>
+        )}
+      </span>
     </button>
   );
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: number | string) => {
+    // If it's already a formatted string, return it
+    if (typeof price === 'string') {
+      return price;
+    }
+    // Otherwise format the number
     return `£${price.toFixed(2)}`;
   };
 
@@ -108,7 +119,7 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
                         </p>
                       )}
                       <p className="font-mono text-sm font-bold mt-2">
-                        {formatPrice(item.price)}
+                        {item.pricing?.displayTotalPrice || formatPrice(0)}
                       </p>
                       
                       {/* Quantity Controls */}
@@ -116,8 +127,8 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
                         <div className="flex items-center space-x-2">
                           <button
                             className="border border-gray-300 hover:border-black min-h-touch min-w-touch flex items-center justify-center touch-manipulation transition-colors"
-                            onClick={() => updateItem({ itemId: item.id, size: item.size || 'default', quantity: Math.max(1, item.quantity - 1) })}
-                            disabled={isUpdatingItem || item.quantity <= 1}
+                            onClick={() => updateItemQuantity(item.id as any, Math.max(1, (item.quantity as any) - 1))}
+                            disabled={isUpdatingItem || (item.quantity as any) <= 1}
                           >
                             <Minus className="h-5 w-5" />
                           </button>
@@ -126,7 +137,7 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
                           </span>
                           <button
                             className="border border-gray-300 hover:border-black min-h-touch min-w-touch flex items-center justify-center touch-manipulation transition-colors"
-                            onClick={() => updateItem({ itemId: item.id, size: item.size || 'default', quantity: item.quantity + 1 })}
+                            onClick={() => updateItemQuantity(item.id as any, (item.quantity as any) + 1)}
                             disabled={isUpdatingItem}
                           >
                             <Plus className="h-5 w-5" />
@@ -135,7 +146,7 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
                         
                         <button
                           className="text-gray-400 hover:text-red-500 p-1 touch-manipulation transition-colors"
-                          onClick={() => removeItem(item.id, item.size || 'default')}
+                          onClick={() => removeItem(item.id as any)}
                           disabled={isRemovingItem}
                           aria-label="Remove item"
                         >

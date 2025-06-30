@@ -6,7 +6,7 @@ buildCommand = "pnpm install --frozen-lockfile && pnpm run build"
 nixPkgs = ["nodejs", "pnpm", "python3"]
 
 [deploy]
-startCommand = "npx medusa db:migrate && pnpm run start"
+startCommand = "pnpm run start"
 healthcheckPath = "/health"
 healthcheckTimeout = 180
 restartPolicyType = "ON_FAILURE"

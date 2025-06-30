@@ -3,7 +3,7 @@ export { ProductSection } from "./product-section";
 export { ProductHeader } from "./product-header";
 export { ProductGrid } from "./product-grid";
 export { ProductScroll } from "./product-scroll";
-export { ProductCard } from "./ProductCard";
+export { ProductCard } from "./product-card";
 export { ProductBadge } from "./product-badge";
 export { ProductPrice } from "./product-price";
 export { ProductActions } from "./product-actions";

@@ -11,14 +11,12 @@ import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalTitle,
-  ModalDescription,
-  ModalBody,
-  ModalFooter,
-} from '@/components/ui/modal';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 
 import {
   QuickViewImage,
@@ -88,19 +86,43 @@ export function QuickViewModalModular({
   const sizes = product.sizes || ['XS', 'S', 'M', 'L', 'XL'];
 
   const handleAddToCart = async () => {
-    if (!selectedSize || product.soldOut || isAdded) return;
+    if (product.soldOut || isAdded) return;
+    
+    // Check if sizes are available and one must be selected
+    if (sizes.length > 0 && !selectedSize) {
+      // Show error toast that size must be selected
+      const { toast } = await import('@/hooks/use-toast');
+      toast({
+        title: 'Please select a size',
+        description: 'You must select a size before adding to cart.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     // Find the actual variant ID based on the selected size
     let variantId: string | null = null;
 
     if (product.variants && product.variants.length > 0) {
-      const variant = product.variants.find((v) => {
-        return v.title.toLowerCase().includes(selectedSize.toLowerCase());
-      });
+      if (selectedSize) {
+        // Try to find variant by exact match first
+        const variant = product.variants.find((v) => {
+          // Check if title contains the size
+          const titleLower = v.title.toLowerCase();
+          const sizeLower = selectedSize.toLowerCase();
+          return titleLower === sizeLower || 
+                 titleLower.includes(`size: ${sizeLower}`) ||
+                 titleLower.includes(`/ ${sizeLower}`) ||
+                 titleLower.endsWith(` ${sizeLower}`);
+        });
 
-      if (variant) {
-        variantId = variant.id;
-      } else if (product.variants.length > 0) {
+        if (variant) {
+          variantId = variant.id;
+        }
+      }
+      
+      // If no size selected or no matching variant found, use first variant
+      if (!variantId && product.variants.length > 0) {
         const firstVariant = product.variants[0];
         if (firstVariant) {
           variantId = firstVariant.id;
@@ -109,6 +131,12 @@ export function QuickViewModalModular({
     }
 
     if (!variantId) {
+      const { toast } = await import('@/hooks/use-toast');
+      toast({
+        title: 'Error',
+        description: 'Unable to add item to cart. Please try again.',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -116,6 +144,14 @@ export function QuickViewModalModular({
       await addItem(createProductId(product.id), createVariantId(variantId), createQuantity(quantity));
 
       setIsAdded(true);
+      
+      // Show success toast
+      const { toast } = await import('@/hooks/use-toast');
+      toast({
+        title: 'Added to cart',
+        description: `${product.name} (${selectedSize || 'One Size'}) has been added to your cart.`,
+      });
+      
       setTimeout(() => {
         setIsAdded(false);
         onClose();
@@ -124,7 +160,15 @@ export function QuickViewModalModular({
         }, 100);
       }, 1500);
     } catch (error) {
+      console.error('Failed to add to cart:', error);
       setIsAdded(false);
+      
+      const { toast } = await import('@/hooks/use-toast');
+      toast({
+        title: 'Error',
+        description: 'Failed to add item to cart. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -146,8 +190,8 @@ export function QuickViewModalModular({
     }
   };
 
-  // Mobile view using Drawer
-  if (isMobile) {
+  // Mobile view using Drawer - default to desktop during SSR
+  if (isMobile === true) {
     return (
       <>
         <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -214,21 +258,20 @@ export function QuickViewModalModular({
     );
   }
 
-  // Desktop view using Modal
+  // Desktop view using Dialog
   return (
     <>
-      <Modal open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <ModalContent
+      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent
           className="max-w-6xl w-full h-[85vh] min-h-[600px] p-0 gap-0 overflow-hidden"
-          showCloseButton={true}
         >
           <VisuallyHidden>
-            <ModalHeader>
-              <ModalTitle>Product Quick View - {product.name}</ModalTitle>
-              <ModalDescription>
+            <DialogHeader>
+              <DialogTitle>Product Quick View - {product.name}</DialogTitle>
+              <DialogDescription>
                 View product details for {product.name} and add to cart
-              </ModalDescription>
-            </ModalHeader>
+              </DialogDescription>
+            </DialogHeader>
           </VisuallyHidden>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
@@ -247,7 +290,7 @@ export function QuickViewModalModular({
 
             {/* Product Details & Actions */}
             <div className="flex flex-col h-full min-h-0">
-              <ModalBody className="p-6 lg:p-8">
+              <div className="flex-1 overflow-y-auto p-6 lg:p-8">
                 <QuickViewInfo
                   product={product}
                   isWishlisted={isWishlisted}
@@ -266,21 +309,21 @@ export function QuickViewModalModular({
                   isSoldOut={product.soldOut || false}
                   onSizeGuideOpen={() => setIsSizeGuideOpen(true)}
                 />
-              </ModalBody>
+              </div>
 
-              <ModalFooter className="border-t p-4 lg:p-6">
+              <div className="border-t p-4 lg:p-6">
                 <Link
                   href={`/product/${product.slug}`}
                   onClick={onClose}
-                  className="text-[10px] underline hover:no-underline uppercase tracking-wider text-center w-full"
+                  className="text-[10px] underline hover:no-underline uppercase tracking-wider text-center w-full block"
                 >
                   View Full Product Details
                 </Link>
-              </ModalFooter>
+              </div>
             </div>
           </div>
-        </ModalContent>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
       <SizeGuideModal
         isOpen={isSizeGuideOpen}

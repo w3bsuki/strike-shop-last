@@ -58,7 +58,7 @@ export function ProductQuickView({
 }: ProductQuickViewProps) {
   const isMobile = useMobile();
 
-  if (isMobile) {
+  if (isMobile === true) {
     return (
       <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DrawerContent className="h-[85vh] flex flex-col bg-white">

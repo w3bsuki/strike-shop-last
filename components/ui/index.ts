@@ -115,8 +115,6 @@ export { EmptyState, ErrorState } from './error-states';
 export { SectionHeader } from './section-header';
 export { SectionDivider } from './section-divider';
 
-// Modal components
-export { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalTitle, ModalDescription, useModal } from './modal';
 
 // Performance components
 export { ViewportLoader } from './viewport-loader';

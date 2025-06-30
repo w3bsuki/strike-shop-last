@@ -12,6 +12,7 @@ import { SkipLink } from '@/components/accessibility/skip-link';
 import { ServiceWorkerProvider } from '@/components/service-worker-provider';
 import { PWAInstallPrompt } from '@/components/pwa-install-prompt';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
+import { CartInitializer } from '@/components/cart-initializer';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://strike-shop.com';
 
@@ -166,19 +167,15 @@ export default function RootLayout({
         
         {/* CRITICAL: DNS prefetch and preconnect for external domains */}
         <link rel="dns-prefetch" href="//cdn.sanity.io" />
-        <link rel="dns-prefetch" href="//medusa-public-images.s3.eu-west-1.amazonaws.com" />
-        <link rel="dns-prefetch" href="//clerk.com" />
-        <link rel="dns-prefetch" href="//stripe.com" />
+        <link rel="dns-prefetch" href="//cdn.shopify.com" />
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://medusa-public-images.s3.eu-west-1.amazonaws.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://clerk.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://stripe.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://cdn.shopify.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
         
-        {/* PERFORMANCE: Prefetch critical API endpoints */}
-        <link rel="prefetch" href="/api/products" />
-        <link rel="prefetch" href="/api/categories" />
+        {/* PERFORMANCE: Prefetch critical pages */}
+        <link rel="prefetch" href="/men" />
+        <link rel="prefetch" href="/women" />
         
         {/* PERFORMANCE: Resource hints for faster font loading */}
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -203,6 +200,7 @@ export default function RootLayout({
           <ProvidersWrapper>
             {children}
             {modal}
+            <CartInitializer />
             <ServiceWorkerProvider />
             <PWAInstallPrompt />
           </ProvidersWrapper>

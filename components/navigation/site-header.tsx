@@ -17,6 +17,8 @@ export function SiteHeader({ className }: SiteHeaderProps) {
   const [isScrolled, setIsScrolled] = React.useState(false);
 
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
@@ -33,6 +35,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
           isScrolled && "shadow-sm",
           className
         )}
+        suppressHydrationWarning
       >
         <div className="strike-container">
           {/* DESKTOP */}

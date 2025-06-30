@@ -1,289 +1,201 @@
-// Error handling utilities for Strike Shop
+import { toast } from '@/hooks/use-toast';
 
-export class AppError extends Error {
-  constructor(
-    message: string,
-    public code: string,
-    public statusCode: number = 500,
-    public details?: any
-  ) {
+// Error types
+export class NetworkError extends Error {
+  constructor(message: string = 'Network request failed') {
     super(message);
-    this.name = 'AppError';
-    Object.setPrototypeOf(this, AppError.prototype);
+    this.name = 'NetworkError';
   }
 }
 
-export class ValidationError extends AppError {
-  constructor(message: string, details?: any) {
-    super(message, 'VALIDATION_ERROR', 400, details);
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public statusCode?: number,
+    public details?: any
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+export class ValidationError extends Error {
+  constructor(
+    message: string,
+    public fields?: Record<string, string[]>
+  ) {
+    super(message);
     this.name = 'ValidationError';
   }
 }
 
-export class AuthenticationError extends AppError {
-  constructor(message: string = 'Authentication required') {
-    super(message, 'AUTHENTICATION_ERROR', 401);
-    this.name = 'AuthenticationError';
-  }
+// Retry configuration
+interface RetryConfig {
+  maxAttempts?: number;
+  delay?: number;
+  backoff?: boolean;
+  onRetry?: (attempt: number, error: Error) => void;
 }
 
-export class AuthorizationError extends AppError {
-  constructor(message: string = 'Insufficient permissions') {
-    super(message, 'AUTHORIZATION_ERROR', 403);
-    this.name = 'AuthorizationError';
-  }
-}
-
-export class NotFoundError extends AppError {
-  constructor(resource: string) {
-    super(`${resource} not found`, 'NOT_FOUND', 404);
-    this.name = 'NotFoundError';
-  }
-}
-
-export class ConflictError extends AppError {
-  constructor(message: string) {
-    super(message, 'CONFLICT', 409);
-    this.name = 'ConflictError';
-  }
-}
-
-export class RateLimitError extends AppError {
-  constructor(retryAfter?: number) {
-    super('Too many requests', 'RATE_LIMIT_EXCEEDED', 429, { retryAfter });
-    this.name = 'RateLimitError';
-  }
-}
-
-export class ExternalServiceError extends AppError {
-  constructor(service: string, originalError?: any) {
-    super(`External service error: ${service}`, 'EXTERNAL_SERVICE_ERROR', 502, {
-      service,
-      originalError,
-    });
-    this.name = 'ExternalServiceError';
-  }
-}
-
-// Error handler middleware for API routes
-export function errorHandler(error: any) {
-
-  // Handle known errors
-  if (error instanceof AppError) {
-    return {
-      error: {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-      },
-      status: error.statusCode,
-    };
-  }
-
-  // Handle Stripe errors
-  if (error.type === 'StripeCardError') {
-    return {
-      error: {
-        code: 'PAYMENT_ERROR',
-        message: error.message,
-        details: {
-          type: error.type,
-          code: error.code,
-          decline_code: error.decline_code,
-        },
-      },
-      status: 402,
-    };
-  }
-
-  // Handle Medusa errors
-  if (error.response?.data?.message) {
-    return {
-      error: {
-        code: 'MEDUSA_ERROR',
-        message: error.response.data.message,
-        details: error.response.data,
-      },
-      status: error.response.status || 500,
-    };
-  }
-
-  // Handle validation errors from libraries
-  if (error.name === 'ValidationError') {
-    return {
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Validation failed',
-        details: error.errors || error.message,
-      },
-      status: 400,
-    };
-  }
-
-  // Default error response
-  return {
-    error: {
-      code: 'INTERNAL_ERROR',
-      message: 'An unexpected error occurred',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-    },
-    status: 500,
-  };
-}
-
-// Async error wrapper for API routes
-export function asyncHandler<T extends (...args: any[]) => Promise<any>>(
-  fn: T
-): T {
-  return (async (...args: Parameters<T>) => {
-    try {
-      return await fn(...args);
-    } catch (error) {
-      const errorResponse = errorHandler(error);
-      throw new Response(JSON.stringify(errorResponse.error), {
-        status: errorResponse.status,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-  }) as T;
-}
-
-// Client-side error handling
-export function handleClientError(
-  error: any,
-  fallbackMessage: string = 'Something went wrong'
-) {
-
-  if (error.response?.data?.error) {
-    return error.response.data.error.message || fallbackMessage;
-  }
-
-  if (error.message) {
-    return error.message;
-  }
-
-  return fallbackMessage;
-}
-
-// Error logging utility
-export function logError(error: any, context?: Record<string, any>) {
-  // In production, send to error tracking service
-  if (process.env.NODE_ENV === 'production') {
-    // Send to Sentry, LogRocket, etc.
-    console.error({
-      timestamp: new Date().toISOString(),
-      error: {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-        code: error.code,
-      },
-      context,
-      environment: {
-        nodeEnv: process.env.NODE_ENV,
-        url: typeof window !== 'undefined' ? window.location.href : 'server',
-        userAgent:
-          typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
-      },
-    });
-  } else {
-    console.error({
-      timestamp: new Date().toISOString(),
-      error: {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-        code: error.code,
-      },
-      context,
-      environment: {
-        nodeEnv: process.env.NODE_ENV,
-        url: typeof window !== 'undefined' ? window.location.href : 'server',
-        userAgent:
-          typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
-      },
-    });
-  }
-}
-
-// Retry utility for flaky operations
+// Retry mechanism
 export async function retry<T>(
   fn: () => Promise<T>,
-  options: {
-    maxAttempts?: number;
-    delay?: number;
-    backoff?: number;
-    shouldRetry?: (error: any) => boolean;
-  } = {}
+  config: RetryConfig = {}
 ): Promise<T> {
   const {
     maxAttempts = 3,
     delay = 1000,
-    backoff = 2,
-    shouldRetry = () => true,
-  } = options;
+    backoff = true,
+    onRetry,
+  } = config;
 
-  let lastError: any;
+  let lastError: Error;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       return await fn();
     } catch (error) {
-      lastError = error;
+      lastError = error as Error;
 
-      if (attempt === maxAttempts || !shouldRetry(error)) {
-        throw error;
+      if (attempt === maxAttempts) {
+        throw lastError;
       }
 
-      const waitTime = delay * Math.pow(backoff, attempt - 1);
-      await new Promise((resolve) => setTimeout(resolve, waitTime));
+      if (onRetry) {
+        onRetry(attempt, lastError);
+      }
+
+      const waitTime = backoff ? delay * Math.pow(2, attempt - 1) : delay;
+      await new Promise(resolve => setTimeout(resolve, waitTime));
     }
   }
 
-  throw lastError;
+  throw lastError!;
 }
 
-// Form validation error formatter
-export function formatValidationErrors(
-  errors: Record<string, string[]>
-): string {
-  const errorMessages = Object.entries(errors)
-    .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
-    .join('; ');
-
-  return `Validation failed: ${errorMessages}`;
-}
-
-// Safe JSON parse
-export function safeJsonParse<T>(json: string, fallback: T): T {
-  try {
-    return JSON.parse(json);
-  } catch (error) {
-    logError(error, { json, fallback });
-    return fallback;
+// Error handling utilities
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
   }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return 'An unexpected error occurred';
 }
 
-// Network error detection
-export function isNetworkError(error: any): boolean {
+export function isNetworkError(error: unknown): boolean {
   return (
-    error.code === 'ECONNREFUSED' ||
-    error.code === 'ENOTFOUND' ||
-    error.code === 'ETIMEDOUT' ||
-    error.message?.includes('fetch failed') ||
-    error.message?.includes('Network request failed')
+    error instanceof NetworkError ||
+    (error instanceof Error && 
+      (error.message.includes('fetch') || 
+       error.message.includes('network') ||
+       error.message.includes('Failed to fetch')))
   );
 }
 
+export function isApiError(error: unknown): error is ApiError {
+  return error instanceof ApiError;
+}
+
+export function isValidationError(error: unknown): error is ValidationError {
+  return error instanceof ValidationError;
+}
+
 // User-friendly error messages
-export const ERROR_MESSAGES = {
-  NETWORK_ERROR: 'Unable to connect. Please check your internet connection.',
-  SERVER_ERROR: 'Server error. Please try again later.',
-  VALIDATION_ERROR: 'Please check your input and try again.',
-  AUTH_ERROR: 'Please sign in to continue.',
-  PERMISSION_ERROR: 'You do not have permission to perform this action.',
-  NOT_FOUND: 'The requested resource was not found.',
-  PAYMENT_ERROR: 'Payment processing failed. Please try again.',
-  CART_ERROR: 'Unable to update cart. Please try again.',
-  STOCK_ERROR: 'Some items are no longer available.',
-} as const;
+export function getUserFriendlyErrorMessage(error: unknown): string {
+  if (isNetworkError(error)) {
+    return 'Connection error. Please check your internet and try again.';
+  }
+
+  if (isApiError(error)) {
+    switch (error.statusCode) {
+      case 400:
+        return 'Invalid request. Please check your input and try again.';
+      case 401:
+        return 'Please sign in to continue.';
+      case 403:
+        return 'You don\'t have permission to perform this action.';
+      case 404:
+        return 'The requested item was not found.';
+      case 409:
+        return 'This action conflicts with existing data.';
+      case 429:
+        return 'Too many requests. Please wait a moment and try again.';
+      case 500:
+      case 502:
+      case 503:
+        return 'Server error. Please try again later.';
+      default:
+        return error.message || 'Something went wrong. Please try again.';
+    }
+  }
+
+  if (isValidationError(error)) {
+    return error.message || 'Please check your input and try again.';
+  }
+
+  return getErrorMessage(error);
+}
+
+// Toast error handler
+export function handleError(error: unknown, showToast = true): void {
+  const message = getUserFriendlyErrorMessage(error);
+  
+  // Log to console in development
+  if (process.env.NODE_ENV === 'development') {
+    console.error('Error:', error);
+  }
+
+  // Log to monitoring service
+  if (typeof window !== 'undefined' && (window as any).Sentry) {
+    (window as any).Sentry.captureException(error);
+  }
+
+  // Show toast notification
+  if (showToast) {
+    toast({
+      title: 'Error',
+      description: message,
+      variant: 'destructive',
+    });
+  }
+}
+
+// Async error handler wrapper
+export function withErrorHandling<T extends (...args: any[]) => Promise<any>>(
+  fn: T,
+  options: { showToast?: boolean; fallback?: any } = {}
+): T {
+  return (async (...args: Parameters<T>) => {
+    try {
+      return await fn(...args);
+    } catch (error) {
+      handleError(error, options.showToast);
+      if (options.fallback !== undefined) {
+        return options.fallback;
+      }
+      throw error;
+    }
+  }) as T;
+}
+
+// Loading state manager
+export interface LoadingState<T = any> {
+  isLoading: boolean;
+  error: Error | null;
+  data: T | null;
+  retry: () => void;
+}
+
+// Hook for managing loading states
+export function createLoadingState<T>(
+  initialData: T | null = null
+): LoadingState<T> {
+  return {
+    isLoading: false,
+    error: null,
+    data: initialData,
+    retry: () => {},
+  };
+}

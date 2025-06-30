@@ -63,7 +63,7 @@ serve(async (req) => {
       
       case 'checkout.session.completed':
         console.log('Checkout completed:', event.data.object.id)
-        // Sync with Medusa if needed
+        // Handle checkout completion
         break
       
       default:

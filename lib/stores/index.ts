@@ -20,7 +20,7 @@ export const useStore = create<StoreState>()(
           // Cart state
           cart: {
             cartId: cartSlice.cartId,
-            items: cartSlice.items,
+            items: cartSlice.items || [],
             isOpen: cartSlice.isOpen,
             isLoading: cartSlice.isLoading,
             error: cartSlice.error,
@@ -28,7 +28,7 @@ export const useStore = create<StoreState>()(
 
           // Wishlist state
           wishlist: {
-            items: wishlistSlice.items,
+            items: wishlistSlice.items || [],
             isLoading: wishlistSlice.isLoading,
           },
 
@@ -114,20 +114,20 @@ export const useWishlistActions = () => useStore(wishlistActionsSelector);
 export const useAuthActions = () => useStore(authActionsSelector);
 
 // Specific selectors for common use cases - memoized for performance
-export const useCartItems = () => useStore((state) => state.cart.items);
+export const useCartItems = () => useStore((state) => state.cart.items || []);
 export const useCartIsOpen = () => useStore((state) => state.cart.isOpen);
 export const useCartTotalItems = () =>
-  useStore((state) => state.cart.items.reduce((sum, item) => sum + item.quantity, 0));
+  useStore((state) => state.cart.items?.reduce((sum, item) => sum + item.quantity, 0) || 0);
 export const useCartTotalPrice = () =>
   useStore((state) => 
-    state.cart.items.reduce((sum, item) => sum + (item.pricing.unitPrice * item.quantity), 0)
+    state.cart.items?.reduce((sum, item) => sum + (item.pricing.unitPrice * item.quantity), 0) || 0
   );
 
-export const useWishlistItems = () => useStore((state) => state.wishlist.items);
+export const useWishlistItems = () => useStore((state) => state.wishlist.items || []);
 export const useWishlistCount = () =>
-  useStore((state) => state.wishlist.items.length);
+  useStore((state) => state.wishlist.items?.length || 0);
 export const useIsWishlisted = (productId: string) =>
-  useStore((state) => state.wishlist.items.some(item => item.id === productId));
+  useStore((state) => state.wishlist.items?.some(item => item.id === productId) || false);
 
 export const useUser = () => useStore((state) => state.auth.user);
 export const useIsAuthenticated = () =>

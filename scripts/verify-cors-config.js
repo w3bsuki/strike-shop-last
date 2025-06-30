@@ -98,10 +98,7 @@ function parseCorsConfig(envVar, defaults, name) {
 function checkTypeScriptConfig() {
   logInfo('Checking TypeScript configuration files...\n');
   
-  const configFiles = [
-    'medusa-config.production.ts',
-    'medusa-config.ts'
-  ];
+  const configFiles = [];
   
   configFiles.forEach(file => {
     const filePath = path.join(process.cwd(), file);
@@ -149,9 +146,7 @@ function checkTypeScriptConfig() {
 function checkJavaScriptConfig() {
   logInfo('\nChecking JavaScript configuration files...\n');
   
-  const configFiles = [
-    'medusa-config.js'
-  ];
+  const configFiles = [];
   
   configFiles.forEach(file => {
     const filePath = path.join(process.cwd(), file);

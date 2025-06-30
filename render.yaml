@@ -4,7 +4,7 @@ services:
     runtime: node
     region: frankfurt
     plan: starter
-    rootDir: my-medusa-store
+    rootDir: .
     buildCommand: npm install && npm run build && npm run predeploy
     startCommand: npm run start:render
     healthCheckPath: /health
@@ -13,5 +13,3 @@ services:
         value: production
       - key: PORT
         value: 10000
-      - key: DISABLE_MEDUSA_ADMIN
-        value: true

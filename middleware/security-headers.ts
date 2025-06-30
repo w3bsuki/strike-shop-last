@@ -71,7 +71,6 @@ export function buildCSP(nonce: string): string {
       'https:',
       'https://cdn.sanity.io',
       'https://images.unsplash.com',
-      'https://medusa-public-images.s3.eu-west-1.amazonaws.com',
       'https://*.clerk.dev',
       'https://*.clerk.com',
       'https://img.clerk.com'

@@ -1,47 +1,37 @@
 'use client';
 
-import { useCartStore } from '@/lib/cart-store';
-import { createProductId, createQuantity } from '@/types/branded';
+import { useCart, useCartActions } from '@/lib/stores';
 import Image from 'next/image';
 import Link from 'next/link';
-import { X, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, Trash2, AlertCircle, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CartError } from '@/components/ui/error-message';
+import { CartItemSkeleton } from '@/components/ui/loading-skeleton';
+import { ErrorBoundary } from '@/components/error-boundary';
 
 export default function CartSidebar() {
-  const {
-    items,
-    isOpen,
-    isLoading,
-    error,
-    closeCart,
-    updateQuantity,
-    removeItem,
-    getTotalItems,
-    getTotalPrice,
-    clearError,
-  } = useCartStore();
+  const { items, isOpen, isLoading, error } = useCart();
+  const { setCartOpen, updateItemQuantity, removeItem, getTotals, getItemCount } = useCartActions();
 
   if (!isOpen) return null;
 
-  const handleUpdateQuantity = async (
-    id: string,
-    size: string,
-    quantity: number
-  ) => {
+  const closeCart = () => setCartOpen(false);
+  
+  const handleUpdateQuantity = async (id: string, quantity: number) => {
     try {
       // Haptic feedback for mobile
       if (navigator.vibrate) navigator.vibrate(30);
-      await updateQuantity(createProductId(id), size, createQuantity(quantity));
+      await updateItemQuantity(id, quantity);
     } catch (_error) {
       // Error handled by cart store
     }
   };
 
-  const handleRemoveItem = async (id: string, size: string) => {
+  const handleRemoveItem = async (id: string) => {
     try {
       // Haptic feedback for mobile
       if (navigator.vibrate) navigator.vibrate([50, 25, 50]);
-      await removeItem(createProductId(id), size);
+      await removeItem(id);
     } catch (_error) {
       // Error handled by cart store
     }
@@ -54,9 +44,10 @@ export default function CartSidebar() {
     }).format(price);
   };
 
-  const subtotal = getTotalPrice();
-  const shipping = subtotal > 100 ? 0 : 10;
-  const total = subtotal + shipping;
+  const totals = getTotals();
+  const totalItems = getItemCount();
+  const shipping = totals.subtotal > 10000 ? 0 : 1000; // 10000 = £100 in pence
+  const total = totals.subtotal + shipping;
 
   return (
     <div className="fixed inset-0" style={{ zIndex: 'var(--z-modal)' }}>
@@ -81,7 +72,7 @@ export default function CartSidebar() {
           <div className="flex items-center space-x-2">
             <ShoppingBag className="h-5 w-5" />
             <h2 className="text-lg font-bold uppercase tracking-wider">
-              Cart ({getTotalItems()})
+              Cart ({totalItems})
             </h2>
           </div>
           <button onClick={closeCart} aria-label="Close cart" className="h-11 w-11 flex items-center justify-center -mr-3 touch-manipulation">
@@ -91,23 +82,34 @@ export default function CartSidebar() {
 
         {/* Error Display */}
         {error && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm">
-            <div className="flex justify-between items-center">
-              <span>{error}</span>
-              <button
-                onClick={clearError}
-                className="h-8 w-8 flex items-center justify-center text-red-500 hover:text-red-700 touch-manipulation"
-                aria-label="Clear error"
-              >
-                <X className="h-4 w-4" />
-              </button>
+          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <div className="flex items-center gap-2">
+              {error.includes('connection') || error.includes('network') ? (
+                <WifiOff className="h-4 w-4 text-red-600" />
+              ) : (
+                <AlertCircle className="h-4 w-4 text-red-600" />
+              )}
+              <span className="text-red-700 text-sm">{error}</span>
             </div>
           </div>
         )}
 
         {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto">
-          {items.length === 0 ? (
+        <ErrorBoundary
+          fallback={({ retry }) => (
+            <div className="flex-1 flex items-center justify-center p-6">
+              <CartError onRetry={retry} />
+            </div>
+          )}
+        >
+          <div className="flex-1 overflow-y-auto">
+            {isLoading && items.length === 0 ? (
+              <div className="p-6">
+                {[1, 2, 3].map(i => (
+                  <CartItemSkeleton key={i} />
+                ))}
+              </div>
+            ) : items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-6 text-center">
               <ShoppingBag className="h-16 w-16 text-gray-300 mb-4" />
               <h3 className="text-lg font-bold mb-2">Your cart is empty</h3>
@@ -158,7 +160,6 @@ export default function CartSidebar() {
                           onClick={() =>
                             handleUpdateQuantity(
                               item.id,
-                              item.size,
                               item.quantity - 1
                             )
                           }
@@ -175,7 +176,6 @@ export default function CartSidebar() {
                           onClick={() =>
                             handleUpdateQuantity(
                               item.id,
-                              item.size,
                               item.quantity + 1
                             )
                           }
@@ -187,7 +187,7 @@ export default function CartSidebar() {
                         </button>
                       </div>
                       <button
-                        onClick={() => handleRemoveItem(item.id, item.size)}
+                        onClick={() => handleRemoveItem(item.id)}
                         disabled={isLoading}
                         className="h-11 w-11 flex items-center justify-center text-[var(--subtle-text-color)] hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                         aria-label="Remove item"
@@ -197,29 +197,24 @@ export default function CartSidebar() {
                     </div>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-sm font-bold">
-                        {item.pricing.displayUnitSalePrice ||
-                          item.pricing.displayUnitPrice}
+                        {item.pricing.displayTotalPrice}
                       </span>
-                      {item.pricing.displayUnitSalePrice && (
-                        <span className="text-xs text-[var(--subtle-text-color)] line-through">
-                          {item.pricing.displayUnitPrice}
-                        </span>
-                      )}
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
+            )}
+          </div>
+        </ErrorBoundary>
 
         {/* Footer */}
         {items.length > 0 && (
           <div className="border-t border-subtle p-6 space-y-4">
             {/* Shipping Notice */}
-            {subtotal < 100 && (
+            {totals.subtotal < 10000 && (
               <div className="text-xs text-[var(--subtle-text-color)] text-center p-2 bg-gray-50">
-                Add {formatPrice(100 - subtotal)} more for free shipping
+                Add {formatPrice(10000 - totals.subtotal)} more for free shipping
               </div>
             )}
 
@@ -227,7 +222,7 @@ export default function CartSidebar() {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Subtotal</span>
-                <span>{formatPrice(subtotal)}</span>
+                <span>{totals.formattedSubtotal}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Shipping</span>

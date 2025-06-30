@@ -15,7 +15,7 @@ export const ProductImage = React.memo(({ className }: ProductImageProps) => {
   const { product, priority } = useProductContext();
   
   return (
-    <div className={`product-card-image-wrapper relative bg-gray-100 aspect-[3/4] overflow-hidden rounded-lg ${className || ''}`}>
+    <div className={`product-card-image-wrapper relative bg-strike-gray-100 aspect-[3/4] overflow-hidden ${className || ''}`}>
       <Image
         src={product.image || '/placeholder.svg'}
         alt={`${product.name}${product.soldOut ? ' - sold out' : ''}`}

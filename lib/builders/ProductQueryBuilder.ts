@@ -512,42 +512,6 @@ export class ProductQueryBuilder {
   /**
    * Build for specific data sources
    */
-  buildForMedusa(): any {
-    const query = this.build();
-
-    const medusaQuery: any = {};
-
-    // Basic pagination
-    if (query.limit) medusaQuery.limit = query.limit;
-    if (query.offset) medusaQuery.offset = query.offset;
-
-    // Categories
-    if (query.categories && query.categories.length > 0) {
-      medusaQuery.category_id = query.categories;
-    }
-
-    // Tags
-    if (query.tags && query.tags.length > 0) {
-      medusaQuery.tags = query.tags;
-    }
-
-    // Search
-    if (query.searchTerm) {
-      medusaQuery.q = query.searchTerm;
-    }
-
-    // Region
-    if (query.region) {
-      medusaQuery.region_id = query.region;
-    }
-
-    // Currency for pricing
-    if (query.currency) {
-      medusaQuery.currency_code = query.currency;
-    }
-
-    return medusaQuery;
-  }
 
   buildForSanity(): string {
     const query = this.build();
@@ -670,7 +634,6 @@ export class ProductQueryBuilder {
    */
   debug(): {
     query: ProductQuery;
-    medusaQuery: any;
     sanityQuery: string;
     validation: QueryValidationResult;
   } {
@@ -679,7 +642,6 @@ export class ProductQueryBuilder {
 
     return {
       query,
-      medusaQuery: validation.valid ? this.buildForMedusa() : null,
       sanityQuery: validation.valid ? this.buildForSanity() : '',
       validation,
     };

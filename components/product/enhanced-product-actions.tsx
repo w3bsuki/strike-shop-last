@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Minus, Plus, Heart, ShoppingBag, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/hooks/use-cart';
+import { useCart, useCartActions } from '@/hooks/use-cart';
 import { useWishlistActions, useIsWishlisted } from '@/lib/stores';
 import { SizeGuideModal } from '@/components/size-guide-modal';
 import { toast } from '@/hooks/use-toast';
@@ -25,7 +25,9 @@ export function EnhancedProductActions({ product, slug }: ProductActionsProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   
-  const { addItem, isAddingItem } = useCart();
+  const { cart } = useCart();
+  const { addItem } = useCartActions();
+  const isAddingItem = cart.isLoading;
   const { addToWishlist, removeFromWishlist } = useWishlistActions();
   const isWishlisted = useIsWishlisted(product.id);
   const maxQuantity = product.inventory || 10; // Default max if no inventory data
@@ -47,11 +49,11 @@ export function EnhancedProductActions({ product, slug }: ProductActionsProps) {
     }
 
     // Create cart item matching the expected format
-    addItem({
-      productId: product.id,
-      variantId: `${product.id}-${selectedSize || 'onesize'}`,
-      quantity,
-    });
+    addItem(
+      product.id,
+      `${product.id}-${selectedSize || 'onesize'}`,
+      quantity
+    );
     
     toast({
       title: "Added to Cart",

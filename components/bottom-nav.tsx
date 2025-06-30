@@ -15,6 +15,8 @@ export default function BottomNav() {
   const wishlistCount = useWishlistCount();
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleScroll = () => {
       // Calculate hero height (65vh on mobile, 70vh on desktop)
       const heroHeight = window.innerWidth < 768 ? window.innerHeight * 0.65 : window.innerHeight * 0.70;
@@ -46,14 +48,19 @@ export default function BottomNav() {
 
   const handleNavClick = () => {
     // Light haptic feedback for navigation
-    if (navigator.vibrate) navigator.vibrate(25);
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(25);
+    }
   };
 
   return (
     <>
-      <div className={`fixed bottom-0 left-0 right-0 z-40 bg-black/95 backdrop-blur-sm border-t border-gray-800 lg:hidden bottom-nav transition-all duration-300 ease-out ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
-      }`}>
+      <div 
+        className={`fixed bottom-0 left-0 right-0 z-40 bg-black/95 backdrop-blur-sm border-t border-gray-800 lg:hidden bottom-nav transition-all duration-300 ease-out ${
+          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+        }`}
+        suppressHydrationWarning
+      >
         <div className="flex items-center justify-around py-2" style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}>
           <Link
             href="/"

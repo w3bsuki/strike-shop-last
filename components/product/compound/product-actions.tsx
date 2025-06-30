@@ -19,23 +19,27 @@ interface ProductActionsProps {
 export const ProductActions = React.memo(({ rawProduct }: ProductActionsProps) => {
   const { product } = useProductContext();
   const isWishlisted = useIsWishlisted(product.id);
-  const { isAddingItem } = useCart();
+  const { cart } = useCart();
+  const isAddingItem = cart.isLoading;
   const actions = useProductActions(product, rawProduct);
 
   return (
     <>
-      {/* Action Buttons - Bottom Center */}
-      <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-3 z-20">
-        <QuickViewButton onClick={actions.handleQuickView} productName={product.name} />
-        <AddToCartButton 
-          onClick={actions.handleAddToCart} 
-          isLoading={isAddingItem}
-          disabled={product.soldOut || false}
-          productName={product.name}
-        />
+      {/* Desktop: Show on hover, Mobile: Always show */}
+      <div className="md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-base pointer-events-none">
+        {/* Action Buttons - Bottom Center */}
+        <div className="absolute bottom-space-3 left-1/2 transform -translate-x-1/2 flex items-center gap-space-2 z-20 pointer-events-auto">
+          <QuickViewButton onClick={actions.handleQuickView} productName={product.name} />
+          <AddToCartButton 
+            onClick={actions.handleAddToCart} 
+            isLoading={isAddingItem}
+            disabled={product.soldOut || false}
+            productName={product.name}
+          />
+        </div>
       </div>
 
-      {/* Wishlist Button - Top Right */}
+      {/* Wishlist Button - Always visible */}
       <WishlistButton
         onClick={(e) => actions.handleWishlistToggle(e, isWishlisted)}
         isWishlisted={isWishlisted}

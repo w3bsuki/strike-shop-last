@@ -12,21 +12,22 @@ interface WishlistButtonProps {
 /**
  * WishlistButton - Atomic component for wishlist toggle action
  */
-export const WishlistButton = React.memo(({ onClick, isWishlisted }: WishlistButtonProps) => (
+export const WishlistButton = React.memo(({ onClick, isWishlisted, productName }: WishlistButtonProps) => (
   <button
-    className={`absolute top-3 right-3 h-10 w-10 flex items-center justify-center bg-white rounded-full shadow-md hover:shadow-lg transition-all z-30 ${
-      isWishlisted ? 'text-red-500' : 'text-gray-700 hover:text-black'
+    className={`absolute top-space-3 right-space-3 min-h-space-10 min-w-space-10 flex items-center justify-center bg-strike-white/90 backdrop-blur-sm border border-strike-gray-200 hover:border-strike-black transition-all duration-base z-30 touch-manipulation ${
+      isWishlisted ? 'text-strike-black' : 'text-strike-gray-600 hover:text-strike-black'
     }`}
     onClick={onClick}
     type="button"
-    aria-label={`${isWishlisted ? 'Remove from' : 'Add to'} wishlist`}
+    aria-label={`${isWishlisted ? 'Remove from' : 'Add to'} wishlist ${productName}`}
     aria-pressed={isWishlisted}
   >
     <Heart
       className={`h-5 w-5 transition-colors ${
-        isWishlisted ? 'fill-red-500 text-red-500' : ''
+        isWishlisted ? 'fill-strike-black text-strike-black' : ''
       }`}
       aria-hidden="true"
+      strokeWidth={1.5}
     />
   </button>
 ));

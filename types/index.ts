@@ -6,14 +6,14 @@
 // Core branded types
 export type {
   ProductId, VariantId, CartId, LineItemId, UserId, CustomerId,
-  OrderId, CategoryId, Email, Price, Quantity, CurrencyCode
+  OrderId, CategoryId, TagId, Email, Price, Quantity, CurrencyCode
 } from './branded';
 
 // Branded type constructors (only from branded.ts)
 export {
   createProductId, createVariantId, createCartId, createLineItemId,
   createUserId, createCustomerId, createOrderId, createCategoryId,
-  createEmail, createPrice, createQuantity, createCurrencyCode,
+  createTagId, createEmail, createPrice, createQuantity, createCurrencyCode,
   createImageURL, createSlug, createSKU
 } from './branded';
 
@@ -39,10 +39,9 @@ export {
 
 // Business domain types
 export * from './store';
-export * from './medusa';
 export * from './integrated';
 export * from './home-page';
-export * from './medusa-api';
+export * from './product';
 
 // Built-in utility types are available globally, no need to re-export
 

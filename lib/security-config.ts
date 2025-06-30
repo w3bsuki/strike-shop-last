@@ -8,7 +8,6 @@ export function validateEnvironmentVariables() {
   const requiredEnvVars = [
     'NEXT_PUBLIC_SANITY_PROJECT_ID',
     'NEXT_PUBLIC_SANITY_DATASET',
-    'NEXT_PUBLIC_MEDUSA_BACKEND_URL',
   ];
 
   const missing = requiredEnvVars.filter((varName) => !process.env[varName]);

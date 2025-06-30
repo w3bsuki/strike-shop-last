@@ -2,7 +2,9 @@
 
 import { useQuickView } from '@/contexts/QuickViewContext';
 import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect } from 'react';
+import { ShopifyService } from '@/lib/shopify/services';
+import type { IntegratedProduct } from '@/types/integrated';
 
 // BUNDLE OPTIMIZATION: Lazy load QuickView to reduce initial bundle
 // Using the new modular QuickView implementation
@@ -44,11 +46,63 @@ const QuickViewModalModular = dynamic(
  * - Accessibility compliance
  */
 export function QuickViewModal() {
-  const { isOpen, closeQuickView } = useQuickView();
-  const currentProduct = null; // TODO: Fix context type
+  const { isOpen, productId, closeQuickView } = useQuickView();
+  const [currentProduct, setCurrentProduct] = useState<IntegratedProduct | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch product data when modal opens
+  useEffect(() => {
+    if (isOpen && productId) {
+      setIsLoading(true);
+      // Since getProductById doesn't exist, we'll use getProducts and filter
+      ShopifyService.getProducts(50)
+        .then(products => {
+          const product = products.find(p => p.id === productId);
+          if (product) {
+            // Transform to format expected by QuickViewModalModular
+            const transformedProduct = {
+              id: product.id,
+              name: product.content.name,
+              price: product.pricing.displayPrice,
+              originalPrice: product.pricing.displaySalePrice,
+              discount: product.badges.isSale && product.pricing.discount 
+                ? `-${product.pricing.discount.percentage}%` 
+                : undefined,
+              image: product.content.images[0]?.url || '/placeholder.svg',
+              images: product.content.images.map((img: any) => typeof img === 'string' ? img : img.url),
+              isNew: product.badges.isNew,
+              soldOut: product.badges.isSoldOut,
+              slug: product.slug,
+              description: product.content.description,
+              sizes: product.commerce.variants.map((v: any) => {
+                // Extract size from variant title
+                const sizeMatch = v.title.match(/Size: ([\w\s]+)/i) || v.title.match(/([XS|S|M|L|XL|XXL]+)/i);
+                return sizeMatch ? sizeMatch[1] : v.title;
+              }),
+              variants: product.commerce.variants.map((v: any) => ({
+                id: v.id,
+                title: v.title,
+                sku: v.sku,
+                prices: v.pricing ? [{ amount: v.pricing.price }] : []
+              }))
+            };
+            setCurrentProduct(transformedProduct);
+          }
+        })
+        .catch((error: any) => {
+          console.error('Failed to fetch product for quick view:', error);
+          setCurrentProduct(null);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else {
+      setCurrentProduct(null);
+    }
+  }, [isOpen, productId]);
 
   // Only render when needed for optimal performance
-  if (!isOpen || !currentProduct) return null;
+  if (!isOpen) return null;
 
   return (
     <Suspense fallback={
@@ -56,11 +110,17 @@ export function QuickViewModal() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
       </div>
     }>
-      <QuickViewModalModular
-        product={currentProduct}
-        isOpen={isOpen}
-        onClose={closeQuickView}
-      />
+      {isLoading ? (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        </div>
+      ) : currentProduct ? (
+        <QuickViewModalModular
+          product={currentProduct}
+          isOpen={isOpen}
+          onClose={closeQuickView}
+        />
+      ) : null}
     </Suspense>
   );
 }

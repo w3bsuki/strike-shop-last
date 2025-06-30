@@ -44,8 +44,7 @@ export const SECURITY_CONFIG = {
       "https:",
       "blob:",
       "https://cdn.sanity.io",
-      "https://images.unsplash.com",
-      "https://medusa-public-images.s3.eu-west-1.amazonaws.com"
+      "https://images.unsplash.com"
     ],
     'connect-src': [
       "'self'",

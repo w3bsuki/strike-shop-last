@@ -45,7 +45,7 @@ const ProductHeader = React.forwardRef<HTMLDivElement, ProductHeaderProps>(
             {badge}
           </div>
           {description && (
-            <p className="mt-2 text-muted-foreground text-sm md:text-base max-w-2xl hidden sm:block">
+            <p className="mt-2 text-muted-foreground text-sm md:text-base max-w-2xl">
               {description}
             </p>
           )}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useId, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
 /**
  * ARIA Helpers and Utilities
@@ -132,7 +132,7 @@ export function Landmark({
   className = '',
   as: Component = 'div'
 }: LandmarkProps) {
-  const id = useId();
+  const id = `landmark-${Math.random().toString(36).substr(2, 9)}`;
   
   return (
     <Component
@@ -158,7 +158,7 @@ interface AriaDescriptionProps {
 }
 
 export function AriaDescription({ children, id, className = 'sr-only' }: AriaDescriptionProps) {
-  const generatedId = useId();
+  const generatedId = `desc-${Math.random().toString(36).substr(2, 9)}`;
   const descriptionId = id || generatedId;
 
   return (
@@ -234,8 +234,8 @@ export function AccessibleButton({
   className = '',
   ...props
 }: AccessibleButtonProps) {
-  const buttonId = useId();
-  const descriptionId = useId();
+  const buttonId = `btn-${Math.random().toString(36).substr(2, 9)}`;
+  const descriptionId = `desc-${Math.random().toString(36).substr(2, 9)}`;
   
   const variantStyles = {
     primary: 'strike-button-primary',
@@ -316,8 +316,8 @@ export function AriaAlert({
   onDismiss,
   className = ''
 }: AriaAlertProps) {
-  const alertId = useId();
-  const titleId = useId();
+  const alertId = `alert-${Math.random().toString(36).substr(2, 9)}`;
+  const titleId = `title-${Math.random().toString(36).substr(2, 9)}`;
   
   const variantStyles = {
     info: 'bg-muted border-border text-foreground',
@@ -395,10 +395,10 @@ export function AccessibleField({
   optional = false,
   className = ''
 }: AccessibleFieldProps) {
-  const fieldId = useId();
-  const labelId = useId();
-  const descriptionId = useId();
-  const errorId = useId();
+  const fieldId = `field-${Math.random().toString(36).substr(2, 9)}`;
+  const labelId = `label-${Math.random().toString(36).substr(2, 9)}`;
+  const descriptionId = `desc-${Math.random().toString(36).substr(2, 9)}`;
+  const errorId = `error-${Math.random().toString(36).substr(2, 9)}`;
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -471,8 +471,8 @@ export function AccessibleProgress({
   showPercentage = true,
   className = ''
 }: AccessibleProgressProps) {
-  const progressId = useId();
-  const labelId = useId();
+  const progressId = `progress-${Math.random().toString(36).substr(2, 9)}`;
+  const labelId = `label-${Math.random().toString(36).substr(2, 9)}`;
   const percentage = Math.round((value / max) * 100);
 
   return (
@@ -521,7 +521,7 @@ export function AccessibleProgress({
  * Custom Hook for generating accessible IDs
  */
 export function useAccessibleId(prefix: string = 'accessible') {
-  return useId().replace(/:/g, prefix);
+  return `${prefix}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 /**

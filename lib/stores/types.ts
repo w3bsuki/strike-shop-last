@@ -13,27 +13,31 @@ export interface CartSlice {
   isOpen: boolean;
   isLoading: boolean;
   error: string | null;
+  checkoutUrl?: string;
 }
 
 export interface CartActions {
-  openCart: () => void;
-  closeCart: () => void;
-  clearError: () => void;
   initializeCart: () => Promise<void>;
   addItem: (
     productId: string,
     variantId: string,
     quantity: number
   ) => Promise<void>;
-  updateQuantity: (
-    itemId: string,
-    size: string,
-    quantity: number
-  ) => Promise<void>;
-  removeItem: (itemId: string, size: string) => Promise<void>;
-  clearCart: () => void;
-  getTotalItems: () => number;
-  getTotalPrice: () => number;
+  updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
+  removeItem: (itemId: string) => Promise<void>;
+  setCartOpen: (isOpen: boolean) => void;
+  clearCart: () => Promise<void>;
+  getTotals: () => {
+    subtotal: number;
+    tax: number;
+    shipping: number;
+    total: number;
+    formattedSubtotal: string;
+    formattedTax: string;
+    formattedShipping: string;
+    formattedTotal: string;
+  };
+  getItemCount: () => number;
 }
 
 // Wishlist slice types

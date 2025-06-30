@@ -50,16 +50,22 @@ export const useCartStore = (): CartStore => {
     isLoading: cart.isLoading,
     error: cart.error,
 
-    // Actions - all delegated to the unified store
-    openCart: actions.openCart,
-    closeCart: actions.closeCart,
-    clearError: actions.clearError,
+    // Actions - mapped to unified store methods with signature adaptation
+    openCart: () => actions.setCartOpen(true),
+    closeCart: () => actions.setCartOpen(false),
+    clearError: () => {}, // Not implemented in current store
     initializeCart: actions.initializeCart,
     addItem: actions.addItem,
-    updateQuantity: actions.updateQuantity,
-    removeItem: actions.removeItem,
+    updateQuantity: async (itemId: ProductId, _size: string, quantity: Quantity) => {
+      // Convert to the new signature - ignore size for now since new store only uses itemId
+      return actions.updateItemQuantity(itemId as string, quantity as number);
+    },
+    removeItem: async (itemId: ProductId, _size: string) => {
+      // Convert to the new signature - ignore size for now
+      return actions.removeItem(itemId as string);
+    },
     clearCart: actions.clearCart,
-    getTotalItems: actions.getTotalItems,
-    getTotalPrice: actions.getTotalPrice,
+    getTotalItems: actions.getItemCount,
+    getTotalPrice: () => actions.getTotals().total,
   };
 };

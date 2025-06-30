@@ -27,20 +27,20 @@ export interface SyncCartRequest {
 
 // Cart API Response Types
 export interface CartAPIResponse {
-  cart: MedusaCart;
+  cart: Cart;
   cartId: CartId;
 }
 
 export interface CartSyncResponse {
-  cart: MedusaCart;
+  cart: Cart;
   cartId: CartId;
   syncedItems: CartItem[];
 }
 
-// Medusa Cart Types (from API responses)
-export interface MedusaCart {
+// Cart Types (from API responses)
+export interface Cart {
   id: CartId;
-  items?: MedusaCartItem[] | undefined;
+  items?: CartItem[] | undefined;
   region?: {
     currency_code: string | undefined;
     id: string;
@@ -55,10 +55,10 @@ export interface MedusaCart {
   updated_at: string;
 }
 
-export interface MedusaCartItem {
+export interface CartItem {
   id: LineItemId;
   variant_id: VariantId;
-  variant?: MedusaVariant | undefined;
+  variant?: Variant | undefined;
   product_id?: ProductId | undefined;
   title: string;
   quantity: Quantity;
@@ -71,19 +71,19 @@ export interface MedusaCartItem {
   updated_at: string;
 }
 
-export interface MedusaVariant {
+export interface Variant {
   id: VariantId;
   product_id?: ProductId | undefined;
-  product?: MedusaProduct | undefined;
+  product?: Product | undefined;
   title?: string | undefined;
   sku?: SKU | undefined;
-  prices?: MedusaPrice[] | undefined;
+  prices?: Price[] | undefined;
   inventory_quantity?: number | undefined;
   manage_inventory?: boolean | undefined;
   allow_backorder?: boolean | undefined;
 }
 
-export interface MedusaProduct {
+export interface Product {
   id: ProductId;
   handle?: Slug | undefined;
   title?: string | undefined;
@@ -92,7 +92,7 @@ export interface MedusaProduct {
   status?: string | undefined;
 }
 
-export interface MedusaPrice {
+export interface Price {
   id: string;
   amount: Price;
   currency_code: string;
@@ -280,12 +280,12 @@ export function isAPIErrorResponse(response: unknown): response is APIErrorRespo
 }
 
 // Response validation helpers
-export function validateMedusaCart(data: unknown): data is MedusaCart {
+export function validateCart(data: unknown): data is Cart {
   return (
     typeof data === 'object' &&
     data !== null &&
     'id' in data &&
-    typeof (data as MedusaCart).id === 'string'
+    typeof (data as Cart).id === 'string'
   );
 }
 

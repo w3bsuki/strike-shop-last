@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { MedusaProductService } from '@/lib/medusa-service-refactored';
+import { ShopifyService } from '@/lib/shopify/services';
 
 // PERFORMANCE: Cache sitemap for 1 hour
 export const revalidate = 3600;
@@ -88,15 +88,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let productPages: MetadataRoute.Sitemap = [];
 
   try {
-    // Try to get products from Medusa first
-    const medusaProducts = await MedusaProductService.getProducts({
-      limit: 1000,
-    });
+    // Try to get products from Shopify
+    const shopifyProducts = await ShopifyService.getProducts(1000);
 
-    if (medusaProducts && medusaProducts.products.length > 0) {
-      productPages = medusaProducts.products.map((product) => ({
-        url: `${baseUrl}/product/${product.handle}`,
-        lastModified: new Date(product.updated_at || product.created_at),
+    if (shopifyProducts && shopifyProducts.length > 0) {
+      productPages = shopifyProducts.map((product) => ({
+        url: `${baseUrl}/product/${product.slug}`,
+        lastModified: new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.7,
       }));
@@ -109,13 +107,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let categoryPages: MetadataRoute.Sitemap = [];
 
   try {
-    // Try to get categories from Medusa first
-    const medusaCategories = await MedusaProductService.getCategories();
+    // Try to get collections from Shopify
+    const shopifyCollections = await ShopifyService.getCollections();
 
-    if (medusaCategories && medusaCategories.length > 0) {
-      categoryPages = medusaCategories.map((category) => ({
-        url: `${baseUrl}/${category.handle}`,
-        lastModified: new Date(category.updated_at || category.created_at),
+    if (shopifyCollections && shopifyCollections.length > 0) {
+      categoryPages = shopifyCollections.map((collection) => ({
+        url: `${baseUrl}/${collection.slug}`,
+        lastModified: new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.8,
       }));

@@ -26,10 +26,16 @@ export function useMobileTouch(): MobileTouchCapabilities {
     prefersTouchInteraction: false,
     screenSize: 'desktop'
   });
-
   const detectCapabilities = useCallback(() => {
     if (typeof window === 'undefined') {
-      return capabilities;
+      return {
+        isMobile: false,
+        isTouch: false,
+        hasHover: true, // Assume desktop during SSR
+        supportsVibration: false,
+        prefersTouchInteraction: false,
+        screenSize: 'desktop' as const
+      };
     }
 
     // Screen size detection
@@ -72,6 +78,8 @@ export function useMobileTouch(): MobileTouchCapabilities {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     // Initial detection
     setCapabilities(detectCapabilities());
 

@@ -1,29 +1,24 @@
 /**
  * Integrated Type Definitions
- * Combines Sanity content with Medusa commerce data
+ * For future Shopify integration
  */
 
 import type { SanityImage, SanityBlock, SanityCategory } from './sanity';
-import type {
-  MedusaProduct,
-  MedusaProductVariant,
-} from './medusa';
 import type { 
   ProductId, VariantId, LineItemId, ImageURL, 
   Slug, SKU, Price, Quantity, CurrencyCode 
 } from './branded';
 
 /**
- * Integrated Product combining Sanity content and Medusa commerce data
+ * Integrated Product - will be used with Shopify
  */
 export interface IntegratedProduct {
   // Core identifiers
-  id: ProductId; // Medusa ID
-  sanityId?: string;
+  id: ProductId;
   slug: Slug;
   sku?: SKU;
 
-  // Content from Sanity
+  // Content
   content: {
     name: string;
     description?: string;
@@ -58,9 +53,8 @@ export interface IntegratedProduct {
     };
   };
 
-  // Commerce data from Medusa
+  // Commerce data - will come from Shopify
   commerce: {
-    medusaProduct?: MedusaProduct;
     variants: IntegratedVariant[];
     prices: IntegratedPrice[];
     inventory: {
@@ -139,9 +133,6 @@ export interface IntegratedVariant {
 
   // Images (variant-specific)
   images?: SanityImage[];
-
-  // Original Medusa variant
-  medusaVariant?: MedusaProductVariant;
 }
 
 /**

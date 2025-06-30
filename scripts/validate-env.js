@@ -13,9 +13,6 @@ const crypto = require('crypto');
 const REQUIRED_VARS = {
   common: [
     'NODE_ENV',
-    'NEXT_PUBLIC_MEDUSA_BACKEND_URL',
-    'NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY',
-    'NEXT_PUBLIC_MEDUSA_REGION_ID',
     'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',
     'STRIPE_SECRET_KEY',
   ],
@@ -42,8 +39,6 @@ const VALIDATION_RULES = {
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: { prefix: 'pk_', type: 'public_key' },
   STRIPE_SECRET_KEY: { prefix: 'sk_', type: 'secret_key' },
   STRIPE_WEBHOOK_SECRET: { prefix: 'whsec_', type: 'webhook_secret' },
-  NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: { prefix: 'pk_', type: 'public_key' },
-  NEXT_PUBLIC_MEDUSA_REGION_ID: { prefix: 'reg_', type: 'region_id' },
   DATABASE_URL: { pattern: /^postgres(ql)?:\/\//, type: 'database_url' },
   REDIS_URL: { pattern: /^redis:\/\//, type: 'redis_url' },
   RESEND_API_KEY: { prefix: 're_', type: 'api_key' },

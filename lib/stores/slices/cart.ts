@@ -1,13 +1,13 @@
 import type { StateCreator } from 'zustand';
-import type { StoreState, CartSlice, CartActions, CartItem } from '../types';
-import { medusaClient } from '../../medusa-service-refactored';
+import type { StoreState, CartSlice, CartActions } from '../types';
 import { cartEventEmitter } from '../../events';
 import { toast } from '@/hooks/use-toast';
-import { createProductId } from '@/types/branded';
+import { createLineItemId, createVariantId, createSlug, createImageURL, createPrice, createProductId, createQuantity } from '@/types/branded';
+import { retry, handleError, NetworkError } from '@/lib/error-handling';
+// import type { CartItem } from '../../cart-store';
 
-
-const formatPrice = (amount: number, currencyCode: string = 'GBP') => {
-  return new Intl.NumberFormat('en-GB', {
+const formatPrice = (amount: number, currencyCode: string = 'EUR') => {
+  return new Intl.NumberFormat('en-EU', {
     style: 'currency',
     currency: currencyCode,
   }).format(amount / 100);
@@ -28,429 +28,430 @@ export const createCartSlice: StateCreator<
 
   actions: {
     cart: {
-      // UI Actions
-      openCart: () =>
-        set((state) => ({ cart: { ...state.cart, isOpen: true } })),
-      closeCart: () =>
-        set((state) => ({ cart: { ...state.cart, isOpen: false } })),
-      clearError: () =>
-        set((state) => ({ cart: { ...state.cart, error: null } })),
-
-      // Initialize cart
+      // Initialize cart with Shopify Cart API
       initializeCart: async () => {
-        const { cart } = get();
-
-        if (cart.cartId) {
-          // Validate existing cart
-          try {
-            const response = await medusaClient.store.cart.retrieve(cart.cartId);
-            if (response && response.cart) {
-              const medusaCart = response.cart;
-              // Update items from server
-              const items: CartItem[] =
-                medusaCart.items?.map((item: any) => ({
-                  id: createProductId(item.variant?.product_id || item.product_id || ''),
-                  lineItemId: item.id,
-                  variantId: item.variant_id,
-                  name: item.title,
-                  slug: item.variant?.product?.handle || '',
-                  size: item.variant?.title || 'One Size',
-                  ...(item.variant?.sku && { sku: item.variant.sku }),
-                  quantity: item.quantity,
-                  ...(item.thumbnail && { image: item.thumbnail }),
-                  pricing: {
-                    unitPrice: item.unit_price,
-                    totalPrice:
-                      item.subtotal || item.unit_price * item.quantity,
-                    displayUnitPrice: formatPrice(
-                      item.unit_price,
-                      medusaCart.region?.currency_code
-                    ),
-                    displayTotalPrice: formatPrice(
-                      item.subtotal || item.unit_price * item.quantity,
-                      medusaCart.region?.currency_code
-                    ),
-                  },
-                })) || [];
-
-              set((state) => ({
-                cart: { ...state.cart, items, cartId: medusaCart.id },
-              }));
-
-              // Emit cart initialized event
-              cartEventEmitter.emit('cart-initialized', {
-                cartId: medusaCart.id,
-                items,
-                timestamp: new Date(),
-                source: 'system',
-              });
-
-              return;
-            }
-          } catch (error) {
-
-          }
-        }
-
-        // Create new cart
+        set((state) => ({ 
+          ...state, 
+          cart: { ...state.cart, isLoading: true, error: null } 
+        }));
         try {
-          const response = await medusaClient.store.cart.create(
-            {
-              region_id:
-                process.env.NEXT_PUBLIC_MEDUSA_REGION_ID ||
-                'reg_01J0PY5V5W92D5H5YZH52XNNPQ',
+          // Import Shopify client dynamically to avoid circular dependency
+          const { shopifyClient } = await import('@/lib/shopify/client');
+          
+          // Check for existing cart ID in localStorage
+          const savedCartId = typeof window !== 'undefined' ? localStorage.getItem('strike-cart-id') : null;
+          let shopifyCart;
+          
+          if (savedCartId && shopifyClient) {
+            // Try to retrieve existing cart
+            shopifyCart = await shopifyClient.getCart(savedCartId);
+          }
+          
+          if (!shopifyCart && shopifyClient) {
+            // Create new Shopify cart
+            shopifyCart = await shopifyClient.createCart();
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('strike-cart-id', shopifyCart.id);
             }
-          );
-          set((state) => ({
-            cart: { ...state.cart, cartId: response.cart.id, items: [] },
-          }));
-
-          // Emit cart initialized event
-          cartEventEmitter.emit('cart-initialized', {
-            cartId: response.cart.id,
-            items: [],
-            timestamp: new Date(),
-            source: 'system',
-          });
+          }
+          
+          if (shopifyCart) {
+            // Convert Shopify cart to our format
+            const items = shopifyCart.lines.edges.map(({ node }) => ({
+              id: createProductId(node.merchandise.product.id),
+              lineItemId: createLineItemId(node.id),
+              variantId: createVariantId(node.merchandise.id),
+              name: node.merchandise.product.title,
+              slug: createSlug(node.merchandise.product.handle),
+              size: node.merchandise.title || 'One Size',
+              quantity: createQuantity(node.quantity),
+              image: createImageURL(node.merchandise.image?.url || ''),
+              pricing: {
+                unitPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) * 100 / node.quantity)),
+                totalPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) * 100)),
+                displayUnitPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) / node.quantity, node.cost.totalAmount.currencyCode),
+                displayTotalPrice: formatPrice(parseFloat(node.cost.totalAmount.amount), node.cost.totalAmount.currencyCode),
+              },
+            }));
+            
+            set((state) => ({ 
+              ...state, 
+              cart: { 
+                ...state.cart, 
+                cartId: shopifyCart.id, 
+                items, 
+                isLoading: false,
+                checkoutUrl: shopifyCart.checkoutUrl 
+              } 
+            }));
+          } else {
+            // Fallback to local cart if Shopify not configured
+            const cartId = `local_cart_${Date.now()}`;
+            set((state) => ({ 
+              ...state, 
+              cart: { ...state.cart, cartId, items: [], isLoading: false } 
+            }));
+          }
         } catch (error) {
-
-          set((state) => ({
-            cart: { ...state.cart, error: 'Failed to initialize cart' },
+          handleError(error, false);
+          const errorMessage = error instanceof NetworkError 
+            ? 'No internet connection. Cart will sync when online.'
+            : 'Cart initialization failed, using offline mode';
+          
+          // Fallback to local cart on error
+          const cartId = `local_cart_${Date.now()}`;
+          set((state) => ({ 
+            ...state, 
+            cart: { ...state.cart, cartId, items: [], isLoading: false, error: errorMessage } 
           }));
-
-          // Emit error event
-          cartEventEmitter.emit('cart-error', {
-            error: error instanceof Error ? error : new Error(String(error)),
-            context: { operation: 'initialize' },
-            timestamp: new Date(),
-            source: 'system',
+          
+          toast({
+            title: 'Offline Mode',
+            description: errorMessage,
+            variant: 'default',
           });
         }
       },
 
-      // Add item to cart
-      addItem: async (
-        productId: string,
-        variantId: string,
-        quantity: number
-      ) => {
-        set((state) => ({
-          cart: { ...state.cart, isLoading: true, error: null },
+      // Add item to cart with Shopify integration
+      addItem: async (_productId: string, variantId: string, quantity: number = 1) => {
+        set((state) => ({ 
+          ...state, 
+          cart: { ...state.cart, isLoading: true, error: null } 
         }));
-
-        // Emit loading start event
-        cartEventEmitter.emit('cart-loading-start', {
-          operation: 'add-item',
-          timestamp: new Date(),
-        });
-
         try {
-          const { cart } = get();
-          if (!cart.cartId) {
-            await get().actions.cart.initializeCart();
+          const state = get();
+          let cartId = state.cart.cartId;
+          
+          // Import Shopify client dynamically to avoid circular dependency
+          const { shopifyClient } = await import('@/lib/shopify/client');
+          
+          if (!shopifyClient) {
+            throw new Error('Shopify client not configured');
           }
-
-          const currentCartId = get().cart.cartId;
-          if (!currentCartId) {
-            throw new Error('Failed to initialize cart');
+          
+          let shopifyCart;
+          
+          // Create cart if it doesn't exist
+          if (!cartId) {
+            shopifyCart = await shopifyClient.createCart();
+            cartId = shopifyCart.id;
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('strike-cart-id', cartId);
+            }
           }
-
-          // Add line item
-          const response = await (medusaClient.store.cart as any).createLineItem(currentCartId, {
-            variant_id: variantId,
-            quantity,
-          });
-
-          // Update local state
-          const items: CartItem[] =
-            response.cart?.items?.map((item: any) => ({
-              id: item.variant?.product_id || item.product_id || '',
-              lineItemId: item.id,
-              variantId: item.variant_id,
-              name: item.title,
-              slug: item.variant?.product?.handle || '',
-              size: item.variant?.title || 'One Size',
-              ...(item.variant?.sku && { sku: item.variant.sku }),
-              quantity: item.quantity,
-              ...(item.thumbnail && { image: item.thumbnail }),
-              pricing: {
-                unitPrice: item.unit_price,
-                ...(item.variant?.prices?.[0]?.amount && { unitSalePrice: item.variant.prices[0].amount }),
-                totalPrice: item.subtotal || item.unit_price * item.quantity,
-                displayUnitPrice: formatPrice(
-                  item.unit_price,
-                  response.cart?.region?.currency_code
-                ),
-                ...(item.variant?.prices?.[0]?.amount && {
-                  displayUnitSalePrice: formatPrice(
-                    item.variant.prices[0].amount,
-                    response.cart?.region?.currency_code
-                  )
-                }),
-                displayTotalPrice: formatPrice(
-                  item.subtotal || item.unit_price * item.quantity,
-                  response.cart?.region?.currency_code
-                ),
+          
+          // Add item to Shopify cart using cartLinesAdd mutation with retry
+          shopifyCart = await retry(
+            () => shopifyClient.addToCart(cartId, variantId, quantity),
+            {
+              maxAttempts: 3,
+              onRetry: (attempt) => {
+                if (attempt === 2) {
+                  toast({
+                    title: 'Connection issues',
+                    description: 'Having trouble adding to cart. Retrying...',
+                  });
+                }
               },
-            })) || [];
-
-          set((state) => ({ cart: { ...state.cart, items, isOpen: true } }));
-
-          // Find the newly added item
-          const newItem = items.find(
-            (item) =>
-              item.variantId === variantId &&
-              (!get().cart.items.find(
-                (existing) => existing.variantId === variantId
-              ) ||
-                item.quantity >
-                  (get().cart.items.find(
-                    (existing) => existing.variantId === variantId
-                  )?.quantity || 0))
+            }
           );
-
-          if (newItem) {
-            // Emit item added event
-            cartEventEmitter.emit('item-added', {
-              item: newItem,
-              timestamp: new Date(),
-              source: 'user',
-            });
-          }
-
-          toast({
-            title: 'Added to cart',
-            description: 'Item has been added to your cart',
-          });
-        } catch (error) {
-
-          set((state) => ({
-            cart: {
-              ...state.cart,
-              error: error instanceof Error ? error.message : 'Failed to add item to cart',
+          
+          // Convert Shopify cart to our format
+          const items = shopifyCart.lines.edges.map(({ node }) => ({
+            id: createProductId(node.merchandise.product.id),
+            lineItemId: createLineItemId(node.id),
+            variantId: createVariantId(node.merchandise.id),
+            name: node.merchandise.product.title,
+            slug: createSlug(node.merchandise.product.handle),
+            size: node.merchandise.title || 'One Size',
+            quantity: node.quantity as any,
+            image: createImageURL(node.merchandise.image?.url || ''),
+            pricing: {
+              unitPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) * 100 / node.quantity)),
+              totalPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) * 100)),
+              displayUnitPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) * 100 / node.quantity, node.cost.totalAmount.currencyCode),
+              displayTotalPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) * 100, node.cost.totalAmount.currencyCode),
             },
           }));
-
-          // Emit error event
-          cartEventEmitter.emit('cart-error', {
-            error: error instanceof Error ? error : new Error(String(error)),
-            context: { operation: 'add-item', productId, variantId, quantity },
-            timestamp: new Date(),
-            source: 'user',
-          });
-
+          
+          set((state) => ({ 
+            ...state, 
+            cart: { 
+              ...state.cart, 
+              cartId,
+              items, 
+              isLoading: false,
+              checkoutUrl: shopifyCart.checkoutUrl
+            } 
+          }));
+          
+          // Save to localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('strike-cart', JSON.stringify({ cartId, items }));
+          }
+          
+          // Find the item that was just added/updated
+          const addedItem = items.find(item => item.variantId === createVariantId(variantId));
+          if (addedItem) {
+            cartEventEmitter.emit('item-added', {
+              item: addedItem,
+              timestamp: new Date(),
+              source: 'user'
+            });
+          }
+          
+          // Show toast
           toast({
-            title: 'Error',
-            description: 'Failed to add item to cart',
-            variant: 'destructive',
+            title: "Added to cart",
+            description: `${quantity} item${quantity > 1 ? 's' : ''} added to your cart`,
           });
-        } finally {
-          set((state) => ({ cart: { ...state.cart, isLoading: false } }));
-
-          // Emit loading end event
-          cartEventEmitter.emit('cart-loading-end', {
-            operation: 'add-item',
-            duration: 0, // Would need to track start time for accurate duration
-            timestamp: new Date(),
-          });
+        } catch (error) {
+          handleError(error);
+          
+          const isNetworkError = error instanceof NetworkError || 
+            (error instanceof Error && error.message.includes('fetch'));
+          
+          const errorMessage = isNetworkError
+            ? 'No connection. Item will be added when online.'
+            : 'Failed to add item to cart. Please try again.';
+          
+          set((state) => ({ 
+            ...state, 
+            cart: { ...state.cart, isLoading: false, error: errorMessage } 
+          }));
+          
+          // If network error, queue the action for later
+          if (isNetworkError && typeof window !== 'undefined') {
+            const pendingActions = JSON.parse(
+              localStorage.getItem('strike-pending-cart-actions') || '[]'
+            );
+            pendingActions.push({
+              type: 'addItem',
+              payload: { variantId, quantity },
+              timestamp: Date.now(),
+            });
+            localStorage.setItem('strike-pending-cart-actions', JSON.stringify(pendingActions));
+          }
         }
       },
 
       // Update item quantity
-      updateQuantity: async (
-        itemId: string,
-        size: string,
-        quantity: number
-      ) => {
-        if (quantity < 1) {
-          return get().actions.cart.removeItem(itemId, size);
-        }
-
-        set((state) => ({
-          cart: { ...state.cart, isLoading: true, error: null },
+      updateItemQuantity: async (itemId: string, quantity: number) => {
+        set((state) => ({ 
+          ...state, 
+          cart: { ...state.cart, isLoading: true, error: null } 
         }));
-
         try {
-          const { cart } = get();
-          if (!cart.cartId) throw new Error('No cart found');
-
-          const item = cart.items.find(
-            (i) => i.id === itemId && i.size === size
-          );
-          if (!item) throw new Error('Item not found');
-
-          // Update line item
-          const response = await medusaClient.store.cart.updateLineItem(cart.cartId, item.lineItemId, {
-            quantity,
-          });
-
-          // Update local state
-          const updatedItems =
-            response.cart?.items?.map((item: any) => ({
-              id: createProductId(item.variant?.product_id || item.product_id || ''),
-              lineItemId: item.id,
-              variantId: item.variant_id,
-              name: item.title,
-              slug: item.variant?.product?.handle || '',
-              size: item.variant?.title || 'One Size',
-              sku: item.variant?.sku,
-              quantity: item.quantity,
-              image: item.thumbnail,
-              pricing: {
-                unitPrice: item.unit_price,
-                ...(item.variant?.prices?.[0]?.amount && { unitSalePrice: item.variant.prices[0].amount }),
-                totalPrice: item.subtotal || item.unit_price * item.quantity,
-                displayUnitPrice: formatPrice(
-                  item.unit_price,
-                  response.cart?.region?.currency_code
-                ),
-                ...(item.variant?.prices?.[0]?.amount && {
-                  displayUnitSalePrice: formatPrice(
-                    item.variant.prices[0].amount,
-                    response.cart?.region?.currency_code
-                  )
-                }),
-                displayTotalPrice: formatPrice(
-                  item.subtotal || item.unit_price * item.quantity,
-                  response.cart?.region?.currency_code
-                ),
-              },
-            })) || [];
-
-          set((state) => ({ cart: { ...state.cart, items: updatedItems } }));
-        } catch (error) {
-
-          set((state) => ({
-            cart: {
-              ...state.cart,
-              error: error instanceof Error ? error.message : 'Failed to update quantity',
+          const state = get();
+          const items = state.cart.items || [];
+          const cartId = state.cart.cartId;
+          
+          if (!cartId) {
+            throw new Error('No cart ID available');
+          }
+          
+          // Import Shopify client dynamically to avoid circular dependency
+          const { shopifyClient } = await import('@/lib/shopify/client');
+          
+          if (!shopifyClient) {
+            throw new Error('Shopify client not configured');
+          }
+          
+          // Find the item to get its line item ID
+          const item = items.find(item => item.id === itemId);
+          if (!item) {
+            throw new Error('Item not found in cart');
+          }
+          
+          let shopifyCart;
+          
+          if (quantity === 0) {
+            // Remove item using Shopify mutation
+            shopifyCart = await shopifyClient.removeFromCart(cartId, [String(item.lineItemId)]);
+          } else {
+            // Update quantity using Shopify mutation
+            shopifyCart = await shopifyClient.updateCartLines(cartId, String(item.lineItemId), quantity);
+          }
+          
+          // Convert Shopify cart to our format
+          const newItems = shopifyCart.lines.edges.map(({ node }) => ({
+            id: createProductId(node.merchandise.product.id),
+            lineItemId: createLineItemId(node.id),
+            variantId: createVariantId(node.merchandise.id),
+            name: node.merchandise.product.title,
+            slug: createSlug(node.merchandise.product.handle),
+            size: node.merchandise.title || 'One Size',
+            quantity: node.quantity as any,
+            image: createImageURL(node.merchandise.image?.url || ''),
+            pricing: {
+              unitPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) * 100 / node.quantity)),
+              totalPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) * 100)),
+              displayUnitPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) * 100 / node.quantity, node.cost.totalAmount.currencyCode),
+              displayTotalPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) * 100, node.cost.totalAmount.currencyCode),
             },
           }));
+          
+          set((state) => ({ 
+            ...state, 
+            cart: { 
+              ...state.cart, 
+              items: newItems, 
+              isLoading: false,
+              checkoutUrl: shopifyCart.checkoutUrl
+            } 
+          }));
+          
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('strike-cart', JSON.stringify({ cartId, items: newItems }));
+          }
+          
+          // Emit appropriate event based on action
+          if (quantity === 0) {
+            cartEventEmitter.emit('item-removed', {
+              itemId,
+              timestamp: new Date(),
+              source: 'user'
+            });
+            toast({
+              title: "Item removed",
+              description: "Item has been removed from your cart",
+            });
+          } else {
+            const updatedItem = newItems.find(item => item.id === itemId);
+            if (updatedItem) {
+              cartEventEmitter.emit('item-updated', {
+                itemId: updatedItem.id,
+                oldItem: updatedItem,
+                newItem: updatedItem,
+                changes: { quantity: updatedItem.quantity },
+                timestamp: new Date(),
+                source: 'user'
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to update item:', error);
+          set((state) => ({ 
+            ...state, 
+            cart: { ...state.cart, error: 'Failed to update item', isLoading: false } 
+          }));
           toast({
-            title: 'Error',
-            description: 'Failed to update quantity',
-            variant: 'destructive',
+            title: "Error",
+            description: "Failed to update item quantity",
+            variant: "destructive",
           });
-        } finally {
-          set((state) => ({ cart: { ...state.cart, isLoading: false } }));
         }
       },
 
       // Remove item from cart
-      removeItem: async (itemId: string, size: string) => {
-        set((state) => ({
-          cart: { ...state.cart, isLoading: true, error: null },
+      removeItem: async (itemId: string) => {
+        await get().actions.cart.updateItemQuantity(itemId, 0);
+      },
+
+      // Set cart open state
+      setCartOpen: (isOpen: boolean) => {
+        set((state) => ({ 
+          ...state, 
+          cart: { ...state.cart, isOpen } 
         }));
-
-        try {
-          const { cart } = get();
-          if (!cart.cartId) throw new Error('No cart found');
-
-          const item = cart.items.find(
-            (i) => i.id === itemId && i.size === size
-          );
-          if (!item) throw new Error('Item not found');
-
-          // Delete line item
-          const response = await medusaClient.store.cart.deleteLineItem(cart.cartId, item.lineItemId);
-
-          // Update local state
-          const updatedItems =
-            response.parent?.items?.map((item: any) => ({
-              id: createProductId(item.variant?.product_id || item.product_id || ''),
-              lineItemId: item.id,
-              variantId: item.variant_id,
-              name: item.title,
-              slug: item.variant?.product?.handle || '',
-              size: item.variant?.title || 'One Size',
-              sku: item.variant?.sku,
-              quantity: item.quantity,
-              image: item.thumbnail,
-              pricing: {
-                unitPrice: item.unit_price,
-                ...(item.variant?.prices?.[0]?.amount && { unitSalePrice: item.variant.prices[0].amount }),
-                totalPrice: item.subtotal || item.unit_price * item.quantity,
-                displayUnitPrice: formatPrice(
-                  item.unit_price,
-                  response.parent?.region?.currency_code
-                ),
-                ...(item.variant?.prices?.[0]?.amount && {
-                  displayUnitSalePrice: formatPrice(
-                    item.variant.prices[0].amount,
-                    response.parent?.region?.currency_code
-                  )
-                }),
-                displayTotalPrice: formatPrice(
-                  item.subtotal || item.unit_price * item.quantity,
-                  response.parent?.region?.currency_code
-                ),
-              },
-            })) || [];
-
-          set((state) => ({ cart: { ...state.cart, items: updatedItems } }));
-
-          // Emit item removed event
-          cartEventEmitter.emit('item-removed', {
-            itemId: item.id,
-            item,
-            timestamp: new Date(),
-            source: 'user',
-          });
-
-          toast({
-            title: 'Removed from cart',
-            description: 'Item has been removed from your cart',
-          });
-        } catch (error) {
-
-          set((state) => ({
-            cart: {
-              ...state.cart,
-              error: error instanceof Error ? error.message : 'Failed to remove item',
-            },
-          }));
-          toast({
-            title: 'Error',
-            description: 'Failed to remove item',
-            variant: 'destructive',
-          });
-        } finally {
-          set((state) => ({ cart: { ...state.cart, isLoading: false } }));
-        }
       },
 
       // Clear cart
-      clearCart: () => {
-        const { cart } = get();
-        const clearedItems = [...cart.items];
-
-        set((state) => ({
-          cart: { ...state.cart, items: [], cartId: null, isOpen: false },
+      clearCart: async () => {
+        set((state) => ({ 
+          ...state, 
+          cart: { ...state.cart, isLoading: true, error: null } 
         }));
-
-        // Emit cart cleared event
-        cartEventEmitter.emit('cart-cleared', {
-          clearedItems,
-          timestamp: new Date(),
-          source: 'user',
-        });
+        try {
+          const state = get();
+          const cartId = state.cart.cartId;
+          const items = state.cart.items || [];
+          
+          if (cartId && items.length > 0) {
+            // Import Shopify client dynamically to avoid circular dependency
+            const { shopifyClient } = await import('@/lib/shopify/client');
+            
+            if (shopifyClient) {
+              // Remove all items from Shopify cart
+              const lineIds = items.map(item => String(item.lineItemId));
+              await shopifyClient.removeFromCart(cartId, lineIds);
+            }
+          }
+          
+          // Clear local state
+          set((state) => ({ 
+            ...state, 
+            cart: { ...state.cart, items: [], cartId: null, isLoading: false } 
+          }));
+          
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('strike-cart');
+            localStorage.removeItem('strike-cart-id');
+          }
+          
+          cartEventEmitter.emit('cart-cleared', {
+            clearedItems: items,
+            timestamp: new Date(),
+            source: 'user'
+          });
+          
+          toast({
+            title: "Cart cleared",
+            description: "All items have been removed from your cart",
+          });
+        } catch (error) {
+          console.error('Failed to clear cart:', error);
+          // Clear local state anyway
+          set((state) => ({ 
+            ...state, 
+            cart: { ...state.cart, items: [], cartId: null, isLoading: false } 
+          }));
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('strike-cart');
+            localStorage.removeItem('strike-cart-id');
+          }
+          cartEventEmitter.emit('cart-cleared', {
+            clearedItems: [],
+            timestamp: new Date(),
+            source: 'user'
+          });
+        }
       },
 
-      // Get total items count
-      getTotalItems: () => {
-        const { cart } = get();
-        if (!cart || !cart.items) return 0;
-        return cart.items.reduce((total, item) => total + item.quantity, 0);
+      // Calculate totals
+      getTotals: () => {
+        const state = get();
+        const items = state.cart.items || [];
+        const subtotal = items.reduce((acc, item) => {
+          const price = item.pricing?.totalPrice;
+          if (typeof price === 'number') {
+            return acc + price;
+          }
+          // If it's a Price branded type, convert to number
+          return acc + ((price as unknown as number) || 0);
+        }, 0);
+        const tax = Math.round(subtotal * 0.2); // 20% VAT
+        const shipping = 0; // Free shipping
+        const total = subtotal + tax + shipping;
+
+        return {
+          subtotal,
+          tax,
+          shipping,
+          total,
+          formattedSubtotal: formatPrice(subtotal),
+          formattedTax: formatPrice(tax),
+          formattedShipping: formatPrice(shipping),
+          formattedTotal: formatPrice(total),
+        };
       },
 
-      // Get total price
-      getTotalPrice: () => {
-        const { cart } = get();
-        if (!cart || !cart.items) return 0;
-        return cart.items.reduce(
-          (total, item) => total + item.pricing.totalPrice / 100,
-          0
-        );
+      // Get item count
+      getItemCount: () => {
+        const state = get();
+        const items = state.cart.items || [];
+        return items.reduce((acc, item) => acc + (item.quantity || 0), 0);
       },
     },
   },

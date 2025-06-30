@@ -36,25 +36,25 @@ export function MobileNavItem({
   };
 
   const baseStyles = cn(
-    'flex flex-col items-center justify-center transition-all duration-200',
-    'min-h-[44px] min-w-[44px] p-2 touch-manipulation',
+    'flex flex-col items-center justify-center transition-colors duration-base',
+    'min-h-space-11 min-w-space-11 p-space-2 touch-manipulation',
     'relative group',
     // Ensure proper tap target size
-    'after:absolute after:inset-0 after:min-h-[44px] after:min-w-[44px]'
+    'after:absolute after:inset-0 after:min-h-space-11 after:min-w-space-11'
   );
 
   const variantStyles = {
     default: cn(
-      'text-white hover:text-gray-300',
-      isActive && 'text-white'
+      'text-strike-gray-600 hover:text-strike-black',
+      isActive && 'text-strike-black'
     ),
     minimal: cn(
-      'text-gray-600 hover:text-gray-900',
-      isActive && 'text-black'
+      'text-strike-gray-500 hover:text-strike-gray-900',
+      isActive && 'text-strike-black'
     ),
     floating: cn(
-      'text-white/80 hover:text-white',
-      isActive && 'text-white'
+      'text-strike-white/80 hover:text-strike-white',
+      isActive && 'text-strike-white'
     ),
   };
 
@@ -67,10 +67,10 @@ export function MobileNavItem({
       {isActive && (
         <div
           className={cn(
-            'absolute inset-x-0 h-0.5 transition-all duration-300',
-            variant === 'default' && 'bottom-0 bg-white',
-            variant === 'minimal' && 'bottom-0 bg-black',
-            variant === 'floating' && 'bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white'
+            'absolute inset-x-0 h-[2px] transition-all duration-base',
+            variant === 'default' && 'bottom-0 bg-strike-black',
+            variant === 'minimal' && 'bottom-0 bg-strike-black',
+            variant === 'floating' && 'bottom-space-1 left-1/2 -translate-x-1/2 w-space-1 h-space-1 bg-strike-white'
           )}
         />
       )}

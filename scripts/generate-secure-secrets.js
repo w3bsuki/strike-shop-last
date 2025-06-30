@@ -93,7 +93,6 @@ function generateFortressSecrets() {
     
     // 🔗 WEBHOOK SECURITY
     STRIPE_WEBHOOK_SECRET: `whsec_${generateSecureSecret(24)}`,
-    MEDUSA_WEBHOOK_SECRET: generateSecureSecret(SECURITY_STANDARDS.WEBHOOK_SECRET),
     
     // 🧂 CRYPTOGRAPHIC SALTS
     PASSWORD_SALT: generateSecureSecret(SECURITY_STANDARDS.SALT),
@@ -187,7 +186,6 @@ ADMIN_API_KEY="${secrets.ADMIN_API_KEY}"
 
 # Payment webhook secrets
 STRIPE_WEBHOOK_SECRET="${secrets.STRIPE_WEBHOOK_SECRET}"
-MEDUSA_WEBHOOK_SECRET="${secrets.MEDUSA_WEBHOOK_SECRET}"
 
 # ==============================================================================
 # 🧂 CRYPTOGRAPHIC SALTS

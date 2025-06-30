@@ -159,7 +159,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: medusa-test
+          POSTGRES_DB: strike-shop-test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -179,7 +179,7 @@ jobs:
           - 6379:6379
 
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/medusa-test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/strike-shop-test
       REDIS_URL: redis://localhost:6379
 
     steps:
@@ -201,8 +201,9 @@ jobs:
 
       - name: Run database migrations
         run: |
-          cd my-medusa-store
-          npx medusa migrations run
+          # Run any necessary database migrations
+          # npm run db:migrate
+          echo "Database migrations would run here"
 
       - name: Run integration tests
         run: pnpm test:integration
@@ -385,7 +386,6 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           npm i -g @railway/cli
-          cd my-medusa-store
           railway up --environment production
 
       - name: Run health checks

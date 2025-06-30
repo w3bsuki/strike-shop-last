@@ -22,12 +22,6 @@ const envSchema = z.object({
   
   // Public URLs
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  NEXT_PUBLIC_MEDUSA_BACKEND_URL: z.string().url(),
-  
-  // Medusa Configuration
-  NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: z.string().startsWith('pk_'),
-  NEXT_PUBLIC_MEDUSA_REGION_ID: z.string().startsWith('reg_'),
-  MEDUSA_ADMIN_SECRET: z.string().min(32).optional(),
   
   // Stripe Configuration
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().startsWith('pk_'),
@@ -176,7 +170,6 @@ class SecureConfigService {
       RESEND_API_KEY,
       DATABASE_URL,
       REDIS_URL,
-      MEDUSA_ADMIN_SECRET,
       ...publicConfig 
     } = this.config;
     

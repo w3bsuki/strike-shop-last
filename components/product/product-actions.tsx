@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useIsWishlisted, useWishlistActions } from "@/lib/stores";
 import { useQuickView } from "@/contexts/QuickViewContext";
 import { useAria } from "@/components/accessibility/aria-helpers";
-import { useCart } from "@/hooks/use-cart";
+import { useCart, useCartActions } from "@/hooks/use-cart";
 import type { WishlistItem } from "@/lib/wishlist-store";
 
 export interface ProductActionsProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -41,7 +41,9 @@ const ProductActions = React.forwardRef<HTMLDivElement, ProductActionsProps>(
     const { addToWishlist, removeFromWishlist } = useWishlistActions();
     const { openQuickView } = useQuickView();
     const { announceToScreenReader } = useAria();
-    const { addItem, isAddingItem } = useCart();
+    const { cart } = useCart();
+    const { addItem } = useCartActions();
+    const isAddingItem = cart.isLoading;
 
     const wishlistItem: WishlistItem = React.useMemo(() => ({
       id: product.id,
@@ -83,11 +85,7 @@ const ProductActions = React.forwardRef<HTMLDivElement, ProductActionsProps>(
       const variantId = product.variantId || `${product.id}_default`;
       
       try {
-        addItem({
-          productId: product.id,
-          variantId: variantId,
-          quantity: 1
-        });
+        addItem(product.id, variantId, 1);
         announceToScreenReader(`${product.name} added to cart`, 'polite');
       } catch (error) {
         console.error('Failed to add item to cart:', error);

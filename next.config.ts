@@ -36,11 +36,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'medusa-public-images.s3.eu-west-1.amazonaws.com',
+        hostname: 'images.unsplash.com',
       },
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
+        hostname: 'cdn.shopify.com',
       },
     ],
     formats: ['image/webp', 'image/avif'],
@@ -123,8 +123,6 @@ const nextConfig: NextConfig = {
             key: 'Link',
             value: [
               '<https://fonts.googleapis.com>; rel=preconnect',
-              '<https://cdn.sanity.io>; rel=preconnect',
-              '<https://medusa-public-images.s3.eu-west-1.amazonaws.com>; rel=preconnect',
               '<https://images.unsplash.com>; rel=preconnect',
               '</fonts/CourierPrime-Regular.ttf>; rel=preload; as=font; type=font/ttf; crossorigin=anonymous',
               '</fonts/CourierPrime-Bold.ttf>; rel=preload; as=font; type=font/ttf; crossorigin=anonymous',

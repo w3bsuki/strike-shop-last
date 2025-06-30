@@ -111,12 +111,13 @@ export default function HomePageClient({
         </div>
       </section>
 
-      <ErrorBoundary>
+      {saleItems.length > 0 && (
+        <ErrorBoundary>
           <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
             <ProductShowcase
-              title="SS25 MENS"
+              title="SALE COLLECTION"
               products={saleItems}
-              viewAllLink="/sale/men"
+              viewAllLink="/sale"
               layout="scroll"
               showBadge={true}
               badgeText="SALE"
@@ -125,6 +126,7 @@ export default function HomePageClient({
             />
           </Suspense>
         </ErrorBoundary>
+      )}
 
       {/* Divider Section using modular components */}
       <DividerSection theme="default" size="sm">
@@ -135,20 +137,22 @@ export default function HomePageClient({
           </div>
         </DividerSection>
 
-        <ErrorBoundary>
-          <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
-            <ProductShowcase
-              title="NEW ARRIVALS"
-              products={newArrivals}
-              viewAllLink="/new"
-              layout="scroll"
-              showBadge={true}
-              badgeText="NEW"
-              badgeVariant="new"
-              description="Fresh drops and latest designs from our cutting-edge SS25 collection"
-            />
-          </Suspense>
-        </ErrorBoundary>
+        {newArrivals.length > 0 && (
+          <ErrorBoundary>
+            <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
+              <ProductShowcase
+                title="NEW ARRIVALS"
+                products={newArrivals}
+                viewAllLink="/new"
+                layout="scroll"
+                showBadge={true}
+                badgeText="NEW"
+                badgeVariant="new"
+                description="Fresh drops and latest designs from our cutting-edge collection"
+              />
+            </Suspense>
+          </ErrorBoundary>
+        )}
 
       <DividerSection theme="default" size="sm">
           <div className="flex items-center justify-center gap-4">
@@ -158,17 +162,19 @@ export default function HomePageClient({
           </div>
         </DividerSection>
 
-        <ErrorBoundary>
-          <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
-            <ProductShowcase
-              title="FEATURED FOOTWEAR"
-              products={sneakers}
-              viewAllLink="/footwear"
-              layout="scroll"
-              description="Premium sneakers and footwear for the modern streetwear enthusiast"
-            />
-          </Suspense>
-        </ErrorBoundary>
+        {sneakers.length > 0 && (
+          <ErrorBoundary>
+            <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
+              <ProductShowcase
+                title="FEATURED FOOTWEAR"
+                products={sneakers}
+                viewAllLink="/footwear"
+                layout="scroll"
+                description="Premium sneakers and footwear for the modern streetwear enthusiast"
+              />
+            </Suspense>
+          </ErrorBoundary>
+        )}
 
       <DividerSection theme="default" size="sm">
           <div className="flex items-center justify-center gap-4">
@@ -178,17 +184,19 @@ export default function HomePageClient({
           </div>
         </DividerSection>
 
-        <ErrorBoundary>
-          <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
-            <ProductShowcase
-              title="KIDS COLLECTION"
-              products={kidsItems}
-              viewAllLink="/kids"
-              layout="scroll"
-              description="Next generation streetwear for the young and bold - mini versions of our iconic pieces"
-            />
-          </Suspense>
-        </ErrorBoundary>
+        {kidsItems.length > 0 && (
+          <ErrorBoundary>
+            <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
+              <ProductShowcase
+                title="KIDS COLLECTION"
+                products={kidsItems}
+                viewAllLink="/kids"
+                layout="scroll"
+                description="Next generation streetwear for the young and bold - mini versions of our iconic pieces"
+              />
+            </Suspense>
+          </ErrorBoundary>
+        )}
 
       <DividerSection theme="default" size="sm">
           <div className="flex items-center justify-center gap-4">

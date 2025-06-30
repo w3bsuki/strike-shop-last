@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Lock, CreditCard, ShieldCheck } from 'lucide-react';
-import { getStripe, stripeConfig } from '@/lib/stripe-client';
+import { getStripe } from '@/lib/stripe-client';
 import { useCartStore } from '@/lib/cart-store';
 import { toast } from '@/hooks/use-toast';
 
@@ -179,10 +179,10 @@ export default function StripePaymentForm({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Create payment session with Medusa
+    // Create payment session
     const initializePayment = async () => {
       try {
-        // Create payment intent directly via API since Medusa v2 payment sessions may differ
+        // Create payment intent directly via API
 
         const response = await fetch('/api/payments/create-intent', {
           method: 'POST',
@@ -247,7 +247,9 @@ export default function StripePaymentForm({
       stripe={stripePromise}
       options={{
         clientSecret,
-        appearance: stripeConfig.appearance,
+        appearance: {
+          theme: 'stripe',
+        },
       }}
     >
       <PaymentForm cartId={cartId} onSuccess={onSuccess} />

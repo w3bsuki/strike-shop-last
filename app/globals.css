@@ -194,6 +194,21 @@
   --radius: 0 !important;
 }
 
+/* ==========================================================================
+   Mobile Navigation Spacing
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Add padding to body for fixed bottom nav */
+  body {
+    padding-bottom: 56px; /* Standard mobile nav height */
+  }
+  
+  /* Ensure main content doesn't go under nav */
+  main {
+    padding-bottom: 56px;
+  }
+}
+
 /* Force all rounded utilities to zero */
 .rounded-none { border-radius: 0 !important; }
 .rounded-sm { border-radius: 0 !important; }

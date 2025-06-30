@@ -18,9 +18,9 @@ export function MobileNavContainer({
   showThreshold,
   position = 'bottom',
   variant = 'default',
-  hideOnScroll = true,
+  hideOnScroll = false,
 }: MobileNavContainerProps) {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(showThreshold === 0); // Show immediately if threshold is 0
   const [isHidden, setIsHidden] = useState(false);
   const lastScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout>();
@@ -33,19 +33,26 @@ export function MobileNavContainer({
 
     scrollTimeout.current = setTimeout(() => {
       const currentScrollY = window.scrollY;
-      const threshold = showThreshold || (window.innerWidth < 768 ? 0.65 : 0.70);
-      const heroHeight = window.innerHeight * threshold;
       
-      // Check if past hero threshold
+      // If showThreshold is 0, always show
+      if (showThreshold === 0) {
+        setIsVisible(true);
+        setIsHidden(false);
+        return;
+      }
+      
+      // Show nav when user scrolls past the hero section (default ~65% of viewport)
+      const threshold = showThreshold || 0.65;
+      const heroHeight = window.innerHeight * threshold;
       const pastThreshold = currentScrollY > heroHeight;
       setIsVisible(pastThreshold);
       
-      // Hide-on-scroll logic
+      // Hide-on-scroll logic only when enabled
       if (hideOnScroll && pastThreshold) {
         const scrollDelta = currentScrollY - lastScrollY.current;
         
-        // Hide when scrolling down > 100px
-        if (scrollDelta > 100 && currentScrollY > 100) {
+        // Hide when scrolling down fast
+        if (scrollDelta > 50 && currentScrollY > 200) {
           setIsHidden(true);
         }
         // Show when scrolling up
@@ -55,7 +62,7 @@ export function MobileNavContainer({
       }
       
       lastScrollY.current = currentScrollY;
-    }, 100); // 100ms throttle
+    }, 50); // 50ms throttle for smoother response
   }, [showThreshold, hideOnScroll]);
 
   useEffect(() => {
@@ -71,7 +78,7 @@ export function MobileNavContainer({
   }, [handleScroll]);
 
   const baseStyles = cn(
-    'fixed left-0 right-0 lg:hidden transition-all duration-300 ease-out',
+    'fixed left-0 right-0 lg:hidden transition-transform duration-base ease-out',
     'bottom-nav' // Class for global styling
   );
 
@@ -81,9 +88,9 @@ export function MobileNavContainer({
   };
 
   const variantStyles = {
-    default: 'bg-black/95 backdrop-blur-sm border-t border-gray-800',
-    minimal: 'bg-white/95 backdrop-blur-sm border-t border-gray-200',
-    floating: 'bg-black/90 backdrop-blur-md mx-4 mb-4 rounded-full border border-gray-800',
+    default: 'bg-strike-white border-t border-strike-gray-200 shadow-sm',
+    minimal: 'bg-strike-white/95 backdrop-blur-sm border-t border-strike-gray-100',
+    floating: 'bg-strike-black mx-space-4 mb-space-4 border border-strike-gray-800',
   };
 
   const visibilityStyles = !isVisible
@@ -105,17 +112,16 @@ export function MobileNavContainer({
         visibilityStyles,
         className
       )}
-      style={{ zIndex: 'var(--z-fixed)' }}
+      style={{ zIndex: 50 }}
       role="navigation"
       aria-label="Mobile navigation"
     >
       <div
         className={cn(
-          'flex items-center justify-around',
-          variant === 'floating' ? 'px-6 py-3' : 'py-2 px-safe',
-          // Safe area padding for top/bottom
-          position === 'bottom' && variant !== 'floating' && 'pb-safe-4',
-          position === 'top' && variant !== 'floating' && 'pt-safe-4'
+          'flex items-center justify-around h-14', // 56px height
+          variant === 'floating' ? 'px-space-6' : 'px-space-4',
+          // Safe area padding for iOS devices
+          position === 'bottom' && 'pb-safe'
         )}
       >
         {children}

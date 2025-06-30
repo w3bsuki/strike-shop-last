@@ -124,10 +124,10 @@ export function useUpdateCartQuantity() {
   const cart = useStore((state) => state.cart);
 
   return useMutation({
-    mutationFn: async ({ itemId, size, quantity }: UpdateQuantityParams) => {
-      await cartActions.updateQuantity(itemId, size, quantity);
+    mutationFn: async ({ itemId, quantity }: UpdateQuantityParams) => {
+      await cartActions.updateItemQuantity(itemId, quantity);
     },
-    onMutate: async ({ itemId, size, quantity }) => {
+    onMutate: async ({ itemId, quantity }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.cart });
 
       const previousCart = cart.items;
@@ -137,7 +137,7 @@ export function useUpdateCartQuantity() {
         cart: {
           ...state.cart,
           items: state.cart.items.map((item) =>
-            item.id === itemId && item.size === size
+            item.id === itemId
               ? {
                   ...item,
                   quantity: createQuantity(quantity),
@@ -185,10 +185,10 @@ export function useRemoveFromCart() {
   const cart = useStore((state) => state.cart);
 
   return useMutation({
-    mutationFn: async ({ itemId, size }: RemoveItemParams) => {
-      await cartActions.removeItem(itemId, size);
+    mutationFn: async ({ itemId }: RemoveItemParams) => {
+      await cartActions.removeItem(itemId);
     },
-    onMutate: async ({ itemId, size }) => {
+    onMutate: async ({ itemId }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.cart });
 
       const previousCart = cart.items;
@@ -198,7 +198,7 @@ export function useRemoveFromCart() {
         cart: {
           ...state.cart,
           items: state.cart.items.filter(
-            (item) => !(item.id === itemId && item.size === size)
+            (item) => item.id !== itemId
           ),
         },
       }));

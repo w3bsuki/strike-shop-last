@@ -5,7 +5,7 @@ import { ProductSection } from "./product-section";
 import { ProductHeader } from "./product-header";
 import { ProductScroll } from "./product-scroll";
 import { ProductGrid } from "./product-grid";
-import { ProductCard } from "./ProductCard";
+import { ProductCard } from "./product-card";
 import { ProductBadge } from "./product-badge";
 
 type Product = {

@@ -13,12 +13,12 @@ interface QuickViewButtonProps {
  */
 export const QuickViewButton = React.memo(({ onClick, productName }: QuickViewButtonProps) => (
   <button
-    className="h-12 w-12 flex items-center justify-center bg-black text-white rounded-full shadow-lg hover:bg-gray-800 transition-colors active:scale-95"
+    className="hidden md:flex min-h-space-11 min-w-space-11 items-center justify-center bg-strike-white text-strike-black border border-strike-black hover:bg-strike-black hover:text-strike-white transition-colors duration-base active:scale-95 touch-manipulation"
     onClick={onClick}
     type="button"
     aria-label={`Quick view ${productName}`}
   >
-    <Eye className="h-5 w-5" aria-hidden="true" />
+    <Eye className="h-5 w-5" aria-hidden="true" strokeWidth={1.5} />
   </button>
 ));
 

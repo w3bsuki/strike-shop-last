@@ -8,7 +8,7 @@ const PUBLISHABLE_KEY = 'pk_29b82d9f59f0a63f3af01b371bbb4213c0f335610e50c3b9db47
 async function loginAdmin() {
   try {
     const response = await axios.post(`${BACKEND_URL}/auth/user/emailpass`, {
-      email: 'admin@medusa-test.com',
+      email: 'admin@strike-shop.com',
       password: 'supersecret'
     });
     return response.headers['set-cookie'];

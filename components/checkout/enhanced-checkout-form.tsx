@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { Elements, PaymentElement, AddressElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard, Smartphone, Globe } from 'lucide-react';
-import { getStripe, stripeConfig } from '@/lib/stripe-client';
-import { useCart } from '@/hooks/use-cart';
+import { getStripe } from '@/lib/stripe-client';
+import { useCart, useCartActions } from '@/hooks/use-cart';
 import { useUser } from '@/lib/supabase/hooks';
 import { toast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
@@ -22,7 +22,10 @@ function CheckoutForm({ clientSecret: _clientSecret, onPaymentSuccess, onPayment
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'klarna' | 'auto'>('auto');
   const { user } = useUser();
-  const { cart, totalPrice } = useCart();
+  const { cart } = useCart();
+  const { getTotals } = useCartActions();
+  
+  const totals = getTotals();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -201,7 +204,7 @@ function CheckoutForm({ clientSecret: _clientSecret, onPaymentSuccess, onPayment
         <div className="space-y-2 text-sm font-mono">
           <div className="flex justify-between">
             <span>Subtotal ({cart?.items?.length || 0} items)</span>
-            <span>£{totalPrice.toFixed(2)}</span>
+            <span>{totals.formattedTotal}</span>
           </div>
           <div className="flex justify-between">
             <span>Shipping</span>
@@ -210,7 +213,7 @@ function CheckoutForm({ clientSecret: _clientSecret, onPaymentSuccess, onPayment
           <Separator />
           <div className="flex justify-between font-bold text-base">
             <span>Total</span>
-            <span>£{totalPrice.toFixed(2)}</span>
+            <span>{totals.formattedTotal}</span>
           </div>
         </div>
       </div>
@@ -229,7 +232,7 @@ function CheckoutForm({ clientSecret: _clientSecret, onPaymentSuccess, onPayment
         ) : (
           <>
             <Globe className="h-4 w-4 mr-2" />
-            COMPLETE ORDER - £{totalPrice.toFixed(2)}
+            COMPLETE ORDER - {totals.formattedTotal}
           </>
         )}
       </Button>
@@ -252,8 +255,11 @@ interface EnhancedCheckoutFormProps {
 export function EnhancedCheckoutForm({ onPaymentSuccess, onPaymentError }: EnhancedCheckoutFormProps) {
   const [clientSecret, setClientSecret] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
-  const { cart, totalPrice } = useCart();
+  const { cart } = useCart();
+  const { getTotals } = useCartActions();
   const { user } = useUser();
+  
+  const totals = getTotals();
 
   useEffect(() => {
     if (!cart?.items?.length || !user) return;
@@ -266,7 +272,7 @@ export function EnhancedCheckoutForm({ onPaymentSuccess, onPaymentError }: Enhan
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            amount: totalPrice,
+            amount: totals.total,
             currency: 'gbp',
             items: cart.items.map((item: any) => ({
               id: item.id,
@@ -297,7 +303,7 @@ export function EnhancedCheckoutForm({ onPaymentSuccess, onPaymentError }: Enhan
     };
 
     createPaymentIntent();
-  }, [cart, totalPrice, user]);
+  }, [cart, totals.total, user]);
 
   if (isLoading) {
     return (
@@ -325,7 +331,9 @@ export function EnhancedCheckoutForm({ onPaymentSuccess, onPaymentError }: Enhan
       stripe={stripePromise}
       options={{
         clientSecret,
-        appearance: stripeConfig.appearance,
+        appearance: {
+          theme: 'stripe',
+        },
       }}
     >
       <CheckoutForm
