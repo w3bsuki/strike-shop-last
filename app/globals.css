@@ -323,6 +323,19 @@
   animation: marquee 60s linear infinite;
 }
 
+@keyframes scroll-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left 30s linear infinite;
+}
+
 /* Dark mode is not currently implemented - remove unused styles */
 
 /* ==========================================================================
