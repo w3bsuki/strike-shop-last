@@ -333,7 +333,7 @@
 }
 
 .animate-scroll-left {
-  animation: scroll-left 30s linear infinite;
+  animation: scroll-left 80s linear infinite;
 }
 
 /* Dark mode is not currently implemented - remove unused styles */
