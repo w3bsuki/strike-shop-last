@@ -70,7 +70,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
           <div className="grid lg:hidden grid-cols-3 items-center h-16">
             {/* Left: Hamburger */}
             <div className="justify-self-start">
-              <MobileNav />
+              <MobileNav currentLocale={currentLocale} />
             </div>
 
             {/* Center: Logo */}
@@ -81,10 +81,8 @@ export function SiteHeader({ className }: SiteHeaderProps) {
               STRIKE™
             </Link>
 
-            {/* Right: Language + Currency + Cart */}
-            <div className="justify-self-end flex items-center gap-1">
-              <LanguageSwitcherCompact currentLocale={currentLocale} />
-              <CurrencySwitcherCompact />
+            {/* Right: Cart only */}
+            <div className="justify-self-end">
               <UserNav showCart />
             </div>
           </div>

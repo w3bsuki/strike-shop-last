@@ -254,7 +254,8 @@ export function ResponsivePicture({
         alt={alt}
         loading={loading}
         decoding="async"
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover touch-pan-y"
+        style={{ touchAction: 'pan-y', WebkitUserSelect: 'none', userSelect: 'none' }}
       />
     </picture>
   );

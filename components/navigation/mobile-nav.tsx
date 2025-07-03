@@ -1,18 +1,21 @@
 "use client";
 
 import * as React from "react";
-import { Menu, Search, User, Heart, Package, HelpCircle } from "lucide-react";
+import { Menu, Search, User, Heart, Package, HelpCircle, Globe, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { mainNavItems } from "@/config/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { CurrencySwitcher } from "@/components/currency-switcher";
 
 interface MobileNavProps {
   className?: string;
+  currentLocale?: string;
 }
 
-export function MobileNav({ className }: MobileNavProps) {
+export function MobileNav({ className, currentLocale = 'en' }: MobileNavProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -56,6 +59,23 @@ export function MobileNav({ className }: MobileNavProps) {
                   </li>
                 ))}
               </ul>
+            </div>
+            
+            {/* Region Settings */}
+            <div className="py-6 border-t border-border">
+              <h3 className="px-6 mb-3 text-xs font-typewriter font-bold text-foreground uppercase tracking-widest">
+                Settings
+              </h3>
+              <div className="px-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-typewriter font-medium uppercase text-foreground">Language</span>
+                  <LanguageSwitcher variant="mobile" currentLocale={currentLocale as any} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-typewriter font-medium uppercase text-foreground">Currency</span>
+                  <CurrencySwitcher variant="mobile" />
+                </div>
+              </div>
             </div>
             
             {/* Account Section */}

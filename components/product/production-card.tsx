@@ -48,13 +48,15 @@ export const ProductCard = React.memo(({ product, className = '', priority = fal
     });
   };
 
-  const handleQuickView = () => {
+  const handleQuickView = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     openQuickView(product.slug);
   };
 
   return (
-    <article className={`group relative ${className}`}>
-      <Link href={`/products/${product.slug}`} onClick={handleQuickView} className="block">
+    <article className={`group relative touch-pan-y ${className}`} style={{ touchAction: 'pan-y' }}>
+      <div className="block">
         <div className="relative aspect-[3/4] overflow-hidden bg-gray-100 rounded-lg">
           <Image
             src={product.image}
@@ -97,40 +99,48 @@ export const ProductCard = React.memo(({ product, className = '', priority = fal
             <Heart className={`h-4 w-4 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`} />
           </button>
           
-          {/* Add to Cart on Hover */}
-          <div className="absolute inset-x-0 bottom-0 p-3 opacity-0 group-hover:opacity-100 transition-all duration-200">
+          {/* Quick View on Hover (always visible on mobile) */}
+          <div className="absolute inset-x-0 bottom-0 p-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200">
             <button
-              onClick={handleAddToCart}
-              disabled={product.soldOut}
-              className="w-full bg-black text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              onClick={handleQuickView}
+              className="w-full bg-white/90 backdrop-blur text-black py-2 px-4 rounded-md text-sm font-medium hover:bg-white transition-colors shadow-sm"
             >
-              <ShoppingBag className="h-4 w-4 inline mr-2" />
-              {product.soldOut ? 'SOLD OUT' : 'ADD TO CART'}
+              Quick View
             </button>
           </div>
         </div>
         
-        <div className="mt-3">
-          <h3 className="text-sm font-medium text-gray-900 line-clamp-1">
-            {product.name}
-          </h3>
-          <div className="mt-1 flex items-center gap-2">
-            <span className="text-sm font-bold text-gray-900">
-              {product.price}
-            </span>
-            {product.originalPrice && (
-              <span className="text-sm text-gray-500 line-through">
-                {product.originalPrice}
+        <div className="mt-3 flex items-start justify-between gap-2">
+          <Link href={`/products/${product.slug}`} className="flex-1 min-w-0">
+            <h3 className="text-sm font-medium text-gray-900 line-clamp-1 hover:underline">
+              {product.name}
+            </h3>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-sm font-bold text-gray-900">
+                {product.price}
               </span>
+              {product.originalPrice && (
+                <span className="text-sm text-gray-500 line-through">
+                  {product.originalPrice}
+                </span>
+              )}
+            </div>
+            {product.colors && product.colors > 1 && (
+              <p className="mt-1 text-xs text-gray-500">
+                {product.colors} colors
+              </p>
             )}
-          </div>
-          {product.colors && product.colors > 1 && (
-            <p className="mt-1 text-xs text-gray-500">
-              {product.colors} colors
-            </p>
-          )}
+          </Link>
+          <button
+            onClick={handleAddToCart}
+            disabled={product.soldOut}
+            className="flex-shrink-0 p-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            aria-label={product.soldOut ? 'Sold out' : 'Add to cart'}
+          >
+            <ShoppingBag className="h-4 w-4" />
+          </button>
         </div>
-      </Link>
+      </div>
     </article>
   );
 });

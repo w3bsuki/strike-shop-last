@@ -16,7 +16,7 @@ import { i18n, localeMetadata, type Locale, getLocaleFromPath, removeLocaleFromP
 import { cn } from '@/lib/utils';
 
 interface LanguageSwitcherProps {
-  variant?: 'default' | 'minimal' | 'compact';
+  variant?: 'default' | 'minimal' | 'compact' | 'mobile';
   className?: string;
   showFlag?: boolean;
   showLabel?: boolean;
@@ -65,6 +65,15 @@ export function LanguageSwitcher({
           </div>
         );
       
+      case 'mobile':
+        return (
+          <div className="flex items-center space-x-1">
+            <span className="text-sm">{currentLanguage.flag}</span>
+            <span className="font-medium text-sm uppercase">{currentLocale}</span>
+            <ChevronDown className="h-3 w-3 opacity-50" />
+          </div>
+        );
+      
       default:
         return (
           <div className="flex items-center space-x-2">
@@ -87,10 +96,11 @@ export function LanguageSwitcher({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          size={variant === 'compact' ? 'sm' : 'default'}
+          size={variant === 'compact' || variant === 'mobile' ? 'sm' : 'default'}
           className={cn(
             'h-auto p-2',
             variant === 'compact' && 'h-8 px-2',
+            variant === 'mobile' && 'h-8 px-3',
             className
           )}
         >

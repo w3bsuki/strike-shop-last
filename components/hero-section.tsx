@@ -10,7 +10,7 @@ export function HeroSection() {
   const t = useTranslations();
 
   return (
-    <section className="relative w-full min-h-[50vh] md:min-h-[60vh] overflow-hidden bg-black">
+    <section className="relative w-full min-h-[50vh] md:min-h-[60vh] overflow-hidden bg-black touch-pan-y hero-container">
       <ResponsivePicture
         sources={[
           {
@@ -53,24 +53,28 @@ export function HeroSection() {
       </div>
       <div className="absolute bottom-0 left-0 right-0 bg-black text-white py-3 overflow-hidden border-t-2 border-white">
         <div className="flex animate-marquee whitespace-nowrap" style={{ willChange: 'transform' }}>
-          <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
-          <span className="mx-4 font-bold">•</span>
-          <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">"{t('home.premiumQuality')}"</span>
-          <span className="mx-4 font-bold">•</span>
-          <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.sustainableMaterials')}</span>
-          <span className="mx-4 font-bold">•</span>
-          <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.support247')}</span>
-          <span className="mx-4 font-bold">•</span>
-        </div>
-        <div className="flex animate-marquee2 whitespace-nowrap absolute top-0" style={{ willChange: 'transform' }}>
-          <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
-          <span className="mx-4 font-bold">•</span>
-          <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">"{t('home.premiumQuality')}"</span>
-          <span className="mx-4 font-bold">•</span>
-          <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.sustainableMaterials')}</span>
-          <span className="mx-4 font-bold">•</span>
-          <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.support247')}</span>
-          <span className="mx-4 font-bold">•</span>
+          {/* First copy of content */}
+          <div className="flex">
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
+            <span className="mx-4 font-bold">•</span>
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">"{t('home.premiumQuality')}"</span>
+            <span className="mx-4 font-bold">•</span>
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.sustainableMaterials')}</span>
+            <span className="mx-4 font-bold">•</span>
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.support247')}</span>
+            <span className="mx-4 font-bold">•</span>
+          </div>
+          {/* Duplicate for seamless loop */}
+          <div className="flex" aria-hidden="true">
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
+            <span className="mx-4 font-bold">•</span>
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">"{t('home.premiumQuality')}"</span>
+            <span className="mx-4 font-bold">•</span>
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.sustainableMaterials')}</span>
+            <span className="mx-4 font-bold">•</span>
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.support247')}</span>
+            <span className="mx-4 font-bold">•</span>
+          </div>
         </div>
       </div>
     </section>
