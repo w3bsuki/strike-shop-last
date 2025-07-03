@@ -53,18 +53,13 @@ export function HeroSection() {
       </div>
       <div className="absolute bottom-0 left-0 right-0 bg-black text-white py-3 overflow-hidden border-t-2 border-white">
         <div className="relative flex">
-          <style jsx>{`
-            @keyframes slow-scroll {
-              0% { transform: translateX(0); }
-              100% { transform: translateX(-50%); }
-            }
-            .marquee-content {
-              display: flex;
-              animation: slow-scroll 120s linear infinite;
-            }
-          `}</style>
-          <div className="marquee-content">
-            <div className="flex whitespace-nowrap pr-8">
+          <div 
+            className="flex"
+            style={{
+              animation: 'hero-marquee-scroll 100s linear infinite',
+            }}
+          >
+            <div className="flex whitespace-nowrap pr-12">
               <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
               <span className="mx-4 font-bold">•</span>
               <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">"{t('home.premiumQuality')}"</span>
@@ -74,7 +69,7 @@ export function HeroSection() {
               <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.support247')}</span>
               <span className="mx-4 font-bold">•</span>
             </div>
-            <div className="flex whitespace-nowrap pr-8" aria-hidden="true">
+            <div className="flex whitespace-nowrap pr-12" aria-hidden="true">
               <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
               <span className="mx-4 font-bold">•</span>
               <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">"{t('home.premiumQuality')}"</span>

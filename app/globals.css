@@ -336,6 +336,15 @@
   animation: scroll-left 80s linear infinite;
 }
 
+@keyframes hero-marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 /* Dark mode is not currently implemented - remove unused styles */
 
 /* ==========================================================================
