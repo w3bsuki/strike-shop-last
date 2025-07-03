@@ -1,8 +1,6 @@
-'use client';
-
+// Server Component - CVE-2025-29927 Compliant Performance Optimization
 import React from 'react';
 import { CategoryCard, CategoryCardSkeleton } from './CategoryCard';
-import { motion } from '@/lib/dynamic-imports/framer-motion';
 
 interface Category {
   id: string;
@@ -34,15 +32,8 @@ export function CategoryGrid({
     desktop: 4
   }
 }: CategoryGridProps) {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
+  // CSS-based animation classes (replacing Framer Motion for performance)
+  const animationClasses = 'animate-fade-in-up';
 
   // Generate responsive grid classes
   const gridClasses = `
@@ -63,22 +54,22 @@ export function CategoryGrid({
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className={gridClasses}
-    >
+    <div className={`${gridClasses} ${animationClasses}`}>
       {categories.map((category, index) => (
-        <CategoryCard
+        <div 
           key={category.id}
-          category={category}
-          variant={variant}
-          priority={index < 4}
-          index={index}
-        />
+          className="animate-fade-in-stagger"
+          style={{ animationDelay: `${index * 0.1}s` }}
+        >
+          <CategoryCard
+            category={category}
+            variant={variant}
+            priority={index < 4}
+            index={index}
+          />
+        </div>
       ))}
-    </motion.div>
+    </div>
   );
 }
 
@@ -90,15 +81,8 @@ export function CategoryMasonry({
   categories: Category[];
   loading?: boolean;
 }) {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
+  // CSS-based animation classes (replacing Framer Motion for performance)
+  const animationClasses = 'animate-fade-in-up';
 
   if (loading) {
     return (
@@ -113,14 +97,13 @@ export function CategoryMasonry({
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 sm:gap-4 lg:gap-6"
-    >
+    <div className={`columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 sm:gap-4 lg:gap-6 ${animationClasses}`}>
       {categories.map((category, index) => (
-        <div key={category.id} className="break-inside-avoid mb-3 sm:mb-4 lg:mb-6">
+        <div 
+          key={category.id} 
+          className="break-inside-avoid mb-3 sm:mb-4 lg:mb-6 animate-fade-in-stagger"
+          style={{ animationDelay: `${index * 0.1}s` }}
+        >
           <CategoryCard
             category={category}
             variant={index % 3 === 0 ? 'featured' : 'default'}
@@ -129,6 +112,6 @@ export function CategoryMasonry({
           />
         </div>
       ))}
-    </motion.div>
+    </div>
   );
 }

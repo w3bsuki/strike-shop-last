@@ -9,7 +9,7 @@ function getStripe(): Stripe {
       throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
     }
     stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2024-06-20',
+      apiVersion: '2025-05-28.basil',
       typescript: true,
     });
   }
@@ -131,7 +131,7 @@ export async function createEphemeralKey(customerId: string) {
   try {
     const ephemeralKey = await stripe.ephemeralKeys.create(
       { customer: customerId },
-      { apiVersion: '2024-12-18.acacia' }
+      { apiVersion: '2025-05-28.basil' }
     );
 
     return ephemeralKey;

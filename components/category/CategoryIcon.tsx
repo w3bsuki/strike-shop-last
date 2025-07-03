@@ -74,11 +74,11 @@ export function CategoryIconBadge({
   };
 
   return (
-    <div className={`${sizeClasses[variant]} bg-gray-100 flex items-center justify-center transition-colors hover:bg-gray-200`}>
+    <div className={`${sizeClasses[variant]} bg-muted flex items-center justify-center transition-colors hover:bg-muted/80 rounded-md`}>
       <CategoryIcon 
         categoryName={categoryName} 
         size={iconSizes[variant]}
-        className="text-gray-700"
+        className="text-muted-foreground"
       />
     </div>
   );

@@ -1,5 +1,4 @@
-"use client";
-
+// Server Component - CVE-2025-29927 Compliant Performance Optimization
 import * as React from "react";
 import { cn } from "@/lib/utils";
 

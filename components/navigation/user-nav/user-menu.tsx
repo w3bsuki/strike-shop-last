@@ -94,7 +94,7 @@ export const UserMenu = React.forwardRef<
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="cursor-pointer text-red-600 focus:text-red-600"
+          className="cursor-pointer text-destructive focus:text-destructive"
           onClick={signOut}
           disabled={isLoading}
         >

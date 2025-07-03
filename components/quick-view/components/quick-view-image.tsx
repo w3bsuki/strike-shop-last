@@ -39,14 +39,16 @@ export function QuickViewImage({
     <div className={cn('relative h-full bg-gray-50 group', className)}>
       {/* Main Image */}
       <div className="relative h-full w-full">
-        <Image
-          src={images[currentIndex] || images[0] || ''}
-          alt={`${productName} - Image ${currentIndex + 1}`}
-          fill
+        {(images[currentIndex] || images[0]) && (
+          <Image
+            src={(images[currentIndex] || images[0]) || '/placeholder.svg?height=400&width=400'}
+            alt={`${productName} - Image ${currentIndex + 1}`}
+            fill
           className="object-contain"
           sizes="(max-width: 768px) 100vw, 50vw"
           priority
         />
+        )}
       </div>
 
       {/* Navigation Arrows - Only show if multiple images */}
@@ -108,7 +110,7 @@ export function QuickViewImage({
           </div>
         )}
         {!badges?.soldOut && badges?.discount && (
-          <div className="bg-red-600 text-white px-3 py-1.5 text-xs font-bold">
+          <div className="bg-destructive text-white px-3 py-1.5 text-xs font-bold">
             {badges.discount}
           </div>
         )}

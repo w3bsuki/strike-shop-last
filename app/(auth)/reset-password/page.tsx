@@ -210,7 +210,7 @@ export default function ResetPasswordPage() {
             
             <div className="text-sm text-center space-x-1">
               <span className="text-gray-600">Remember your password?</span>
-              <Link href="/sign-in" className="text-blue-600 hover:underline">
+              <Link href="/sign-in" className="text-info hover:underline">
                 Sign in
               </Link>
             </div>

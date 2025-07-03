@@ -1,121 +1,211 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { updateSession } from '@/utils/supabase/middleware';
+import { i18n, type Locale } from './lib/i18n/config';
 
-// Security headers to apply to all responses
+/**
+ * CVE-2025-29927 Compliant Middleware
+ * 
+ * SECURITY: This middleware contains NO authentication logic
+ * Authentication is handled in Data Access Layer only (lib/auth/server.ts)
+ * 
+ * Middleware responsibilities:
+ * - Security headers
+ * - Static asset optimization  
+ * - Basic routing (non-auth related)
+ * - Internationalization (i18n) routing
+ * - Performance optimizations
+ */
+
+// Locale detection logic
+function getLocale(request: NextRequest): Locale {
+  // 1. Check if locale is in URL path
+  const pathname = request.nextUrl.pathname;
+  const pathnameLocale = pathname.split('/')[1];
+  
+  if (i18n.locales.includes(pathnameLocale as Locale)) {
+    return pathnameLocale as Locale;
+  }
+  
+  // 2. Check browser language preferences
+  const acceptLanguage = request.headers.get('accept-language');
+  if (acceptLanguage) {
+    // Parse Accept-Language header
+    const languages = acceptLanguage
+      .split(',')
+      .map(lang => {
+        const [code, q = '1'] = lang.trim().split(';q=');
+        return { code: (code || 'en').toLowerCase(), quality: parseFloat(q) };
+      })
+      .sort((a, b) => b.quality - a.quality);
+    
+    // Find best match
+    for (const { code } of languages) {
+      // Check exact match first
+      if (i18n.locales.includes(code as Locale)) {
+        return code as Locale;
+      }
+      
+      // Check language without region (e.g., 'en' from 'en-US')
+      const langOnly = code.split('-')[0];
+      if (i18n.locales.includes(langOnly as Locale)) {
+        return langOnly as Locale;
+      }
+    }
+  }
+  
+  // 3. Check geographic region based on headers
+  const country = request.headers.get('cloudflare-ipcountry') || 
+                  request.headers.get('cf-ipcountry') ||
+                  (request as any).geo?.country;
+  
+  if (country) {
+    switch (country.toLowerCase()) {
+      case 'bg':
+      case 'bulgaria':
+        return 'bg';
+      case 'ua':
+      case 'ukraine':
+        return 'ua';
+      case 'gb':
+      case 'us':
+      case 'ca':
+      case 'au':
+      case 'ie':
+      case 'nz':
+        return 'en';
+      default:
+        // Default to English for other countries
+        return 'en';
+    }
+  }
+  
+  // 4. Fallback to default locale
+  return i18n.defaultLocale;
+}
+
+// Enhanced security headers for production
 const securityHeaders = {
+  // DNS prefetching control
   'X-DNS-Prefetch-Control': 'on',
+  
+  // HTTPS enforcement
   'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  
+  // XSS protection
   'X-XSS-Protection': '1; mode=block',
+  
+  // Clickjacking protection
   'X-Frame-Options': 'SAMEORIGIN',
+  
+  // MIME type sniffing prevention
   'X-Content-Type-Options': 'nosniff',
+  
+  // Referrer policy
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()'
+  
+  // Feature policy restrictions
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+  
+  // Content Security Policy (basic)
+  'Content-Security-Policy': `
+    default-src 'self';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com;
+    img-src 'self' data: https: blob:;
+    connect-src 'self' https://api.stripe.com wss://;
+  `.replace(/\s+/g, ' ').trim(),
 };
 
-// Routes that require authentication
-const protectedRoutes = [
-  '/account',
-  '/orders',
-  '/wishlist',
-  '/checkout/payment',
-];
-
-// Routes that are always public
-// const publicRoutes = [
-//   '/',
-//   '/sign-in',
-//   '/sign-up',
-//   '/auth/callback',
-//   '/products',
-//   '/product',
-//   '/category',
-//   '/categories',
-//   '/search',
-//   '/cart',
-//   '/checkout',
-//   '/about',
-//   '/contact',
-//   '/privacy',
-//   '/terms',
-//   '/faq',
-//   '/help',
-// ];
-
 export async function middleware(request: NextRequest) {
-  // Update session
-  let response = await updateSession(request);
-  
-  // Apply security headers
-  Object.entries(securityHeaders).forEach(([key, value]) => {
-    response.headers.set(key, value);
-  });
-
   const path = request.nextUrl.pathname;
-
-  // Skip authentication for static assets
+  
+  // Skip middleware for API routes - MUST be first check
+  if (path.startsWith('/api/')) {
+    const response = NextResponse.next();
+    
+    // Apply security headers to API routes
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+    response.headers.set('Cache-Control', 'no-store, max-age=0');
+    
+    return response;
+  }
+  
+  // Skip middleware for static files and internal Next.js paths
   const isStaticAsset = path.startsWith('/_next/') || 
                        path.startsWith('/static/') ||
                        path.startsWith('/fonts/') ||
                        path.startsWith('/images/') ||
                        path.startsWith('/icons/') ||
                        path.includes('__nextjs') ||
-                       path.includes('.') && (
-                         path.endsWith('.js') ||
-                         path.endsWith('.css') ||
-                         path.endsWith('.png') ||
-                         path.endsWith('.jpg') ||
-                         path.endsWith('.jpeg') ||
-                         path.endsWith('.gif') ||
-                         path.endsWith('.svg') ||
-                         path.endsWith('.ico') ||
-                         path.endsWith('.woff') ||
-                         path.endsWith('.woff2') ||
-                         path.endsWith('.ttf') ||
-                         path.endsWith('.otf')
-                       );
+                       path === '/favicon.ico' ||
+                       path === '/robots.txt' ||
+                       path === '/sitemap.xml' ||
+                       path === '/manifest.json' ||
+                       /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|otf|webp|avif)$/.test(path);
 
   if (isStaticAsset) {
+    const response = NextResponse.next();
+    // Cache static assets aggressively
+    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    
+    // Apply basic security headers to static assets
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+    
     return response;
   }
 
-  // Check if route requires authentication
-  const isProtectedRoute = protectedRoutes.some(route => 
-    path.startsWith(route)
+  // ============= I18N ROUTING LOGIC =============
+  
+  // Check if pathname already has a locale
+  const pathnameHasLocale = i18n.locales.some(
+    locale => path.startsWith(`/${locale}/`) || path === `/${locale}`
   );
+  
+  if (!pathnameHasLocale) {
+    // Detect locale and redirect
+    const locale = getLocale(request);
+    const newUrl = new URL(`/${locale}${path}`, request.url);
+    
+    // Preserve query parameters
+    newUrl.search = request.nextUrl.search;
+    
+    console.log(`[i18n Middleware] Redirecting ${path} to /${locale}${path}`);
+    
+    const redirectResponse = NextResponse.redirect(newUrl);
+    
+    // Apply security headers to redirect response
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      redirectResponse.headers.set(key, value);
+    });
+    
+    return redirectResponse;
+  }
+  
+  // ============= STANDARD RESPONSE =============
+  
+  const response = NextResponse.next();
+  
+  // Apply security headers to all responses
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
 
-  if (isProtectedRoute) {
-    // Properly validate session using Supabase middleware
-    try {
-      const authResponse = await updateSession(request);
-      
-      // Extract user from auth response to verify valid session
-      const userCookie = authResponse.cookies.get('sb-user');
-      const isValidSession = userCookie && userCookie.value && userCookie.value !== 'null';
-      
-      if (!isValidSession) {
-        // Clear invalid cookies and redirect to sign-in
-        const signInUrl = new URL('/sign-in', request.url);
-        signInUrl.searchParams.set('redirect_url', path);
-        const redirectResponse = NextResponse.redirect(signInUrl);
-        
-        // Clear invalid auth cookies
-        redirectResponse.cookies.delete('sb-access-token');
-        redirectResponse.cookies.delete('sb-refresh-token');
-        redirectResponse.cookies.delete('sb-user');
-        
-        return redirectResponse;
-      }
-      
-      // If we have a valid session, use the auth response
-      response = authResponse;
-    } catch (error) {
-      // Session validation failed, redirect to sign-in
-      console.error('Auth validation failed:', error);
-      const signInUrl = new URL('/sign-in', request.url);
-      signInUrl.searchParams.set('redirect_url', path);
-      return NextResponse.redirect(signInUrl);
-    }
+  // Add locale header for use in components
+  if (pathnameHasLocale) {
+    const currentLocale = path.split('/')[1] as Locale;
+    response.headers.set('x-locale', currentLocale);
+  }
+
+
+  // Add performance headers for pages
+  if (!path.startsWith('/api/')) {
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('X-Robots-Tag', 'index, follow');
   }
 
   return response;

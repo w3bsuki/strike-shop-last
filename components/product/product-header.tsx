@@ -38,14 +38,14 @@ const ProductHeader = React.forwardRef<HTMLDivElement, ProductHeaderProps>(
         <div className={cn("flex-1", alignmentClasses[align])}>
           <div className="flex items-center gap-3">
             {title && (
-              <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-tight uppercase leading-tight">
+              <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-tight uppercase leading-tight font-typewriter">
                 {title}
               </h2>
             )}
             {badge}
           </div>
           {description && (
-            <p className="mt-2 text-muted-foreground text-sm md:text-base max-w-2xl">
+            <p className="mt-2 text-muted-foreground text-sm md:text-base max-w-2xl font-professional">
               {description}
             </p>
           )}

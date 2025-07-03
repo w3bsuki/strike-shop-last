@@ -25,10 +25,10 @@ const convertShopifyCart = (shopifyCart: ShopifyCart) => {
     quantity: createQuantity(node.quantity),
     image: createImageURL(node.merchandise.image?.url || ''),
     pricing: {
-      unitPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) * 100 / node.quantity)),
-      totalPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) * 100)),
-      displayUnitPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) * 100 / node.quantity, node.cost.totalAmount.currencyCode),
-      displayTotalPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) * 100, node.cost.totalAmount.currencyCode),
+      unitPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) / node.quantity)),
+      totalPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount))),
+      displayUnitPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) / node.quantity, node.cost.totalAmount.currencyCode),
+      displayTotalPrice: formatPrice(parseFloat(node.cost.totalAmount.amount), node.cost.totalAmount.currencyCode),
     },
   }));
 };
@@ -49,6 +49,21 @@ export const createServerCartSlice: StateCreator<
   isOpen: false,
   isLoading: false,
   error: null,
+  checkoutUrl: undefined,
+  
+  // Enhanced cart state (default values)
+  bulkOperations: [],
+  savedCarts: [],
+  recommendations: [],
+  inventoryStatus: [],
+  taxEstimate: null,
+  shareToken: null,
+  shareExpiry: null,
+  savedForLater: [],
+  abandonmentTracking: {
+    startTime: null,
+    events: [],
+  },
 
   actions: {
     cart: {
@@ -109,7 +124,7 @@ export const createServerCartSlice: StateCreator<
       },
 
       // Add item to cart using server-side API
-      addItem: async (productId: string, variantId: string, quantity: number = 1) => {
+      addItem: async (_productId: string, variantId: string, quantity: number = 1) => {
         set((state) => ({ 
           ...state, 
           cart: { ...state.cart, isLoading: true, error: null } 
@@ -253,13 +268,15 @@ export const createServerCartSlice: StateCreator<
               description: "Item has been removed from your cart",
             });
           } else {
-            const updatedItem = newItems.find(item => item.id === itemId);
-            if (updatedItem) {
+            const updatedItem = newItems.find(newItem => newItem.id === itemId);
+            if (updatedItem && item) {
               cartEventEmitter.emit('item-updated', {
-                item: updatedItem,
+                itemId,
+                oldItem: item,
+                newItem: updatedItem,
+                changes: { quantity: quantity as any },
                 timestamp: new Date(),
-                source: 'user',
-                changeType: 'quantity'
+                source: 'user'
               });
             }
           }
@@ -312,17 +329,24 @@ export const createServerCartSlice: StateCreator<
           }
           
           // Clear local state
-          set((state) => ({ 
-            ...state, 
-            cart: { ...state.cart, items: [], cartId: null, checkoutUrl: undefined, isLoading: false } 
-          }));
+          set((state) => {
+            const { checkoutUrl, ...cartWithoutCheckout } = state.cart;
+            return {
+              ...state,
+              cart: { ...cartWithoutCheckout, items: [], cartId: null, isLoading: false }
+            };
+          });
           
           if (typeof window !== 'undefined') {
             localStorage.removeItem('strike-cart');
             localStorage.removeItem('strike-cart-id');
           }
           
-          cartEventEmitter.emit('cartCleared');
+          cartEventEmitter.emit('cart-cleared', {
+            clearedItems: state.cart.items || [],
+            timestamp: new Date(),
+            source: 'user'
+          });
           
           toast({
             title: "Cart cleared",
@@ -331,15 +355,23 @@ export const createServerCartSlice: StateCreator<
         } catch (error) {
           console.error('Failed to clear cart:', error);
           // Clear local state anyway
-          set((state) => ({ 
-            ...state, 
-            cart: { ...state.cart, items: [], cartId: null, checkoutUrl: undefined, isLoading: false } 
-          }));
+          set((state) => {
+            const { checkoutUrl, ...cartWithoutCheckout } = state.cart;
+            return {
+              ...state,
+              cart: { ...cartWithoutCheckout, items: [], cartId: null, isLoading: false }
+            };
+          });
           if (typeof window !== 'undefined') {
             localStorage.removeItem('strike-cart');
             localStorage.removeItem('strike-cart-id');
           }
-          cartEventEmitter.emit('cartCleared');
+          const state = get();
+          cartEventEmitter.emit('cart-cleared', {
+            clearedItems: state.cart.items || [],
+            timestamp: new Date(),
+            source: 'system'
+          });
         }
       },
 

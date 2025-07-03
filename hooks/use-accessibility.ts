@@ -290,7 +290,7 @@ export function useAccessibleModal(isOpen: boolean) {
       document.body.style.overflow = 'hidden';
       
       // Set up focus trap
-      const cleanup = createFocusTrap(modalRef);
+      const cleanup = createFocusTrap(modalRef as React.RefObject<HTMLElement>);
       
       return () => {
         cleanup?.();

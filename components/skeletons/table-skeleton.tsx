@@ -16,7 +16,7 @@ export function TableSkeleton() {
       {/* Table */}
       <div className="border rounded-lg">
         {/* Table Header */}
-        <div className="border-b bg-gray-50 p-4">
+        <div className="border-b bg-muted p-4">
           <div className="grid grid-cols-6 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <Skeleton key={i} className="h-4 w-full" />

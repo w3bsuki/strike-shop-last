@@ -68,40 +68,61 @@ export function useProductActions(
       e.preventDefault();
       e.stopPropagation();
       
-      // For integrated products, check if we have variant information
-      if (isIntegratedProduct(rawProduct) && rawProduct.commerce?.variants?.length > 0) {
-        // Use the first variant as default
-        const defaultVariant = rawProduct.commerce.variants[0];
+      // Haptic feedback
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+      }
+      
+      try {
+        let variantId: string | null = null;
         
-        if (defaultVariant) {
-          try {
-            await addItem(rawProduct.id, defaultVariant.id, 1);
-          announceToScreenReader(`${product.name} added to cart`, 'polite');
-          toast({
-            title: 'Added to cart',
-            description: `${product.name} has been added to your cart.`,
-          });
-          } catch (error) {
-            console.error('Error adding item to cart:', error);
-            announceToScreenReader(`Failed to add ${product.name} to cart`, 'assertive');
-            toast({
-              title: 'Error',
-              description: 'Failed to add item to cart. Please try again.',
-              variant: 'destructive',
-            });
+        // For integrated products, check if we have variant information
+        if (isIntegratedProduct(rawProduct) && rawProduct.commerce?.variants?.length > 0) {
+          // Use the first variant as default
+          const defaultVariant = rawProduct.commerce.variants[0];
+          if (defaultVariant) {
+            variantId = defaultVariant.id;
           }
+        } 
+        // Check if rawProduct has variants array (common in Shopify data)
+        else if ('variants' in rawProduct && Array.isArray((rawProduct as any).variants) && (rawProduct as any).variants.length > 0) {
+          variantId = (rawProduct as any).variants[0].id;
         }
-      } else {
-        // For simple products or products without variants, redirect to product page
-        announceToScreenReader(`Please select options for ${product.name} on the product page`, 'polite');
+        // Check if rawProduct has a single variant property
+        else if ('variant' in rawProduct && (rawProduct as any).variant?.id) {
+          variantId = (rawProduct as any).variant.id;
+        }
+        // Last resort: construct a variant ID from product ID (may fail)
+        else {
+          // Create a Shopify-style variant ID from product ID
+          const productIdPart = product.id.replace('gid://shopify/Product/', '');
+          variantId = `gid://shopify/ProductVariant/${productIdPart}01`; // Common pattern for single-variant products
+        }
+        
+        if (variantId) {
+          console.log('Adding to cart:', { productId: product.id, variantId, quantity: 1 });
+          await addItem(product.id, variantId, 1);
+          console.log('Successfully added to cart');
+        } else {
+          console.error('No variant ID found for product:', product);
+          throw new Error('Product variant not found. Please visit the product page to select options.');
+        }
+        
+        // Success feedback
+        announceToScreenReader(`${product.name} added to cart`, 'polite');
         toast({
-          title: 'Select Options',
-          description: 'Please visit the product page to select size and add to cart.',
+          title: 'Added to cart',
+          description: `${product.name} has been added to your cart.`,
         });
-        // Navigate to product page after a short delay
-        setTimeout(() => {
-          window.location.href = `/product/${product.slug}`;
-        }, 1000);
+        
+      } catch (error) {
+        console.error('Error adding item to cart:', error);
+        announceToScreenReader(`Failed to add ${product.name} to cart`, 'assertive');
+        toast({
+          title: 'Error',
+          description: 'Failed to add item to cart. Please try again.',
+          variant: 'destructive',
+        });
       }
     },
   }), [product, rawProduct, wishlistItem, addToWishlist, removeFromWishlist, openQuickView, announceToScreenReader, addItem]);

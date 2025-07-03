@@ -1,9 +1,9 @@
 // API type definitions for Strike Shop
 import type { 
   CartId, LineItemId, VariantId, ProductId, 
-  Price, Quantity, ImageURL, Slug, SKU 
+  Price as BrandedPrice, Quantity, ImageURL, Slug, SKU 
 } from './branded';
-import type { CartItem } from './store';
+import type { CartItem as StoreCartItem } from './store';
 
 // ============================================================
 // CART API TYPES
@@ -21,7 +21,7 @@ export interface UpdateCartItemRequest {
 }
 
 export interface SyncCartRequest {
-  items: CartItem[];
+  items: StoreCartItem[];
   cartId?: CartId | null | undefined;
 }
 
@@ -46,11 +46,11 @@ export interface Cart {
     id: string;
     name: string;
   };
-  total?: Price | undefined;
-  subtotal?: Price | undefined;
-  tax_total?: Price | undefined;
-  shipping_total?: Price | undefined;
-  discount_total?: Price | undefined;
+  total?: BrandedPrice | undefined;
+  subtotal?: BrandedPrice | undefined;
+  tax_total?: BrandedPrice | undefined;
+  shipping_total?: BrandedPrice | undefined;
+  discount_total?: BrandedPrice | undefined;
   created_at: string;
   updated_at: string;
 }
@@ -63,10 +63,10 @@ export interface CartItem {
   title: string;
   quantity: Quantity;
   thumbnail?: ImageURL | undefined;
-  unit_price: Price;
-  subtotal?: Price | undefined;
-  total?: Price | undefined;
-  original_total?: Price | undefined;
+  unit_price: BrandedPrice;
+  subtotal?: BrandedPrice | undefined;
+  total?: BrandedPrice | undefined;
+  original_total?: BrandedPrice | undefined;
   created_at: string;
   updated_at: string;
 }
@@ -77,7 +77,7 @@ export interface Variant {
   product?: Product | undefined;
   title?: string | undefined;
   sku?: SKU | undefined;
-  prices?: Price[] | undefined;
+  prices?: BrandedPrice[] | undefined;
   inventory_quantity?: number | undefined;
   manage_inventory?: boolean | undefined;
   allow_backorder?: boolean | undefined;
@@ -94,7 +94,7 @@ export interface Product {
 
 export interface Price {
   id: string;
-  amount: Price;
+  amount: BrandedPrice;
   currency_code: string;
   min_quantity?: number | undefined;
   max_quantity?: number | undefined;
@@ -106,7 +106,7 @@ export interface Price {
 
 // Payment API Request Types
 export interface CreatePaymentIntentRequest {
-  amount: Price;
+  amount: BrandedPrice;
   currency?: string | undefined;
   items: PaymentLineItem[];
   shipping?: ShippingDetails | undefined;
@@ -116,7 +116,7 @@ export interface CreatePaymentIntentRequest {
 export interface PaymentLineItem {
   id: ProductId;
   name: string;
-  price: Price;
+  price: BrandedPrice;
   quantity: Quantity;
   size?: string | undefined;
   sku?: SKU | undefined;
@@ -142,7 +142,7 @@ export interface ShippingAddress {
 export interface PaymentIntentResponse {
   clientSecret: string;
   paymentIntentId: string;
-  amount: Price;
+  amount: BrandedPrice;
   currency: string;
   status: PaymentIntentStatus;
   metadata?: Record<string, string>;
@@ -157,7 +157,7 @@ export interface PaymentStatusResponse {
 // Stripe Types (properly typed from Stripe API)
 export interface StripePaymentIntent {
   id: string;
-  amount: Price;
+  amount: BrandedPrice;
   currency: string;
   status: PaymentIntentStatus;
   client_secret: string;

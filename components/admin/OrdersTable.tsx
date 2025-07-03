@@ -119,9 +119,9 @@ export function OrdersTable() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'delivered':
-        return 'text-green-600 bg-green-50';
+        return 'text-success bg-green-50';
       case 'shipped':
-        return 'text-blue-600 bg-blue-50';
+        return 'text-info bg-blue-50';
       case 'processing':
         return 'text-yellow-600 bg-yellow-50';
       case 'confirmed':
@@ -129,7 +129,7 @@ export function OrdersTable() {
       case 'pending':
         return 'text-gray-600 bg-gray-50';
       case 'cancelled':
-        return 'text-red-600 bg-red-50';
+        return 'text-destructive bg-red-50';
       default:
         return 'text-gray-600 bg-gray-50';
     }
@@ -138,11 +138,11 @@ export function OrdersTable() {
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
       case 'paid':
-        return 'text-green-600';
+        return 'text-success';
       case 'pending':
         return 'text-yellow-600';
       case 'refunded':
-        return 'text-red-600';
+        return 'text-destructive';
       default:
         return 'text-gray-600';
     }

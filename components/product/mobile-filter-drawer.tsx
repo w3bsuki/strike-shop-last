@@ -29,7 +29,7 @@ export function MobileFilterDrawer({
       />
 
       {/* Drawer */}
-      <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-xl flex flex-col">
+      <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-background shadow-xl flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-subtle">
           <div className="flex items-center space-x-2">

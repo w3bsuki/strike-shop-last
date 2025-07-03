@@ -127,7 +127,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
               <div className="flex items-center mb-2">
                 <p className="font-bold">{review.author}</p>
                 {review.isVerified && (
-                  <span className="ml-2 flex items-center text-green-600 text-xs">
+                  <span className="ml-2 flex items-center text-success text-xs">
                     <CheckCircle className="h-3.5 w-3.5 mr-1" /> Verified
                     Purchase
                   </span>

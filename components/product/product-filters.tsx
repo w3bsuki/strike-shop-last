@@ -78,7 +78,7 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="text-xs text-muted-foreground hover:text-foreground underline"
+            className="text-xs text-muted-foreground hover:text-primary underline"
           >
             Clear all
           </button>
@@ -148,8 +148,8 @@ export function ProductFilters({ filters, applied }: ProductFiltersProps) {
                     }}
                     className={`min-h-[44px] px-3 text-xs font-medium border transition-colors touch-manipulation ${
                       applied.sizes?.includes(size.value)
-                        ? 'bg-black text-white border-black'
-                        : 'bg-white text-black border-gray-200 hover:border-black'
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-background text-foreground border-border hover:border-primary'
                     }`}
                   >
                     {size.label}

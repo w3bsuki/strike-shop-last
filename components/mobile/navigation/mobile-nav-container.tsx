@@ -23,7 +23,7 @@ export function MobileNavContainer({
   const [isVisible, setIsVisible] = useState(showThreshold === 0); // Show immediately if threshold is 0
   const [isHidden, setIsHidden] = useState(false);
   const lastScrollY = useRef(0);
-  const scrollTimeout = useRef<NodeJS.Timeout>();
+  const scrollTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Throttled scroll handler
   const handleScroll = useCallback(() => {
@@ -41,8 +41,8 @@ export function MobileNavContainer({
         return;
       }
       
-      // Show nav when user scrolls past the hero section (default ~65% of viewport)
-      const threshold = showThreshold || 0.65;
+      // Show nav when user scrolls past the hero section (aligned with hero height)
+      const threshold = showThreshold || 0.50; // Match hero min-h-[50vh] on mobile
       const heroHeight = window.innerHeight * threshold;
       const pastThreshold = currentScrollY > heroHeight;
       setIsVisible(pastThreshold);
@@ -88,9 +88,9 @@ export function MobileNavContainer({
   };
 
   const variantStyles = {
-    default: 'bg-strike-white border-t border-strike-gray-200 shadow-sm',
-    minimal: 'bg-strike-white/95 backdrop-blur-sm border-t border-strike-gray-100',
-    floating: 'bg-strike-black mx-space-4 mb-space-4 border border-strike-gray-800',
+    default: 'bg-background border-t border-border shadow-sm',
+    minimal: 'bg-background/95 backdrop-blur-sm border-t border-border',
+    floating: 'bg-primary mx-4 mb-4 border border-border',
   };
 
   const visibilityStyles = !isVisible
@@ -119,7 +119,7 @@ export function MobileNavContainer({
       <div
         className={cn(
           'flex items-center justify-around h-14', // 56px height
-          variant === 'floating' ? 'px-space-6' : 'px-space-4',
+          variant === 'floating' ? 'px-6' : 'px-4',
           // Safe area padding for iOS devices
           position === 'bottom' && 'pb-safe'
         )}

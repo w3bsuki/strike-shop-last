@@ -265,7 +265,7 @@ export function PWASettings() {
               </div>
               <div className="flex items-center gap-2">
                 {isPersistent ? (
-                  <span className="text-xs text-green-600">Enabled</span>
+                  <span className="text-xs text-success">Enabled</span>
                 ) : (
                   <Button
                     size="sm"

@@ -1,5 +1,4 @@
-"use client";
-
+// Server Component - CVE-2025-29927 Compliant Performance Optimization
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";

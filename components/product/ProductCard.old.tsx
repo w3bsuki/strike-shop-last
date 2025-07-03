@@ -205,7 +205,7 @@ export const ProductCard = React.memo(({
         )}
         {product.soldOut && (
           <div 
-            className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5"
+            className="absolute top-2 right-2 bg-destructive text-white text-xs font-bold px-1.5 py-0.5"
             role="status"
             aria-label="Product is sold out"
           >

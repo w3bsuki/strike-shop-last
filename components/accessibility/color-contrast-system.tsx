@@ -353,7 +353,7 @@ export function ColorValidator({
           <div className="font-medium">
             Contrast: {result.ratio}:1 ({result.level})
           </div>
-          <div className={`text-sm ${result.isAccessible ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`text-sm ${result.isAccessible ? 'text-success' : 'text-destructive'}`}>
             {result.isAccessible ? '✓ Accessible' : '✗ Not Accessible'}
           </div>
         </div>

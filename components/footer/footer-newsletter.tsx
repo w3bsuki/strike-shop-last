@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { FooterHeader } from './footer-header';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useTranslations } from '@/lib/i18n/i18n-provider';
 
 interface FooterNewsletterProps {
   title: string;
@@ -26,11 +28,29 @@ export function FooterNewsletter({
 }: FooterNewsletterProps) {
   const [email, setEmail] = useState('');
   const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
+  const { toast } = useToast();
+  const t = useTranslations();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && onSubmit) {
-      onSubmit(email, selectedPreferences);
+    if (email) {
+      // Handle newsletter submission internally
+      console.log('Newsletter submission:', { email, selectedPreferences });
+      
+      // Show success toast
+      toast({
+        title: t('common.success'),
+        description: t('home.subscribeSuccess'),
+      });
+      
+      // Call external handler if provided (for legacy compatibility)
+      if (onSubmit) {
+        onSubmit(email, selectedPreferences);
+      }
+      
+      // Reset form
+      setEmail('');
+      setSelectedPreferences([]);
     }
   };
 

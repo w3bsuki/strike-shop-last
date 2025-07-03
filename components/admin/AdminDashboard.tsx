@@ -150,17 +150,17 @@ export function AdminDashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'delivered':
-        return 'text-green-600 bg-green-50';
+        return 'text-success bg-success/10';
       case 'shipped':
-        return 'text-blue-600 bg-blue-50';
+        return 'text-info-foreground bg-info/10';
       case 'processing':
-        return 'text-yellow-600 bg-yellow-50';
+        return 'text-warning bg-warning/10';
       case 'pending':
-        return 'text-purple-600 bg-purple-50';
+        return 'text-info-foreground bg-info/10';
       case 'cancelled':
-        return 'text-red-600 bg-red-50';
+        return 'text-destructive bg-destructive/10';
       default:
-        return 'text-gray-600 bg-gray-50';
+        return 'text-muted-foreground bg-muted';
     }
   };
 
@@ -206,7 +206,7 @@ export function AdminDashboard() {
           const Icon = stat.icon;
           const TrendIcon = stat.trend === 'up' ? TrendingUp : TrendingDown;
           const trendColor =
-            stat.trend === 'up' ? 'text-green-600' : 'text-red-600';
+            stat.trend === 'up' ? 'text-success' : 'text-destructive';
 
           return (
             <Card key={stat.title}>
@@ -214,7 +214,7 @@ export function AdminDashboard() {
                 <CardTitle className="text-sm font-medium">
                   {stat.title}
                 </CardTitle>
-                <Icon className="h-4 w-4 text-gray-500" />
+                <Icon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
@@ -223,7 +223,7 @@ export function AdminDashboard() {
                     {stat.change}
                   </span>
                   <TrendIcon className={`h-3 w-3 ml-1 ${trendColor}`} />
-                  <span className="text-xs text-gray-500 ml-2">
+                  <span className="text-xs text-muted-foreground ml-2">
                     from last period
                   </span>
                 </div>
@@ -290,7 +290,7 @@ export function AdminDashboard() {
                 >
                   <div className="space-y-1">
                     <p className="text-sm font-medium">{order.customer}</p>
-                    <div className="flex items-center text-xs text-gray-500">
+                    <div className="flex items-center text-xs text-muted-foreground">
                       <span>{order.id}</span>
                       <span className="mx-1">•</span>
                       <span>{new Date(order.date).toLocaleDateString()}</span>
@@ -332,7 +332,7 @@ export function AdminDashboard() {
                 >
                   <div className="space-y-1">
                     <p className="text-sm font-medium">{product.name}</p>
-                    <div className="flex items-center text-xs text-gray-500">
+                    <div className="flex items-center text-xs text-muted-foreground">
                       <span>{product.sales} sold</span>
                       <span className="mx-1">•</span>
                       <span>{product.stock} in stock</span>

@@ -61,7 +61,6 @@ export function NetworkProvider({ children }: { children: React.ReactNode }) {
     }
     
     return () => {};
-    }
   }, [hasShownOfflineToast]);
 
   // Periodically check connection
@@ -175,7 +174,7 @@ export function NetworkProvider({ children }: { children: React.ReactNode }) {
             <button
               onClick={retryConnection}
               disabled={isReconnecting}
-              className="ml-2 text-xs bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 px-2 py-1 rounded"
+              className="ml-2 text-xs bg-blue-500 hover:bg-info disabled:bg-gray-600 px-2 py-1 rounded"
             >
               {isReconnecting ? 'Checking...' : 'Retry'}
             </button>

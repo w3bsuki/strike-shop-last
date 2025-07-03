@@ -1,0 +1,136 @@
+/**
+ * Strike Shop Legacy Design Tokens
+ * DEPRECATED: Design tokens have been migrated to app/globals.css @theme directive
+ * This file is kept for reference only and will be removed in future updates
+ * 
+ * All design tokens are now managed via Tailwind CSS v4's @theme directive
+ * See app/globals.css for the current design system
+ */
+
+:root {
+  /* ============================================================================
+     Typography Scale - Mobile Optimized (16px minimum prevents iOS zoom)
+     ============================================================================ */
+  --font-size-xs: clamp(0.75rem, 0.625rem + 0.5vw, 0.875rem);    /* 12px → 14px */
+  --font-size-sm: clamp(0.875rem, 0.75rem + 0.5vw, 1rem);        /* 14px → 16px */
+  --font-size-base: clamp(1rem, 0.875rem + 0.5vw, 1.125rem);     /* 16px → 18px */
+  --font-size-lg: clamp(1.125rem, 1rem + 0.5vw, 1.25rem);        /* 18px → 20px */
+  --font-size-xl: clamp(1.25rem, 1.125rem + 0.5vw, 1.375rem);    /* 20px → 22px */
+  --font-size-2xl: clamp(1.5rem, 1.25rem + 0.75vw, 1.75rem);     /* 24px → 28px */
+  --font-size-3xl: clamp(1.75rem, 1.5rem + 1vw, 2.125rem);       /* 28px → 34px */
+  --font-size-4xl: clamp(2.125rem, 1.75rem + 1.5vw, 2.5rem);     /* 34px → 40px */
+  --font-size-5xl: clamp(2.5rem, 2rem + 2vw, 3.25rem);           /* 40px → 52px */
+  --font-size-6xl: clamp(3.25rem, 2.5rem + 3vw, 4rem);           /* 52px → 64px */
+
+  /* Line Heights */
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+  --line-height-loose: 1.75;
+
+  /* Letter Spacing */
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+  --letter-spacing-strike: 0.1em;      /* Brand-specific */
+  --letter-spacing-strike-wide: 0.15em; /* Brand-specific */
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ============================================================================
+     Spacing Scale - 8px base unit system
+     ============================================================================ */
+  --space-0: 0px;
+  --space-px: 1px;
+  --space-0-5: 0.125rem;  /* 2px */
+  --space-1: 0.25rem;     /* 4px */
+  --space-1-5: 0.375rem;  /* 6px */
+  --space-2: 0.5rem;      /* 8px */
+  --space-2-5: 0.625rem;  /* 10px */
+  --space-3: 0.75rem;     /* 12px */
+  --space-3-5: 0.875rem;  /* 14px */
+  --space-4: 1rem;        /* 16px */
+  --space-5: 1.25rem;     /* 20px */
+  --space-6: 1.5rem;      /* 24px */
+  --space-7: 1.75rem;     /* 28px */
+  --space-8: 2rem;        /* 32px */
+  --space-9: 2.25rem;     /* 36px */
+  --space-10: 2.5rem;     /* 40px */
+  --space-11: 2.75rem;    /* 44px */
+  --space-12: 3rem;       /* 48px */
+  --space-14: 3.5rem;     /* 56px */
+  --space-16: 4rem;       /* 64px */
+  --space-20: 5rem;       /* 80px */
+  --space-24: 6rem;       /* 96px */
+
+  /* Touch Targets - WCAG 2.1 AA Compliance */
+  --touch-target-min: 44px;         /* Absolute minimum */
+  --touch-target-comfortable: 48px; /* Recommended */
+  --touch-target-large: 56px;       /* Generous */
+
+  /* DEPRECATED: Colors moved to app/globals.css @theme directive */
+  /* See app/globals.css for current color system */
+
+  /* ============================================================================
+     Layout & Effects
+     ============================================================================ */
+  
+  /* Border Radius - Sharp edges for Strike brand */
+  --radius: 0;
+  --radius-subtle: 2px;
+  --radius-soft: 4px;
+  --radius-round: 9999px;
+
+  /* Shadows - Subtle elevation system */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Z-index Hierarchy - Documented system */
+  --z-base: 0;              /* Normal document flow */
+  --z-dropdown: 50;         /* Dropdowns, select options */
+  --z-sticky: 100;          /* Sticky headers */
+  --z-fixed: 200;           /* Fixed navigation */
+  --z-modal-backdrop: 300;  /* Modal backdrops */
+  --z-modal: 400;           /* Modals, drawers */
+  --z-notification: 500;    /* Toasts, alerts */
+  --z-tooltip: 600;         /* Tooltips */
+
+  /* Animation Durations */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 400ms;
+
+  /* Animation Easings */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Focus Styles */
+  --focus-ring-width: 2px;
+  --focus-ring-color: var(--primary);
+  --focus-ring-offset: 2px;
+
+  /* Viewport */
+  --vh: 1vh; /* Dynamic viewport height for mobile */
+}
+
+/* Dark mode support (future enhancement) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark mode colors would go here */
+  }
+}

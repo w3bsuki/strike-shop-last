@@ -18,7 +18,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="text-center max-w-md mx-auto">
         <div className="mb-6">
           <AlertTriangle className="h-16 w-16 text-destructive mx-auto mb-4" />
@@ -53,7 +53,7 @@ export default function Error({
             <summary className="text-label-sm cursor-pointer mb-2 font-typewriter font-bold">
               Error Details (Development)
             </summary>
-            <pre className="text-xs bg-muted p-4 rounded border overflow-auto font-typewriter">
+            <pre className="text-xs bg-secondary p-4 rounded border overflow-auto font-typewriter">
               {error.message}
               {error.stack && (
                 <>

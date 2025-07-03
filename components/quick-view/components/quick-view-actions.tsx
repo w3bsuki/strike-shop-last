@@ -120,7 +120,7 @@ export function QuickViewActions({
         disabled={!selectedSize || isSoldOut || isAdded}
         className={cn(
           'w-full min-h-touch-lg text-base font-semibold transition-all',
-          isAdded && 'bg-green-600 hover:bg-green-600'
+          isAdded && 'bg-success hover:bg-success'
         )}
       >
         {isAdded ? (

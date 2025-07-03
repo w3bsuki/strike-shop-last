@@ -155,7 +155,7 @@ export function CheckoutFormSkeleton() {
 // Order summary skeleton
 export function OrderSummarySkeleton() {
   return (
-    <div className="bg-gray-50 p-6 rounded-lg space-y-6">
+    <div className="bg-muted p-6 rounded-lg space-y-6">
       <Skeleton className="h-6 w-32" />
       
       <div className="space-y-4">
@@ -199,6 +199,33 @@ export function ListSkeleton({ rows = 5 }: { rows?: number }) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// Page header skeleton
+export function PageHeaderSkeleton() {
+  return (
+    <div className="mb-8">
+      <Skeleton className="h-4 w-32 mb-4" />
+      <Skeleton className="h-8 w-48" />
+    </div>
+  );
+}
+
+// Progress steps skeleton  
+export function ProgressStepsSkeleton({ steps = 3 }: { steps?: number }) {
+  return (
+    <div className="flex items-center justify-center mb-8">
+      <div className="flex items-center space-x-4">
+        {Array.from({ length: steps }).map((_, i) => (
+          <div key={i} className="flex items-center">
+            <Skeleton className="w-8 h-8 rounded-full" />
+            <Skeleton className="ml-2 h-4 w-20" />
+            {i < steps - 1 && <div className="w-16 h-px bg-border ml-4" />}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

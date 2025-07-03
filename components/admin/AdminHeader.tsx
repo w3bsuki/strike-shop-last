@@ -17,15 +17,15 @@ export default function AdminHeader() {
   const { user, logout } = useAuthStore();
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+    <header className="h-16 bg-background border-b border-border flex items-center justify-between px-6">
       {/* Search */}
       <div className="flex-1 max-w-xl">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
           <Input
             type="search"
             placeholder="Search orders, products, customers..."
-            className="pl-10 bg-gray-50 border-gray-200"
+            className="pl-10 bg-muted border-border"
           />
         </div>
       </div>
@@ -57,7 +57,7 @@ export default function AdminHeader() {
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuItem>Help & Support</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout} className="text-red-600">
+            <DropdownMenuItem onClick={logout} className="text-destructive">
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>

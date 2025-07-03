@@ -1,21 +1,17 @@
-import localFont from 'next/font/local';
+import { Courier_Prime, Inter } from 'next/font/google';
 
-// Configure Typewriter font with Next.js font optimization
-export const typewriterFont = localFont({
-  src: [
-    {
-      path: '../public/fonts/CourierPrime-Regular.ttf',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/CourierPrime-Bold.ttf',
-      weight: '700',
-      style: 'normal',
-    },
-  ],
+// Use Google Fonts instead of local fonts to avoid loading issues
+export const typewriterFont = Courier_Prime({
+  weight: ['400', '700'],
+  subsets: ['latin'],
   variable: '--font-typewriter',
   display: 'swap',
-  preload: true,
-  fallback: ['Courier New', 'Courier', 'ui-monospace', 'monospace'],
+});
+
+// Professional font for body text (similar to Off-White's clean aesthetic)
+export const professionalFont = Inter({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-professional',
+  display: 'swap',
 });

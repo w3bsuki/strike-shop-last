@@ -17,7 +17,7 @@ export function FooterSocial({ links, className }: FooterSocialProps) {
             key={social.label}
             href={social.href}
             aria-label={social.label}
-            className="hover:text-black transition-colors text-[var(--subtle-text-color)]"
+            className="hover:text-foreground transition-colors text-muted-foreground"
             target="_blank"
             rel="noopener noreferrer"
           >

@@ -208,7 +208,7 @@ function CheckoutForm({ clientSecret: _clientSecret, onPaymentSuccess, onPayment
           </div>
           <div className="flex justify-between">
             <span>Shipping</span>
-            <span className="text-green-600">FREE</span>
+            <span className="text-success">FREE</span>
           </div>
           <Separator />
           <div className="flex justify-between font-bold text-base">
@@ -317,7 +317,7 @@ export function EnhancedCheckoutForm({ onPaymentSuccess, onPaymentError }: Enhan
   if (!clientSecret) {
     return (
       <div className="text-center p-8">
-        <p className="font-mono text-sm text-red-600">
+        <p className="font-mono text-sm text-destructive">
           Failed to initialize payment. Please refresh and try again.
         </p>
       </div>

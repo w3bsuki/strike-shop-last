@@ -62,7 +62,7 @@ export function QuickViewInfo({
               {product.originalPrice}
             </span>
             {product.discount && (
-              <span className="text-sm font-semibold text-red-600">
+              <span className="text-sm font-semibold text-destructive">
                 {product.discount}
               </span>
             )}

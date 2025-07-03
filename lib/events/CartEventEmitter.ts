@@ -3,7 +3,7 @@
  * Handles event-driven communication for cart operations
  */
 
-import type { CartItem } from '@/lib/cart-store';
+import type { CartItem } from '@/types/store';
 import type { IntegratedProduct } from '@/types/integrated';
 
 /**
@@ -21,7 +21,12 @@ export type CartEventType =
   | 'cart-loading-end'
   | 'checkout-started'
   | 'checkout-completed'
-  | 'checkout-failed';
+  | 'checkout-failed'
+  | 'bulk-operation-completed'
+  | 'cart-shared'
+  | 'tax-calculated'
+  | 'inventory-validated'
+  | 'recommendation-added';
 
 /**
  * Cart event data structures
@@ -98,6 +103,32 @@ export interface CartEventData {
     cartId: string;
     error: Error | string;
     timestamp: Date;
+  };
+  'bulk-operation-completed': {
+    operation: string;
+    itemCount: number;
+    success: boolean;
+    timestamp?: Date;
+  };
+  'cart-shared': {
+    shareToken: string;
+    expiryHours: number;
+    timestamp?: Date;
+  };
+  'tax-calculated': {
+    tax: number;
+    formattedTax: string;
+    timestamp?: Date;
+  };
+  'inventory-validated': {
+    unavailableCount?: number;
+    items?: any[];
+    timestamp?: Date;
+  };
+  'recommendation-added': {
+    recommendationId: string;
+    type: string;
+    timestamp?: Date;
   };
 }
 

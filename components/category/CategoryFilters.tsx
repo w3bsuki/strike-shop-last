@@ -42,10 +42,10 @@ function FilterSection({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border-b border-gray-200 pb-4">
+    <div className="border-b border-border pb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full py-2 text-left font-typewriter text-sm font-semibold hover:text-gray-700 transition-colors"
+        className="flex items-center justify-between w-full py-2 text-left font-typewriter text-sm font-semibold hover:text-muted-foreground transition-colors"
       >
         {title}
         {isOpen ? (
@@ -99,7 +99,7 @@ export function CategoryFilters() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-50 p-3 rounded-none border border-gray-200"
+          className="bg-muted p-3 rounded-none border border-border"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="font-typewriter text-xs font-semibold">
@@ -147,7 +147,7 @@ export function CategoryFilters() {
           Search Products
         </label>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by name, style..."
             value={searchQuery}
@@ -166,10 +166,10 @@ export function CategoryFilters() {
               onClick={() => toggleColor(color.name)}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className={`relative w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center touch-manipulation ${
+              className={`relative w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center touch-manipulation ${
                 selectedColors.includes(color.name)
-                  ? 'border-black shadow-md'
-                  : 'border-gray-300 hover:border-gray-500'
+                  ? 'border-primary shadow-lg'
+                  : 'border-border hover:border-muted-foreground'
               }`}
               style={{ backgroundColor: color.value }}
               aria-label={`Select ${color.name} color`}
@@ -187,8 +187,8 @@ export function CategoryFilters() {
                         color.value.toUpperCase() === '#FFFFFF' ||
                         color.value.toUpperCase() === '#F5F5DC' ||
                         color.value.toUpperCase() === '#FFC0CB'
-                          ? 'text-black'
-                          : 'text-white'
+                          ? 'text-foreground'
+                          : 'text-primary-foreground'
                       }`} 
                     />
                   </motion.div>
@@ -204,7 +204,7 @@ export function CategoryFilters() {
       <FilterSection title="Sizes" defaultOpen={true}>
         <div className="mb-3">
           <SizeGuideModal>
-            <button className="text-xs font-typewriter text-gray-600 hover:text-black underline underline-offset-2 mb-3">
+            <button className="text-xs font-typewriter text-muted-foreground hover:text-foreground underline underline-offset-2 mb-3">
               View Size Guide
             </button>
           </SizeGuideModal>
@@ -218,8 +218,8 @@ export function CategoryFilters() {
               whileTap={{ scale: 0.95 }}
               className={`py-2.5 px-3 text-xs border font-typewriter transition-all min-h-[44px] touch-manipulation ${
                 selectedSizes.includes(size)
-                  ? 'border-black bg-black text-white shadow-sm'
-                  : 'border-gray-300 hover:border-gray-400 bg-white'
+                  ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                  : 'border-border hover:border-muted-foreground bg-background'
               }`}
             >
               {size}
@@ -235,7 +235,7 @@ export function CategoryFilters() {
             <span className="font-typewriter text-sm font-semibold">
               £{priceRange[0]}
             </span>
-            <span className="font-typewriter text-xs text-gray-600">to</span>
+            <span className="font-typewriter text-xs text-muted-foreground">to</span>
             <span className="font-typewriter text-sm font-semibold">
               £{priceRange[1]}
             </span>
@@ -312,7 +312,7 @@ export function CategoryFilters() {
       </FilterSection>
 
       {/* Availability */}
-      <div className="border-b border-gray-200 pb-4">
+      <div className="border-b border-border pb-4">
         <label className="flex items-center space-x-3 cursor-pointer">
           <Checkbox
             id="in-stock"

@@ -25,6 +25,21 @@ export const createCartSlice: StateCreator<
   isOpen: false,
   isLoading: false,
   error: null,
+  checkoutUrl: undefined,
+  
+  // Enhanced cart state (default values)
+  bulkOperations: [],
+  savedCarts: [],
+  recommendations: [],
+  inventoryStatus: [],
+  taxEstimate: null,
+  shareToken: null,
+  shareExpiry: null,
+  savedForLater: [],
+  abandonmentTracking: {
+    startTime: null,
+    events: [],
+  },
 
   actions: {
     cart: {
@@ -114,7 +129,7 @@ export const createCartSlice: StateCreator<
       },
 
       // Add item to cart with Shopify integration
-      addItem: async (_productId: string, variantId: string, quantity: number = 1) => {
+      addItem: async (productId: string, variantId: string, quantity: number = 1, productData?: any) => {
         set((state) => ({ 
           ...state, 
           cart: { ...state.cart, isLoading: true, error: null } 
@@ -127,7 +142,7 @@ export const createCartSlice: StateCreator<
           const { shopifyClient } = await import('@/lib/shopify/client');
           
           if (!shopifyClient) {
-            throw new Error('Shopify client not configured');
+            throw new Error('Shopify client not initialized. Please restart the dev server.');
           }
           
           let shopifyCart;
@@ -165,16 +180,18 @@ export const createCartSlice: StateCreator<
             name: node.merchandise.product.title,
             slug: createSlug(node.merchandise.product.handle),
             size: node.merchandise.title || 'One Size',
-            quantity: node.quantity as any,
+            quantity: createQuantity(node.quantity),
             image: createImageURL(node.merchandise.image?.url || ''),
             pricing: {
-              unitPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) * 100 / node.quantity)),
-              totalPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) * 100)),
-              displayUnitPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) * 100 / node.quantity, node.cost.totalAmount.currencyCode),
-              displayTotalPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) * 100, node.cost.totalAmount.currencyCode),
+              unitPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) / node.quantity)),
+              totalPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount))),
+              displayUnitPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) / node.quantity, node.cost.totalAmount.currencyCode),
+              displayTotalPrice: formatPrice(parseFloat(node.cost.totalAmount.amount), node.cost.totalAmount.currencyCode),
             },
           }));
           
+          console.log('Updating cart state with items:', items);
+          console.log('First item quantity type and value:', typeof items[0]?.quantity, items[0]?.quantity);
           set((state) => ({ 
             ...state, 
             cart: { 
@@ -185,6 +202,7 @@ export const createCartSlice: StateCreator<
               checkoutUrl: shopifyCart.checkoutUrl
             } 
           }));
+          console.log('Cart state updated successfully');
           
           // Save to localStorage
           if (typeof window !== 'undefined') {
@@ -282,13 +300,13 @@ export const createCartSlice: StateCreator<
             name: node.merchandise.product.title,
             slug: createSlug(node.merchandise.product.handle),
             size: node.merchandise.title || 'One Size',
-            quantity: node.quantity as any,
+            quantity: createQuantity(node.quantity),
             image: createImageURL(node.merchandise.image?.url || ''),
             pricing: {
-              unitPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) * 100 / node.quantity)),
-              totalPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) * 100)),
-              displayUnitPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) * 100 / node.quantity, node.cost.totalAmount.currencyCode),
-              displayTotalPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) * 100, node.cost.totalAmount.currencyCode),
+              unitPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount) / node.quantity)),
+              totalPrice: createPrice(Math.round(parseFloat(node.cost.totalAmount.amount))),
+              displayUnitPrice: formatPrice(parseFloat(node.cost.totalAmount.amount) / node.quantity, node.cost.totalAmount.currencyCode),
+              displayTotalPrice: formatPrice(parseFloat(node.cost.totalAmount.amount), node.cost.totalAmount.currencyCode),
             },
           }));
           

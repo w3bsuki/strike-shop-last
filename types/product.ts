@@ -1,4 +1,4 @@
-import type { ProductId, CategoryId, TagId, ImageURL, Slug } from './branded';
+import type { ProductId, CategoryId, TagId, ImageURL } from './branded';
 
 export interface ProductVariant {
   id: string;

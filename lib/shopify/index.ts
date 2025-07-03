@@ -21,5 +21,12 @@ export {
   transformShopifyProduct,
   transformShopifyVariant,
   transformShopifyCollection,
-  ShopifyService
+  ShopifyService,
+  shopifyService
 } from './services';
+
+// Export customer service
+export { 
+  ShopifyCustomerService, 
+  createCustomerService 
+} from './customer';

@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Lock, CreditCard, ShieldCheck } from 'lucide-react';
 import { getStripe } from '@/lib/stripe-client';
-import { useCartStore } from '@/lib/cart-store';
+import { useCartActions } from '@/lib/stores';
 import { toast } from '@/hooks/use-toast';
 
 interface StripePaymentFormProps {
@@ -24,7 +24,7 @@ function PaymentForm({ cartId, onSuccess }: StripePaymentFormProps) {
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { clearCart } = useCartStore();
+  const cartActions = useCartActions();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +81,7 @@ function PaymentForm({ cartId, onSuccess }: StripePaymentFormProps) {
 
           if (order_id) {
             // Clear the cart
-            clearCart();
+            cartActions.clearCart();
 
             // Show success message
             toast({

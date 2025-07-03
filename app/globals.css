@@ -1,65 +1,272 @@
-/* Import Strike Shop Design System */
-@import '../styles/design-system.css';
+@import "tailwindcss";
 
 /* Import optimized fonts if they exist */
 @import '../styles/optimized-fonts.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind v4 content detection */
+@source "../app/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../components/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../lib/**/*.{js,ts,jsx,tsx,mdx}";
 
-/* Font loading is now handled by Next.js font optimization in lib/fonts.ts */
+/* ==========================================================================
+   STRIKE SHOP DESIGN SYSTEM - TAILWIND V4 THEME
+   Single source of truth for all design tokens
+   Following modern token architecture: Primitives → Semantic → Component
+   ========================================================================== */
+
+@theme {
+  /* ==========================================================================
+     LAYER 1: PRIMITIVE TOKENS - Raw values, the foundation
+     ========================================================================== */
+  
+  /* Color Primitives - Strike's monochrome palette */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  
+  /* Gray Scale - 11 steps for maximum flexibility */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #cccccc;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #808080;
+  --color-gray-600: #666666;
+  --color-gray-700: #4d4d4d;
+  --color-gray-800: #333333;
+  --color-gray-900: #1a1a1a;
+  --color-gray-950: #0d0d0d;
+  
+  /* Status Color Primitives */
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+  --color-green-500: #10b981;
+  --color-green-600: #059669;
+  --color-orange-500: #f59e0b;
+  --color-orange-600: #d97706;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  
+  /* ==========================================================================
+     LAYER 2: SEMANTIC TOKENS - Purpose-based aliases
+     ========================================================================== */
+  
+  /* Core Semantic Colors - Following shadcn convention */
+  --color-background: var(--color-white);
+  --color-foreground: var(--color-black);
+  
+  --color-primary: var(--color-black);
+  --color-primary-foreground: var(--color-white);
+  
+  --color-secondary: var(--color-gray-100);
+  --color-secondary-foreground: var(--color-black);
+  
+  --color-accent: var(--color-gray-100);
+  --color-accent-foreground: var(--color-black);
+  
+  --color-muted: var(--color-gray-100);
+  --color-muted-foreground: var(--color-gray-700);
+  
+  /* Interactive Semantic Colors */
+  --color-card: var(--color-white);
+  --color-card-foreground: var(--color-black);
+  
+  --color-popover: var(--color-white);
+  --color-popover-foreground: var(--color-black);
+  
+  --color-border: var(--color-gray-200);
+  --color-input: var(--color-gray-200);
+  --color-ring: var(--color-black);
+  
+  /* Status Semantic Colors */
+  --color-destructive: var(--color-red-500);
+  --color-destructive-foreground: var(--color-white);
+  
+  --color-success: var(--color-green-500);
+  --color-success-foreground: var(--color-white);
+  
+  --color-warning: var(--color-orange-500);
+  --color-warning-foreground: var(--color-white);
+  
+  --color-info: var(--color-blue-500);
+  --color-info-foreground: var(--color-white);
+  
+  /* Hover/Active States */
+  --color-primary-hover: var(--color-gray-900);
+  --color-secondary-hover: var(--color-gray-200);
+  --color-destructive-hover: var(--color-red-600);
+  
+  /* ==========================================================================
+     SPACING TOKENS - 8px base unit system
+     ========================================================================== */
+  
+  --spacing-0: 0px;
+  --spacing-px: 1px;
+  --spacing-0-5: 0.125rem;   /* 2px */
+  --spacing-1: 0.25rem;      /* 4px */
+  --spacing-1-5: 0.375rem;   /* 6px */
+  --spacing-2: 0.5rem;       /* 8px */
+  --spacing-2-5: 0.625rem;   /* 10px */
+  --spacing-3: 0.75rem;      /* 12px */
+  --spacing-3-5: 0.875rem;   /* 14px */
+  --spacing-4: 1rem;         /* 16px */
+  --spacing-5: 1.25rem;      /* 20px */
+  --spacing-6: 1.5rem;       /* 24px */
+  --spacing-7: 1.75rem;      /* 28px */
+  --spacing-8: 2rem;         /* 32px */
+  --spacing-9: 2.25rem;      /* 36px */
+  --spacing-10: 2.5rem;      /* 40px */
+  --spacing-11: 2.75rem;     /* 44px */
+  --spacing-12: 3rem;        /* 48px */
+  --spacing-14: 3.5rem;      /* 56px */
+  --spacing-16: 4rem;        /* 64px */
+  --spacing-20: 5rem;        /* 80px */
+  --spacing-24: 6rem;        /* 96px */
+  --spacing-28: 7rem;        /* 112px */
+  --spacing-32: 8rem;        /* 128px */
+  --spacing-36: 9rem;        /* 144px */
+  --spacing-40: 10rem;       /* 160px */
+  --spacing-44: 11rem;       /* 176px */
+  --spacing-48: 12rem;       /* 192px */
+  --spacing-52: 13rem;       /* 208px */
+  --spacing-56: 14rem;       /* 224px */
+  --spacing-60: 15rem;       /* 240px */
+  --spacing-64: 16rem;       /* 256px */
+  --spacing-72: 18rem;       /* 288px */
+  --spacing-80: 20rem;       /* 320px */
+  --spacing-96: 24rem;       /* 384px */
+  
+  /* ==========================================================================
+     TYPOGRAPHY TOKENS - Following Tailwind's type scale
+     ========================================================================== */
+  
+  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Courier Prime", "Courier New", ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", monospace;
+  
+  /* Font Sizes - Mobile optimized with fluid scaling */
+  --text-xs: 0.75rem;        /* 12px */
+  --text-sm: 0.875rem;       /* 14px */
+  --text-base: 1rem;         /* 16px */
+  --text-lg: 1.125rem;       /* 18px */
+  --text-xl: 1.25rem;        /* 20px */
+  --text-2xl: 1.5rem;        /* 24px */
+  --text-3xl: 1.875rem;      /* 30px */
+  --text-4xl: 2.25rem;       /* 36px */
+  --text-5xl: 3rem;          /* 48px */
+  --text-6xl: 3.75rem;       /* 60px */
+  --text-7xl: 4.5rem;        /* 72px */
+  --text-8xl: 6rem;          /* 96px */
+  --text-9xl: 8rem;          /* 128px */
+  
+  /* Line Heights */
+  --text-xs--line-height: 1rem;      /* 16px */
+  --text-sm--line-height: 1.25rem;   /* 20px */
+  --text-base--line-height: 1.5rem;  /* 24px */
+  --text-lg--line-height: 1.75rem;   /* 28px */
+  --text-xl--line-height: 1.75rem;   /* 28px */
+  --text-2xl--line-height: 2rem;     /* 32px */
+  --text-3xl--line-height: 2.25rem;  /* 36px */
+  --text-4xl--line-height: 2.5rem;   /* 40px */
+  --text-5xl--line-height: 1;
+  --text-6xl--line-height: 1;
+  --text-7xl--line-height: 1;
+  --text-8xl--line-height: 1;
+  --text-9xl--line-height: 1;
+  
+  /* Font Weights */
+  --font-thin: 100;
+  --font-extralight: 200;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+  
+  /* Letter Spacing */
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+  
+  /* ==========================================================================
+     LAYOUT TOKENS - Shadows, borders, radii
+     ========================================================================== */
+  
+  /* Border Radius - Sharp edges for Strike brand */
+  --radius-none: 0;
+  --radius-sm: 0.125rem;     /* 2px */
+  --radius-default: 0.25rem; /* 4px */
+  --radius-md: 0.375rem;     /* 6px */
+  --radius-lg: 0.5rem;       /* 8px */
+  --radius-xl: 0.75rem;      /* 12px */
+  --radius-2xl: 1rem;        /* 16px */
+  --radius-3xl: 1.5rem;      /* 24px */
+  --radius-full: 9999px;
+  
+  /* Shadows - Subtle elevation system */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-default: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-2xl: 0 35px 60px -15px rgb(0 0 0 / 0.3);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.06);
+  --shadow-none: 0 0 0 0 transparent;
+  
+  /* ==========================================================================
+     ANIMATION TOKENS - Motion design system
+     ========================================================================== */
+  
+  /* Durations */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 400ms;
+  --duration-slowest: 500ms;
+  
+  /* Easings */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
 
 
 :root {
   /* ==========================================================================
-     Core Design Tokens - Now managed by design-system.css
-     Keeping only the color system variables here for compatibility
+     APP-SPECIFIC TOKENS - Component-level design decisions
+     These use the tokens defined in @theme above
      ========================================================================== */
 
-  /* Dynamic viewport height */
-  --vh: 1vh;
+  /* Chart colors - monochrome progression for data visualization */
+  --chart-1: var(--color-black);
+  --chart-2: var(--color-gray-800);
+  --chart-3: var(--color-gray-600);
+  --chart-4: var(--color-gray-400);
+  --chart-5: var(--color-gray-300);
 
-  /* Z-index hierarchy system - DOCUMENTATION
-     
-     Our z-index system follows a consistent hierarchy to prevent stacking conflicts:
-     
-     Level 0 (--z-base: 0):
-     - Base content and normal document flow
-     - Default for most page elements
-     
-     Level 1 (--z-dropdown: 50):
-     - Dropdown menus, select options
-     - Product badges and overlays on cards
-     - Interactive elements that need to appear above content
-     
-     Level 2 (--z-sticky: 100):
-     - Sticky headers and navigation bars
-     - Elements that stick to viewport but stay below dropdowns
-     
-     Level 3 (--z-fixed: 200):
-     - Fixed navigation (mobile nav, bottom nav)
-     - Elements fixed to viewport
-     
-     Level 4 (--z-modal-backdrop: 300):
-     - Modal/drawer backdrop overlays
-     - Semi-transparent overlay behind modals
-     
-     Level 5 (--z-modal: 400):
-     - Modal content, drawers, sheets
-     - Cart sidebar, auth modals
-     
-     Level 6 (--z-notification: 500):
-     - Toast notifications
-     - Temporary alerts and messages
-     
-     Level 7 (--z-tooltip: 600):
-     - Tooltips and focus indicators
-     - Highest level for brief contextual information
-     
-     Usage: Always use CSS variables instead of hardcoded values
-     Example: style={{ zIndex: 'var(--z-modal)' }}
-  */
+  /* Sidebar component tokens */
+  --sidebar-background: var(--color-gray-50);
+  --sidebar-foreground: var(--color-gray-900);
+  --sidebar-primary: var(--color-gray-900);
+  --sidebar-primary-foreground: var(--color-gray-50);
+  --sidebar-accent: var(--color-gray-100);
+  --sidebar-accent-foreground: var(--color-gray-900);
+  --sidebar-border: var(--color-gray-200);
+  --sidebar-ring: var(--color-gray-900);
+  
+  /* Focus system tokens */
+  --focus-ring-width: 2px;
+  --focus-ring-color: var(--color-primary);
+  --focus-ring-offset: 2px;
+  
+  /* Z-index hierarchy */
   --z-base: 0;
   --z-dropdown: 50;
   --z-sticky: 100;
@@ -68,54 +275,19 @@
   --z-modal: 400;
   --z-notification: 500;
   --z-tooltip: 600;
-
-  /* Stacking context isolation for better layering control */
-  --stacking-isolation: isolate;
-
-  /* Accessibility & Focus */
-  --focus-ring: 2px solid var(--primary);
-  --focus-ring-offset: 2px;
-
-  /* ==========================================================================
-     Color System - Light Mode
-     ========================================================================== */
-  --background: 0 0% 100%;
-  --foreground: 0 0% 0%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 0%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 0%;
-  --primary: 0 0% 0%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 96%;
-  --secondary-foreground: 0 0% 0%;
-  --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 25%; /* WCAG AA: 7:1 contrast ratio */
-  --accent: 0 0% 96%;
-  --accent-foreground: 0 0% 0%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 0 0% 89%;
-  --input: 0 0% 89%;
-  --ring: 0 0% 0%;
-  --radius: 0;
-
-  /* Chart colors - all black/gray for consistency */
-  --chart-1: 0 0% 0%;
-  --chart-2: 0 0% 20%;
-  --chart-3: 0 0% 40%;
-  --chart-4: 0 0% 60%;
-  --chart-5: 0 0% 80%;
-
-  /* Sidebar colors */
-  --sidebar-background: 0 0% 98%;
-  --sidebar-foreground: 0 0% 3.9%;
-  --sidebar-primary: 0 0% 9%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 0 0% 96.1%;
-  --sidebar-accent-foreground: 0 0% 9%;
-  --sidebar-border: 0 0% 89.8%;
-  --sidebar-ring: 0 0% 3.9%;
+  
+  /* Touch targets for mobile */
+  --touch-target-min: 44px;
+  --touch-target-comfortable: 48px;
+  --touch-target-large: 56px;
+  
+  /* Strike brand-specific tokens */
+  --letter-spacing-strike: 0.1em;
+  --letter-spacing-strike-wide: 0.15em;
+  
+  /* Font stacks */
+  --font-typewriter: "Courier Prime", var(--font-mono);
+  --font-professional: Inter, var(--font-sans);
 }
 
 /* ==========================================================================
@@ -147,51 +319,15 @@
   animation: marquee2 25s linear infinite;
 }
 
-.dark {
-  --background: 0 0% 9%;
-  --foreground: 0 0% 95%;
-  --card: 0 0% 9%;
-  --card-foreground: 0 0% 95%;
-  --popover: 0 0% 9%;
-  --popover-foreground: 0 0% 95%;
-  --primary: 0 0% 95%;
-  --primary-foreground: 0 0% 9%;
-  --secondary: 0 0% 20%;
-  --secondary-foreground: 0 0% 95%;
-  --muted: 0 0% 20%;
-  --muted-foreground: 0 0% 75%; /* WCAG AA: 4.6:1 contrast ratio on dark */
-  --accent: 0 0% 20%;
-  --accent-foreground: 0 0% 95%;
-  --destructive: 0 62.8% 50%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 0 0% 25%;
-  --input: 0 0% 25%;
-  --ring: 0 0% 85%;
-
-  /* Chart colors for dark mode - all white/gray for consistency */
-  --chart-1: 0 0% 100%;
-  --chart-2: 0 0% 80%;
-  --chart-3: 0 0% 60%;
-  --chart-4: 0 0% 40%;
-  --chart-5: 0 0% 20%;
-
-  /* Sidebar colors for dark mode */
-  --sidebar-background: 0 0% 3.9%;
-  --sidebar-foreground: 0 0% 98%;
-  --sidebar-primary: 0 0% 98%;
-  --sidebar-primary-foreground: 0 0% 9%;
-  --sidebar-accent: 0 0% 14.9%;
-  --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-border: 0 0% 14.9%;
-  --sidebar-ring: 0 0% 83.1%;
-}
+/* Dark mode is not currently implemented - remove unused styles */
 
 /* ==========================================================================
-   SHARP EDGES DESIGN SYSTEM - GLOBAL OVERRIDES
+   SHARP EDGES DESIGN SYSTEM - Strike Brand Identity
+   Using CSS custom properties instead of !important overrides
    ========================================================================== */
-* {
-  border-radius: 0 !important;
-  --radius: 0 !important;
+:root {
+  /* Override default radius for sharp edges aesthetic */
+  --radius: 0;
 }
 
 /* ==========================================================================
@@ -209,56 +345,42 @@
   }
 }
 
-/* Force all rounded utilities to zero */
-.rounded-none { border-radius: 0 !important; }
-.rounded-sm { border-radius: 0 !important; }
-.rounded { border-radius: 0 !important; }
-.rounded-md { border-radius: 0 !important; }
-.rounded-lg { border-radius: 0 !important; }
-.rounded-xl { border-radius: 0 !important; }
-.rounded-2xl { border-radius: 0 !important; }
-.rounded-3xl { border-radius: 0 !important; }
-.rounded-full { border-radius: 0 !important; }
-.rounded-t-\[10px\] { border-radius: 0 !important; }
-.rounded-t-lg { border-radius: 0 !important; }
-.rounded-t-md { border-radius: 0 !important; }
-.rounded-tl-lg { border-radius: 0 !important; }
-.rounded-tr-lg { border-radius: 0 !important; }
-.rounded-bl-lg { border-radius: 0 !important; }
-.rounded-br-lg { border-radius: 0 !important; }
+/* Sharp edges are enforced via the --radius-* tokens in @theme */
 
-/* Enforce typewriter font everywhere */
-body, body * {
-  font-family: 'Typewriter', 'Courier Prime', ui-monospace, monospace !important;
-}
+/* ==========================================================================
+   TYPOGRAPHY HIERARCHY - Strike Brand Design System
+   ========================================================================== */
 
-/* Ensure headings use typewriter font */
+/* Headings use typewriter font for brand identity */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Typewriter', 'Courier Prime', ui-monospace, monospace !important;
+  font-family: var(--font-typewriter);
+  font-weight: var(--font-bold);
+  letter-spacing: var(--letter-spacing-strike);
 }
 
-/* Ensure buttons use typewriter font */
-button, .button, [role="button"] {
-  font-family: 'Typewriter', 'Courier Prime', ui-monospace, monospace !important;
+/* Interactive elements use typewriter font */
+button, .button, [role="button"], nav, .nav-link {
+  font-family: var(--font-typewriter);
+  letter-spacing: var(--letter-spacing-strike);
 }
 
-/* Ensure form elements use typewriter font */
-input, textarea, select {
-  font-family: 'Typewriter', 'Courier Prime', ui-monospace, monospace !important;
+/* Utility classes for font control */
+.font-typewriter {
+  font-family: var(--font-typewriter);
 }
 
-/* Ensure navigation uses typewriter font */
-nav, .nav-link {
-  font-family: 'Typewriter', 'Courier Prime', ui-monospace, monospace !important;
+.font-professional {
+  font-family: var(--font-professional);
 }
+
 
 body {
-  color: hsl(var(--foreground));
-  background: hsl(var(--background));
-  font-family: var(--font-stack, 'Courier New', ui-monospace, monospace);
+  color: var(--color-foreground);
+  background: var(--color-background);
+  font-family: var(--font-professional);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   line-height: 1.5;
   padding-bottom: env(safe-area-inset-bottom);
   -webkit-tap-highlight-color: transparent;
@@ -270,10 +392,7 @@ body {
   touch-action: auto;
 }
 
-/* Typography - using design system variables */
-:root {
-  /* Font sizes handled by design-system.css */
-}
+/* Typography tokens are now defined in @theme above */
 
 /* Essential mobile text optimization */
 @media (max-width: 640px) {
@@ -425,7 +544,7 @@ input, textarea, select {
 
 /* Card Styling */
 .product-card {
-  background-color: hsl(var(--card));
+  background-color: var(--card));
   position: relative;
   transition: transform 0.2s ease;
 }
@@ -478,7 +597,7 @@ input, textarea, select {
 .product-card-image-wrapper {
   position: relative;
   overflow: hidden;
-  background-color: hsl(var(--muted));
+  background-color: var(--muted));
   /* Perfect aspect ratio for mobile */
   aspect-ratio: 3 / 4;
 }
@@ -532,7 +651,7 @@ input, textarea, select {
 
 .product-card-original-price {
   font-size: 10px;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground));
   text-decoration: line-through;
   margin-left: 0.25rem;
 }
@@ -542,7 +661,7 @@ input, textarea, select {
   position: absolute;
   top: 0.5rem;
   left: 0.5rem;
-  color: hsl(var(--primary-foreground));
+  color: var(--primary-foreground));
   font-size: 10px;
   font-weight: 700;
   padding: 0.125rem 0.375rem;
@@ -550,11 +669,11 @@ input, textarea, select {
 }
 
 .product-card-discount {
-  background-color: hsl(var(--destructive));
+  background-color: var(--destructive));
 }
 
 .product-card-new {
-  background-color: hsl(var(--primary));
+  background-color: var(--primary));
 }
 
 .product-card-wishlist {
@@ -565,7 +684,7 @@ input, textarea, select {
   background-color: hsla(var(--background), 0.8);
   backdrop-filter: blur(4px);
   border-radius: 0;
-  color: hsl(var(--foreground));
+  color: var(--foreground));
   /* Always visible on mobile for better usability */
   opacity: 1;
   transition: opacity 0.3s ease;
@@ -591,7 +710,7 @@ input, textarea, select {
 }
 
 .product-card-wishlist:hover {
-  background-color: hsl(var(--background));
+  background-color: var(--background));
 }
 
 /* Responsive product card sizes */
@@ -615,7 +734,7 @@ input, textarea, select {
 
 /* Category Card Styling */
 .category-card {
-  background-color: hsl(var(--card));
+  background-color: var(--card));
   position: relative;
   overflow: hidden;
 }
@@ -650,7 +769,7 @@ input, textarea, select {
   justify-content: flex-end;
   align-items: flex-start;
   padding: 1rem;
-  color: hsl(var(--primary-foreground));
+  color: var(--primary-foreground));
 }
 
 .category-card-title {
@@ -667,7 +786,9 @@ input, textarea, select {
 
 /* Section Styling - Updated to use typography system */
 .section-title {
-  @apply text-section-title;
+  @apply font-bold uppercase mb-4;
+  font-size: var(--text-sm);
+  letter-spacing: var(--letter-spacing-strike);
   font-family: 'Typewriter', 'Courier Prime', monospace !important;
 }
 
@@ -686,7 +807,7 @@ input, textarea, select {
 
 /* Navigation & Buttons */
 .nav-link {
-  color: hsl(var(--foreground));
+  color: var(--foreground));
   font-weight: 400;
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -696,12 +817,12 @@ input, textarea, select {
 }
 
 .nav-link:hover {
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground));
 }
 
 .button-primary {
-  background-color: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
+  background-color: var(--primary));
+  color: var(--primary-foreground));
   font-weight: 700;
   padding: 0.625rem 1.5rem;
   font-size: 0.75rem;
@@ -714,17 +835,17 @@ input, textarea, select {
 }
 
 .button-primary:hover {
-  background-color: hsl(var(--primary) / 0.9);
+  background-color: var(--primary) / 0.9);
 }
 
 .button-primary:disabled {
-  background-color: hsl(var(--muted));
+  background-color: var(--muted));
   cursor: not-allowed;
 }
 
 .button-secondary {
-  border: 1px solid hsl(var(--border));
-  color: hsl(var(--foreground));
+  border: 1px solid var(--border));
+  color: var(--foreground));
   background-color: transparent;
   font-weight: 700;
   padding: 0.625rem 1.5rem;
@@ -737,12 +858,12 @@ input, textarea, select {
 }
 
 .button-secondary:hover {
-  background-color: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
+  background-color: var(--primary));
+  color: var(--primary-foreground));
 }
 
 .button-text {
-  color: hsl(var(--foreground));
+  color: var(--foreground));
   font-weight: 700;
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -754,13 +875,13 @@ input, textarea, select {
 }
 
 .button-text:hover {
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground));
 }
 
 /* Improved Input Field Styling */
 .input-field {
   border: none;
-  border-bottom: 1px solid hsl(var(--border));
+  border-bottom: 1px solid var(--border));
   border-radius: 0;
   font-size: max(16px, 0.875rem); /* Prevent iOS zoom */
   padding: 0.5rem 0.25rem;
@@ -772,22 +893,22 @@ input, textarea, select {
 
 .input-field:focus {
   outline: none;
-  border-bottom-color: hsl(var(--ring));
+  border-bottom-color: var(--ring));
   border-bottom-width: 2px;
   box-shadow: none;
 }
 
 .input-field::placeholder {
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground));
 }
 
 /* Search Input Styling - Fixed */
 .search-input {
-  border: 1px solid hsl(var(--border));
+  border: 1px solid var(--border));
   border-radius: 0;
   font-size: max(16px, 0.875rem); /* Prevent iOS zoom */
   padding: 0.75rem;
-  background-color: hsl(var(--background));
+  background-color: var(--background));
   transition: border-color 0.2s ease;
   font-family: 'Typewriter', monospace;
   width: 100%;
@@ -796,21 +917,21 @@ input, textarea, select {
 
 .search-input:focus {
   outline: none;
-  border-color: hsl(var(--ring));
+  border-color: var(--ring));
   box-shadow: none;
 }
 
 .search-input::placeholder {
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground));
 }
 
 /* Footer specific input styling */
 .footer-input {
-  border: 1px solid hsl(var(--border));
+  border: 1px solid var(--border));
   border-radius: 0;
   font-size: max(16px, 0.75rem); /* Prevent iOS zoom */
   padding: 0.75rem;
-  background-color: hsl(var(--background));
+  background-color: var(--background));
   transition: border-color 0.2s ease;
   font-family: 'Typewriter', monospace;
   touch-action: manipulation;
@@ -818,12 +939,12 @@ input, textarea, select {
 
 .footer-input:focus {
   outline: none;
-  border-color: hsl(var(--ring));
+  border-color: var(--ring));
   box-shadow: none;
 }
 
 .footer-input::placeholder {
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground));
 }
 
 /* Brand Carousel Animation - Bigger and Better */
@@ -883,7 +1004,7 @@ input, textarea, select {
 
 /* Helper for subtle borders */
 .border-subtle {
-  border-color: hsl(var(--border));
+  border-color: var(--border));
 }
 
 /* Main content wrapper to prevent overflow */
@@ -902,22 +1023,22 @@ input, textarea, select {
 /* Typography System - Mobile-First with Clamp */
 .text-display-xl {
   font-size: var(--text-5xl);
-  @apply font-bold tracking-tight font-display;
+  @apply font-bold tracking-tight;
 }
 
 .text-display-lg {
   font-size: var(--text-4xl);
-  @apply font-bold tracking-tight font-display;
+  @apply font-bold tracking-tight;
 }
 
 .text-display-md {
   font-size: var(--text-3xl);
-  @apply font-bold tracking-tight font-display;
+  @apply font-bold tracking-tight;
 }
 
 .text-display-sm {
   font-size: var(--text-2xl);
-  @apply font-bold tracking-tight font-display;
+  @apply font-bold tracking-tight;
 }
 
 .text-heading-xl {
@@ -962,27 +1083,33 @@ input, textarea, select {
 
 .text-label-lg {
   font-size: var(--text-sm);
-  @apply font-medium uppercase tracking-strike;
+  @apply font-medium uppercase;
+  letter-spacing: var(--letter-spacing-strike);
 }
 
 .text-label-md {
   font-size: var(--text-xs);
-  @apply font-bold uppercase tracking-strike;
+  @apply font-bold uppercase;
+  letter-spacing: var(--letter-spacing-strike);
 }
 
 .text-label-sm {
   font-size: var(--text-xs);
-  @apply font-bold uppercase tracking-strike-wide;
+  @apply font-bold uppercase;
+  letter-spacing: var(--letter-spacing-strike-wide);
 }
 
 .text-caption {
   font-size: var(--text-xs);
-  @apply text-muted-foreground leading-tight;
+  color: var(--muted-foreground));
+  line-height: 1.25;
 }
 
 .text-overline {
   font-size: var(--text-xs);
-  @apply font-bold uppercase tracking-strike-wide text-muted-foreground;
+  @apply font-bold uppercase;
+  color: var(--muted-foreground));
+  letter-spacing: var(--letter-spacing-strike-wide);
 }
 
 /* Strike-specific typography patterns */
@@ -998,22 +1125,29 @@ input, textarea, select {
 
 .text-button {
   font-size: var(--text-xs);
-  @apply font-bold uppercase tracking-strike;
+  @apply font-bold uppercase;
+  letter-spacing: var(--letter-spacing-strike);
 }
 
 .text-nav {
   font-size: var(--text-xs);
-  @apply font-medium uppercase tracking-strike;
+  @apply font-medium uppercase;
+  letter-spacing: var(--letter-spacing-strike);
 }
 
 .text-product-title {
   font-size: var(--text-sm);
-  @apply font-medium tracking-tight line-clamp-2;
+  @apply font-medium tracking-tight;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .text-section-title {
   font-size: var(--text-sm);
-  @apply font-bold uppercase tracking-strike mb-4;
+  @apply font-bold uppercase mb-4;
+  letter-spacing: var(--letter-spacing-strike);
 }
 
 /* ==========================================================================
@@ -1318,7 +1452,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid hsl(var(--ring));
+  outline: 2px solid var(--ring));
   outline-offset: 2px;
 }
 
@@ -1345,7 +1479,7 @@ button, [role="button"], a, input, select, textarea {
 
 /* Loading states */
 .skeleton-shimmer {
-  background-color: hsl(var(--muted));
+  background-color: var(--muted));
   animation: pulse 2s infinite;
 }
 

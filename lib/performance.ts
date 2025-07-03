@@ -277,7 +277,7 @@ export function usePerformanceTiming(label: string) {
 
 export function useComponentPerformance(componentName: string) {
   const renderCount = useRef(0);
-  const mountTime = useRef<number>();
+  const mountTime = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     renderCount.current++;

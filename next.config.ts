@@ -63,7 +63,7 @@ const nextConfig: NextConfig = {
   ],
   // Enable experimental features for better performance
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false,
     // Enable critical CSS inlining
     optimizePackageImports: [
       '@radix-ui/react-dialog',

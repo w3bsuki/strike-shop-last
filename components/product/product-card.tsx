@@ -44,6 +44,7 @@
  * </Product.Root>
  */
 
-// Re-export everything from the compound component implementation
-export { ProductCard, Product } from './compound';
+// Re-export everything from the production implementation
+export { ProductCard } from './production-card';
+// export { Product } from './compound'; // Temporarily disabled for production build
 export type { ProductCardProps, SimpleProduct } from './types';

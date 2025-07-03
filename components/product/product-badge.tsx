@@ -9,11 +9,11 @@ const productBadgeVariants = cva(
   {
     variants: {
       variant: {
-        sale: "bg-red-600 text-white",
-        new: "bg-black text-white",
-        soldOut: "bg-gray-600 text-white",
-        limited: "bg-gold-600 text-black",
-        exclusive: "bg-purple-600 text-white",
+        sale: "bg-destructive text-destructive-foreground",
+        new: "bg-primary text-primary-foreground",
+        soldOut: "bg-muted-foreground text-background",
+        limited: "bg-warning text-warning-foreground",
+        exclusive: "bg-info text-info-foreground",
       },
       size: {
         sm: "px-1.5 py-0.5 text-[10px]",

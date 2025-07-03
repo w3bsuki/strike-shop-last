@@ -11,14 +11,10 @@ import { CategorySection, CategoryScroll, CategoryCard } from '@/components/cate
 import { ProductHeader } from '@/components/product/product-header';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useTranslations } from '@/lib/i18n/i18n-provider';
 
-// PERFORMANCE: Below-the-fold components (lazy loaded with smart preloading)
-
-const ProductShowcase = dynamic(() => 
-  import('@/components/product/product-showcase').then(mod => ({ default: mod.ProductShowcase })), {
-  
-  loading: () => <div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>
-});
+// Import directly for immediate rendering (no dynamic loading for critical path)
+import { ProductShowcase } from '@/components/product/product-showcase';
 
 
 // Community section using same pattern as products
@@ -63,6 +59,21 @@ export default function HomePageClient({
   sneakers,
   kidsItems,
 }: HomePageProps) {
+  const t = useTranslations();
+  
+  console.log('[HomePageClient] Received props:', {
+    categories: categories.length,
+    newArrivals: newArrivals.length,
+    saleItems: saleItems.length,
+    sneakers: sneakers.length,
+    kidsItems: kidsItems.length,
+  });
+  
+  // Log first product to debug
+  if (saleItems.length > 0) {
+    console.log('[HomePageClient] First sale item:', saleItems[0]);
+  }
+  
   return (
     <>
 
@@ -70,8 +81,8 @@ export default function HomePageClient({
         <Suspense fallback={<div style={{ minHeight: '320px' }}><CategoryScrollSkeleton /></div>}>
           <CategorySection spacing="default">
             <ProductHeader 
-              title="SHOP BY CATEGORY" 
-              viewAllText="View All Categories"
+              title={t('home.shopByCategory')} 
+              viewAllText={t('home.viewAllCategories')}
               viewAllHref="/categories"
             />
             <CategoryScroll showControls={false}>
@@ -94,18 +105,16 @@ export default function HomePageClient({
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-baseline gap-3 sm:gap-4">
               <h2 className="text-lg sm:text-xl md:text-2xl font-typewriter font-bold uppercase tracking-wider text-white">
-                WINTER SALE
+                {t('home.winterSale')}
               </h2>
-              <span className="text-2xl sm:text-3xl md:text-4xl font-typewriter font-bold text-white">
-                70% OFF
-              </span>
             </div>
             <Button
               asChild
               size="sm"
-              className="font-typewriter uppercase tracking-wider flex-shrink-0 bg-white text-black hover:bg-gray-200"
+              variant="strike-outline"
+              className="font-typewriter font-bold uppercase tracking-wider flex-shrink-0 bg-white text-black border-2 border-white hover:bg-black hover:text-white hover:border-white transition-all duration-200"
             >
-              <Link href="/sale">SHOP NOW</Link>
+              <Link href="/sale">{t('home.shopWinterSale')}</Link>
             </Button>
           </div>
         </div>
@@ -113,88 +122,80 @@ export default function HomePageClient({
 
       {saleItems.length > 0 && (
         <ErrorBoundary>
-          <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
-            <ProductShowcase
-              title="SALE COLLECTION"
-              products={saleItems}
-              viewAllLink="/sale"
-              layout="scroll"
-              showBadge={true}
-              badgeText="SALE"
-              badgeVariant="sale"
-              description="Exclusive deals on premium streetwear essentials and seasonal favorites"
-            />
-          </Suspense>
+          <ProductShowcase
+            title={t('home.saleItems')}
+            products={saleItems}
+            viewAllLink="/sale"
+            layout="scroll"
+            showBadge={true}
+            badgeText={t('products.sale')}
+            badgeVariant="sale"
+            description={t('home.winterSaleDescription')}
+          />
         </ErrorBoundary>
       )}
 
       {/* Divider Section using modular components */}
-      <DividerSection theme="default" size="sm">
+      <DividerSection theme="default" size="lg" className="border-y-2 border-black">
           <div className="flex items-center justify-center gap-4">
-            <DividerLine variant="solid" color="default" className="flex-1" />
-            <DividerText text="LUXURY STREETWEAR" size="sm" spacing="default" />
-            <DividerLine variant="solid" color="default" className="flex-1" />
+            <DividerLine variant="solid" color="white" className="flex-1" />
+            <DividerText text='"LUXURY STREETWEAR"' size="default" color="white" spacing="default" />
+            <DividerLine variant="solid" color="white" className="flex-1" />
           </div>
         </DividerSection>
 
         {newArrivals.length > 0 && (
           <ErrorBoundary>
-            <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
-              <ProductShowcase
-                title="NEW ARRIVALS"
-                products={newArrivals}
-                viewAllLink="/new"
-                layout="scroll"
-                showBadge={true}
-                badgeText="NEW"
-                badgeVariant="new"
-                description="Fresh drops and latest designs from our cutting-edge collection"
-              />
-            </Suspense>
+            <ProductShowcase
+              title={t('home.newArrivals')}
+              products={newArrivals}
+              viewAllLink="/new"
+              layout="scroll"
+              showBadge={true}
+              badgeText={t('products.new')}
+              badgeVariant="new"
+              description={t('home.newsletterDescription')}
+            />
           </ErrorBoundary>
         )}
 
-      <DividerSection theme="default" size="sm">
+      <DividerSection theme="default" size="lg" className="border-y-2 border-black">
           <div className="flex items-center justify-center gap-4">
-            <DividerLine variant="solid" color="default" className="flex-1" />
-            <DividerText text="PREMIUM QUALITY" size="sm" spacing="default" />
-            <DividerLine variant="solid" color="default" className="flex-1" />
+            <DividerLine variant="solid" color="white" className="flex-1" />
+            <DividerText text='"PREMIUM QUALITY"' size="default" color="white" spacing="default" />
+            <DividerLine variant="solid" color="white" className="flex-1" />
           </div>
         </DividerSection>
 
         {sneakers.length > 0 && (
           <ErrorBoundary>
-            <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
-              <ProductShowcase
-                title="FEATURED FOOTWEAR"
-                products={sneakers}
-                viewAllLink="/footwear"
-                layout="scroll"
-                description="Premium sneakers and footwear for the modern streetwear enthusiast"
-              />
-            </Suspense>
+            <ProductShowcase
+              title={t('home.sneakerCollection')}
+              products={sneakers}
+              viewAllLink="/footwear"
+              layout="scroll"
+              description={t('home.newsletterDescription')}
+            />
           </ErrorBoundary>
         )}
 
-      <DividerSection theme="default" size="sm">
+      <DividerSection theme="default" size="lg" className="border-y-2 border-black">
           <div className="flex items-center justify-center gap-4">
-            <DividerLine variant="solid" color="default" className="flex-1" />
-            <DividerText text="NEXT GENERATION" size="sm" spacing="default" />
-            <DividerLine variant="solid" color="default" className="flex-1" />
+            <DividerLine variant="solid" color="white" className="flex-1" />
+            <DividerText text='"NEXT GENERATION"' size="default" color="white" spacing="default" />
+            <DividerLine variant="solid" color="white" className="flex-1" />
           </div>
         </DividerSection>
 
         {kidsItems.length > 0 && (
           <ErrorBoundary>
-            <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
-              <ProductShowcase
-                title="KIDS COLLECTION"
-                products={kidsItems}
-                viewAllLink="/kids"
-                layout="scroll"
-                description="Next generation streetwear for the young and bold - mini versions of our iconic pieces"
-              />
-            </Suspense>
+            <ProductShowcase
+              title={t('home.kidsCollection')}
+              products={kidsItems}
+              viewAllLink="/kids"
+              layout="scroll"
+              description={t('home.newsletterDescription')}
+            />
           </ErrorBoundary>
         )}
 

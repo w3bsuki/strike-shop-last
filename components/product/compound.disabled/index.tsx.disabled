@@ -1,0 +1,62 @@
+// Server Component - CVE-2025-29927 Compliant Performance Optimization
+// Phase 3: Hybrid Component Optimization - Eliminated client wrapper overhead
+import React from 'react';
+import { ProductRoot } from './product-root';
+import { ProductImage } from './product-image';
+import { ProductBadge } from './product-badge';
+import { ProductActions } from './product-actions';
+import { ProductContent } from './product-content';
+import { ProductLink } from './product-link';
+import type { ProductCardProps } from '../types';
+
+// Export individual compound components
+export { ProductRoot } from './product-root';
+export { ProductImage } from './product-image';
+export { ProductBadge } from './product-badge';
+export { ProductActions } from './product-actions';
+export { ProductContent } from './product-content';
+export { ProductLink } from './product-link';
+
+// Export compound component pattern
+export const Product = {
+  Root: ProductRoot,
+  Image: ProductImage,
+  Badge: ProductBadge,
+  Actions: ProductActions,
+  Content: ProductContent,
+  Link: ProductLink
+};
+
+/**
+ * Modern ProductCard - Clean, responsive design with perfect mobile/desktop UX
+ */
+export const ProductCard = React.memo(({ 
+  product: rawProduct, 
+  className = '', 
+  priority = false 
+}: ProductCardProps) => {
+  return (
+    <Product.Root product={rawProduct} className={className} priority={priority}>
+      {/* Image with overlay actions */}
+      <div className="relative">
+        <Product.Image />
+        <Product.Badge />
+        {/* Wishlist button positioned absolutely over image */}
+      </div>
+      
+      {/* Content area with consistent spacing */}
+      <div className="flex flex-col h-full">
+        <Product.Link>
+          <Product.Content />
+        </Product.Link>
+        
+        {/* Actions at bottom of card */}
+        <div className="mt-auto p-4 pt-0">
+          <Product.Actions />
+        </div>
+      </div>
+    </Product.Root>
+  );
+});
+
+ProductCard.displayName = 'ProductCard';

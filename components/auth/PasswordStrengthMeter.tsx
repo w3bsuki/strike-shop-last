@@ -46,12 +46,12 @@ const requirements: PasswordRequirement[] = [
 ];
 
 const strengthColors = {
-  'very-weak': 'bg-red-600',
-  'weak': 'bg-orange-600',
-  'fair': 'bg-yellow-600',
-  'good': 'bg-green-600',
-  'strong': 'bg-green-700',
-  'very-strong': 'bg-green-800'
+  'very-weak': 'bg-destructive',
+  'weak': 'bg-warning',
+  'fair': 'bg-warning',
+  'good': 'bg-success',
+  'strong': 'bg-success',
+  'very-strong': 'bg-success'
 };
 
 const strengthLabels = {
@@ -175,15 +175,15 @@ export function PasswordStrengthMeter({
       {/* Strength meter */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-600">Password strength:</span>
+          <span className="text-muted-foreground">Password strength:</span>
           <span className={cn(
             "font-medium",
-            strength.level === 'very-weak' && "text-red-600",
-            strength.level === 'weak' && "text-orange-600",
-            strength.level === 'fair' && "text-yellow-600",
-            strength.level === 'good' && "text-green-600",
-            strength.level === 'strong' && "text-green-700",
-            strength.level === 'very-strong' && "text-green-800"
+            strength.level === 'very-weak' && "text-destructive",
+            strength.level === 'weak' && "text-warning",
+            strength.level === 'fair' && "text-warning",
+            strength.level === 'good' && "text-success",
+            strength.level === 'strong' && "text-success",
+            strength.level === 'very-strong' && "text-success"
           )}>
             {strengthLabels[strength.level]}
           </span>
@@ -209,7 +209,7 @@ export function PasswordStrengthMeter({
                 key={index}
                 className={cn(
                   "flex items-center gap-2 text-sm transition-colors",
-                  isMet ? "text-green-600" : "text-gray-500"
+                  isMet ? "text-success" : "text-muted-foreground"
                 )}
               >
                 {isMet ? (
@@ -230,7 +230,7 @@ export function PasswordStrengthMeter({
           {strength.feedback.map((message, index) => (
             <div
               key={index}
-              className="flex items-start gap-2 text-sm text-yellow-600"
+              className="flex items-start gap-2 text-sm text-warning"
             >
               <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <span>{message}</span>
@@ -244,8 +244,8 @@ export function PasswordStrengthMeter({
         <div className={cn(
           "text-sm font-medium text-center py-2 px-3 rounded-md",
           strength.meetsPolicy
-            ? "bg-green-50 text-green-700 border border-green-200"
-            : "bg-yellow-50 text-yellow-700 border border-yellow-200"
+            ? "bg-success/10 text-success border border-success/20"
+            : "bg-warning/10 text-warning border border-warning/20"
         )}>
           {strength.meetsPolicy
             ? "Password meets all security requirements"

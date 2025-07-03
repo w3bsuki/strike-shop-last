@@ -1,10 +1,31 @@
-'use client';
-
+// Server Component - CVE-2025-29927 Compliant Performance Optimization
+// Phase 3: Hybrid Component Optimization - Server first row + Client lazy loading
 import React from 'react';
 import { ProductCard } from './product-card';
-import { LazyLoad } from '@/components/lazy-load';
+import { LazyProductRows } from './lazy-product-rows';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { IntegratedProduct } from '@/types/integrated';
+import type { SimpleProduct } from './types';
+
+// Transform IntegratedProduct to SimpleProduct for ProductCard
+const transformToSimpleProduct = (product: IntegratedProduct): SimpleProduct => {
+  const mainImageUrl = product.content?.images?.[0]?.url || '/placeholder.svg?height=400&width=400';
+  const basePrice = product.pricing?.basePrice || 0;
+  const salePrice = product.pricing?.salePrice;
+  
+  return {
+    id: product.id,
+    name: product.content?.name || 'Unnamed Product',
+    price: `€${basePrice}`,
+    originalPrice: salePrice ? `€${basePrice}` : undefined,
+    discount: salePrice ? `-${Math.round(((basePrice - salePrice) / basePrice) * 100)}%` : undefined,
+    image: mainImageUrl,
+    slug: product.slug,
+    isNew: product.badges?.isNew || false,
+    soldOut: product.badges?.isSoldOut || false,
+    colors: product.commerce?.variants?.length || 1,
+  };
+};
 
 interface LazyProductGridProps {
   products: IntegratedProduct[];
@@ -13,8 +34,8 @@ interface LazyProductGridProps {
 }
 
 /**
- * Client Component - Lazy-loaded Product Grid
- * Renders products in batches as user scrolls
+ * Hybrid Component - Server first row + Client lazy loading
+ * PERFORMANCE: First row server-rendered for LCP, remaining rows lazy loaded
  */
 export function LazyProductGrid({
   products,
@@ -29,38 +50,38 @@ export function LazyProductGrid({
     );
   }
 
-  // Split products into rows for better lazy loading
-  const rows: IntegratedProduct[][] = [];
-  for (let i = 0; i < products.length; i += itemsPerRow) {
-    rows.push(products.slice(i, i + itemsPerRow));
-  }
+  // Split products: first row server-rendered, remaining rows lazy loaded
+  const firstRowProducts = products.slice(0, itemsPerRow);
+  const remainingProducts = products.slice(itemsPerRow);
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {rows.map((row, rowIndex) => (
-        <LazyLoad
-          key={rowIndex}
-          fallback={<ProductRowSkeleton itemsPerRow={itemsPerRow} />}
-          threshold={0.1}
-          rootMargin="200px"
-        >
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-            {row.map((product, index) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                priority={rowIndex === 0 && index < 4} // Only prioritize first row
-                className="touch-manipulation"
-              />
-            ))}
-          </div>
-        </LazyLoad>
-      ))}
+      {/* PERFORMANCE: First row server-rendered for LCP */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+        {firstRowProducts.map((product, index) => (
+          <ProductCard
+            key={product.id}
+            product={transformToSimpleProduct(product)}
+            priority={index < 4} // All first row items are priority
+            className="touch-manipulation"
+          />
+        ))}
+      </div>
+      
+      {/* Client component handles lazy loading for remaining products */}
+      {remainingProducts.length > 0 && (
+        <LazyProductRows 
+          products={remainingProducts} 
+          itemsPerRow={itemsPerRow}
+          startingRowIndex={1}
+        />
+      )}
     </div>
   );
 }
 
-function ProductRowSkeleton({ itemsPerRow }: { itemsPerRow: number }) {
+// Server Component - Product row skeleton (static)
+export function ProductRowSkeleton({ itemsPerRow }: { itemsPerRow: number }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
       {Array.from({ length: itemsPerRow }).map((_, i) => (

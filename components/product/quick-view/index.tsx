@@ -5,7 +5,7 @@ import { X, Heart, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useCartStore } from '@/lib/cart-store';
+import { useCartActions, useStore } from '@/lib/stores';
 import { useWishlistStore, type WishlistItem } from '@/lib/wishlist-store';
 import { createProductId, createVariantId, createQuantity } from '@/types/branded';
 import { useMobile } from '@/hooks/use-mobile';
@@ -61,13 +61,13 @@ export function ProductQuickView({
   if (isMobile === true) {
     return (
       <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DrawerContent className="h-[85vh] flex flex-col bg-white">
+        <DrawerContent className="h-[85vh] flex flex-col bg-background">
           <VisuallyHidden>
             <DialogTitle>Product Quick View - {product?.name || 'Loading'}</DialogTitle>
             <DialogDescription>View product details and add to cart</DialogDescription>
           </VisuallyHidden>
           {/* Drawer Handle */}
-          <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-gray-300 mt-3" />
+          <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/30 mt-3" />
 
           {/* Mobile Optimized Content */}
           {product && (
@@ -91,7 +91,7 @@ export function ProductQuickView({
           onClick={onClose}
           variant="ghost"
           size="icon"
-          className="absolute right-4 top-4 z-10 bg-white/80 backdrop-blur-sm hover:bg-white h-11 w-11 touch-manipulation"
+          className="absolute right-4 top-4 z-10 bg-background/80 backdrop-blur-sm hover:bg-background h-11 w-11 touch-manipulation"
           aria-label="Close quick view"
         >
           <X className="h-5 w-5" aria-hidden="true" />
@@ -117,7 +117,8 @@ function QuickViewContent({
   const [isAdded, setIsAdded] = useState(false);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
-  const { addItem, openCart } = useCartStore();
+  const cartActions = useCartActions();
+  const setCartOpen = useStore((state) => state.actions.cart.setCartOpen);
   const { addToWishlist, removeFromWishlist, isInWishlist, wishlist } =
     useWishlistStore();
 
@@ -169,14 +170,14 @@ function QuickViewContent({
     }
 
     try {
-      await addItem(createProductId(product.id), createVariantId(variantId), createQuantity(quantity));
+      await cartActions.addItem(createProductId(product.id), createVariantId(variantId), createQuantity(quantity));
 
       setIsAdded(true);
       setTimeout(() => {
         setIsAdded(false);
         onClose();
         setTimeout(() => {
-          openCart();
+          setCartOpen(true);
         }, 100);
       }, 1500);
     } catch (error) {
@@ -324,7 +325,8 @@ function MobileQuickViewContent({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
 
-  const { addItem, openCart } = useCartStore();
+  const cartActions = useCartActions();
+  const setCartOpen = useStore((state) => state.actions.cart.setCartOpen);
   const { addToWishlist, removeFromWishlist, isInWishlist } =
     useWishlistStore();
 
@@ -354,7 +356,7 @@ function MobileQuickViewContent({
     if (!variantId) return;
 
     try {
-      await addItem(createProductId(product.id), createVariantId(variantId), createQuantity(1)); // Always quantity 1 for quick add
+      await cartActions.addItem(createProductId(product.id), createVariantId(variantId), createQuantity(1)); // Always quantity 1 for quick add
       setIsAdded(true);
 
       // Quick haptic feedback simulation
@@ -362,7 +364,7 @@ function MobileQuickViewContent({
 
       setTimeout(() => {
         onClose();
-        openCart();
+        setCartOpen(true);
       }, 800);
     } catch (error) {
       setIsAdded(false);
@@ -426,7 +428,7 @@ function MobileQuickViewContent({
   return (
     <div className="flex flex-col h-full">
       {/* Image Carousel - 40% height */}
-      <div className="relative h-[40%] bg-gray-50 flex-shrink-0">
+      <div className="relative h-[40%] bg-muted flex-shrink-0">
         <div
           className="relative h-full w-full overflow-hidden"
           onTouchStart={handleTouchStart}
@@ -450,7 +452,7 @@ function MobileQuickViewContent({
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
                   className={`h-2 w-2 rounded-full transition-all touch-manipulation ${
-                    idx === currentImageIndex ? 'bg-white w-6' : 'bg-white/50'
+                    idx === currentImageIndex ? 'bg-background w-6' : 'bg-background/50'
                   }`}
                   aria-label={`Go to image ${idx + 1}`}
                 />
@@ -460,12 +462,12 @@ function MobileQuickViewContent({
 
           {/* Badges */}
           {product.discount && (
-            <div className="absolute top-3 left-3 bg-red-600 text-white px-2 py-1 text-xs font-bold">
+            <div className="absolute top-3 left-3 bg-destructive text-primary-foreground px-2 py-1 text-xs font-bold">
               {product.discount}
             </div>
           )}
           {product.isNew && !product.discount && (
-            <div className="absolute top-3 left-3 bg-black text-white px-2 py-1 text-xs font-bold">
+            <div className="absolute top-3 left-3 bg-primary text-primary-foreground px-2 py-1 text-xs font-bold">
               NEW
             </div>
           )}
@@ -482,7 +484,7 @@ function MobileQuickViewContent({
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold">{product.price}</span>
             {product.originalPrice && (
-              <span className="text-base text-gray-500 line-through">
+              <span className="text-base text-muted-foreground line-through">
                 {product.originalPrice}
               </span>
             )}
@@ -501,10 +503,10 @@ function MobileQuickViewContent({
                   role="radio"
                   aria-checked={selectedSize === size}
                   aria-label={`Size ${size}`}
-                  className={`h-12 px-4 text-sm font-medium border-2 rounded-lg transition-all touch-manipulation ${
+                  className={`h-12 px-4 text-sm font-medium border rounded-md transition-all duration-200 touch-manipulation ${
                     selectedSize === size
-                      ? 'border-black bg-black text-white'
-                      : 'border-gray-200 hover:border-gray-400 active:scale-95'
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-border hover:border-muted-foreground active:scale-95'
                   }`}
                 >
                   {size}
@@ -523,10 +525,10 @@ function MobileQuickViewContent({
           <div className="flex gap-3">
             <button
               onClick={handleWishlistToggle}
-              className={`h-14 w-14 flex items-center justify-center border-2 rounded-xl transition-all flex-shrink-0 touch-manipulation active:scale-95 ${
+              className={`h-14 w-14 flex items-center justify-center border rounded-md transition-all duration-200 flex-shrink-0 touch-manipulation active:scale-95 ${
                 isWishlisted
-                  ? 'border-black bg-black text-white'
-                  : 'border-gray-200 hover:border-gray-400'
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border hover:border-muted-foreground'
               }`}
               aria-label={
                 isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'
@@ -540,7 +542,7 @@ function MobileQuickViewContent({
             <Button
               onClick={handleAddToCart}
               disabled={!selectedSize || product.soldOut || isAdded}
-              className="flex-1 h-14 text-base font-semibold bg-black text-white hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 rounded-xl transition-all touch-manipulation active:scale-95"
+              className="flex-1 h-14 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground rounded-xl transition-all touch-manipulation active:scale-95"
             >
               {isAdded ? (
                 <span className="flex items-center">
@@ -561,7 +563,7 @@ function MobileQuickViewContent({
           <Link
             href={`/product/${product.slug}`}
             onClick={onClose}
-            className="block text-center text-sm text-gray-600 underline py-2"
+            className="block text-center text-sm text-muted-foreground underline py-2"
           >
             View Full Details
           </Link>

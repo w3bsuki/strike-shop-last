@@ -4,7 +4,6 @@ import { useQuickView } from '@/contexts/QuickViewContext';
 import dynamic from 'next/dynamic';
 import { Suspense, useState, useEffect } from 'react';
 import { ShopifyService } from '@/lib/shopify/services';
-import type { IntegratedProduct } from '@/types/integrated';
 
 // BUNDLE OPTIMIZATION: Lazy load QuickView to reduce initial bundle
 // Using the new modular QuickView implementation
@@ -47,7 +46,7 @@ const QuickViewModalModular = dynamic(
  */
 export function QuickViewModal() {
   const { isOpen, productId, closeQuickView } = useQuickView();
-  const [currentProduct, setCurrentProduct] = useState<IntegratedProduct | null>(null);
+  const [currentProduct, setCurrentProduct] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch product data when modal opens

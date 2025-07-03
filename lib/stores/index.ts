@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage, devtools } from 'zustand/middleware';
 import { createCartSlice } from './slices/cart';
+import { createEnhancedCartSlice } from './slices/enhanced-cart';
 import { createWishlistSlice } from './slices/wishlist';
 import { createAuthSlice } from './slices/auth';
 import { executeMigrations } from './migrations';
@@ -13,17 +14,33 @@ export const useStore = create<StoreState>()(
       (set, get, api) => {
         // Create slices once to avoid duplication
         const cartSlice = createCartSlice(set, get, api);
+        const enhancedCartSlice = createEnhancedCartSlice(set, get, api);
         const wishlistSlice = createWishlistSlice(set, get, api);
         const authSlice = createAuthSlice(set, get, api);
 
         return {
-          // Cart state
+          // Cart state (merge basic and enhanced features)
           cart: {
+            // Basic cart state
             cartId: cartSlice.cartId,
             items: cartSlice.items || [],
             isOpen: cartSlice.isOpen,
             isLoading: cartSlice.isLoading,
             error: cartSlice.error,
+            
+            // Enhanced cart state
+            bulkOperations: enhancedCartSlice.bulkOperations || [],
+            savedCarts: enhancedCartSlice.savedCarts || [],
+            recommendations: enhancedCartSlice.recommendations || [],
+            inventoryStatus: enhancedCartSlice.inventoryStatus || [],
+            taxEstimate: enhancedCartSlice.taxEstimate || null,
+            shareToken: enhancedCartSlice.shareToken || null,
+            shareExpiry: enhancedCartSlice.shareExpiry || null,
+            savedForLater: enhancedCartSlice.savedForLater || [],
+            abandonmentTracking: enhancedCartSlice.abandonmentTracking || {
+              startTime: null,
+              events: [],
+            },
           },
 
           // Wishlist state
@@ -43,6 +60,7 @@ export const useStore = create<StoreState>()(
           // Combine all actions
           actions: {
             cart: cartSlice.actions.cart,
+            enhancedCart: enhancedCartSlice.actions.enhancedCart,
             wishlist: wishlistSlice.actions.wishlist,
             auth: authSlice.actions.auth,
           },
@@ -110,14 +128,22 @@ export const useWishlist = () => useStore(wishlistSelector);
 export const useAuth = () => useStore(authSelector);
 
 export const useCartActions = () => useStore(cartActionsSelector);
+export const useEnhancedCartActions = () => useStore((state) => state.actions.enhancedCart);
 export const useWishlistActions = () => useStore(wishlistActionsSelector);
 export const useAuthActions = () => useStore(authActionsSelector);
 
 // Specific selectors for common use cases - memoized for performance
 export const useCartItems = () => useStore((state) => state.cart.items || []);
 export const useCartIsOpen = () => useStore((state) => state.cart.isOpen);
-export const useCartTotalItems = () =>
-  useStore((state) => state.cart.items?.reduce((sum, item) => sum + item.quantity, 0) || 0);
+export const useCartTotalItems = () => {
+  const result = useStore((state) => {
+    const items = state.cart.items || [];
+    const total = items.reduce((sum, item) => sum + Number(item.quantity), 0);
+    console.log('useCartTotalItems - items:', items.length, 'total:', total);
+    return total;
+  });
+  return result;
+};
 export const useCartTotalPrice = () =>
   useStore((state) => 
     state.cart.items?.reduce((sum, item) => sum + (item.pricing.unitPrice * item.quantity), 0) || 0

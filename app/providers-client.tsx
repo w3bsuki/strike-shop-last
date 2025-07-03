@@ -12,6 +12,9 @@ import { ColorContrastProvider } from '@/components/accessibility/color-contrast
 import { FocusManagerProvider } from '@/components/accessibility/enhanced-focus-manager';
 import { LiveRegionProvider } from '@/components/accessibility/live-region';
 import { CartProvider } from '@/components/providers/cart-provider';
+import { CurrencyProvider } from '@/lib/currency/currency-context';
+import { QuickViewProvider } from '@/contexts/QuickViewContext';
+import { RegionProvider } from '@/lib/region/region-context';
 
 // Lazy load dev tools
 let ReactQueryDevtools: any = () => null;
@@ -53,9 +56,15 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
     <SupabaseAuthProvider>
       <QueryClientProvider client={queryClient}>
-        <CartProvider>
-          {children}
-        </CartProvider>
+        <RegionProvider>
+          <CurrencyProvider>
+            <CartProvider>
+              <QuickViewProvider>
+                {children}
+              </QuickViewProvider>
+            </CartProvider>
+          </CurrencyProvider>
+        </RegionProvider>
         {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </SupabaseAuthProvider>

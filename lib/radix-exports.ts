@@ -5,23 +5,16 @@
  */
 
 // Only export components that are actually used in the project
+// Phase 2: Bundle Optimization - Removed 8 unused Radix exports
 export * as Accordion from '@radix-ui/react-accordion';
-export * as AlertDialog from '@radix-ui/react-alert-dialog';
-export * as AspectRatio from '@radix-ui/react-aspect-ratio';
 export * as Avatar from '@radix-ui/react-avatar';
 export * as Checkbox from '@radix-ui/react-checkbox';
 export * as Collapsible from '@radix-ui/react-collapsible';
-export * as ContextMenu from '@radix-ui/react-context-menu';
 export * as Dialog from '@radix-ui/react-dialog';
 export * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-export * as HoverCard from '@radix-ui/react-hover-card';
 export * as Label from '@radix-ui/react-label';
-export * as Menubar from '@radix-ui/react-menubar';
-export * as NavigationMenu from '@radix-ui/react-navigation-menu';
 export * as Popover from '@radix-ui/react-popover';
 export * as Progress from '@radix-ui/react-progress';
-export * as RadioGroup from '@radix-ui/react-radio-group';
-export * as ScrollArea from '@radix-ui/react-scroll-area';
 export * as Select from '@radix-ui/react-select';
 export * as Separator from '@radix-ui/react-separator';
 export * as Slider from '@radix-ui/react-slider';
@@ -42,11 +35,7 @@ export type {
   AccordionContentProps,
 } from '@radix-ui/react-accordion';
 
-export type {
-  AlertDialogProps,
-  AlertDialogTriggerProps,
-  AlertDialogContentProps,
-} from '@radix-ui/react-alert-dialog';
+// Removed AlertDialog type exports - package no longer installed
 
 export type {
   DialogProps,

@@ -20,9 +20,9 @@ const promoCountdownVariants = cva(
       },
       color: {
         inherit: '',
-        white: 'text-white',
-        black: 'text-black',
-        danger: 'text-red-600',
+        white: 'text-primary-foreground',
+        black: 'text-foreground',
+        danger: 'text-destructive',
       },
     },
     defaultVariants: {

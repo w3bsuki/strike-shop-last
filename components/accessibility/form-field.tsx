@@ -49,7 +49,7 @@ export function AccessibleFormField({
         </p>
       )}
 
-      {React.cloneElement(children, {
+      {React.cloneElement(children as React.ReactElement<any>, {
         id,
         'aria-invalid': error ? 'true' : 'false',
         'aria-describedby': describedBy || undefined,

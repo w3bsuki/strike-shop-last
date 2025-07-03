@@ -1,19 +1,47 @@
-// Import types from existing stores for use in this file
-import type { CartItem } from '../cart-store';
+// Import types from unified types for use in this file
+import type { CartItem } from '../../types/store';
 import type { WishlistItem } from '../wishlist-store';
 import type { User, Address, Order, OrderStatus } from '../auth-store';
+import type { 
+  BulkCartItem, 
+  BulkOperation, 
+  SavedCart, 
+  CartRecommendation, 
+  InventoryStatus, 
+  TaxEstimate,
+  EnhancedCartActions 
+} from './slices/enhanced-cart';
 
 // Re-export types from existing stores for backward compatibility
 export type { CartItem, WishlistItem, User, Address, Order, OrderStatus };
 
-// Cart slice types
+// Cart slice types (including enhanced features)
 export interface CartSlice {
+  // Basic cart state
   cartId: string | null;
   items: CartItem[];
   isOpen: boolean;
   isLoading: boolean;
   error: string | null;
   checkoutUrl?: string;
+  
+  // Enhanced cart state
+  bulkOperations: BulkOperation[];
+  savedCarts: SavedCart[];
+  recommendations: CartRecommendation[];
+  inventoryStatus: InventoryStatus[];
+  taxEstimate: TaxEstimate | null;
+  shareToken: string | null;
+  shareExpiry: number | null;
+  savedForLater: any[];
+  abandonmentTracking: {
+    startTime: number | null;
+    events: Array<{
+      event: string;
+      timestamp: number;
+      data?: any;
+    }>;
+  };
 }
 
 export interface CartActions {
@@ -21,7 +49,8 @@ export interface CartActions {
   addItem: (
     productId: string,
     variantId: string,
-    quantity: number
+    quantity: number,
+    productData?: any
   ) => Promise<void>;
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
@@ -99,6 +128,7 @@ export interface StoreState {
   // Actions organized by domain
   actions: {
     cart: CartActions;
+    enhancedCart: EnhancedCartActions;
     wishlist: WishlistActions;
     auth: AuthActions;
   };

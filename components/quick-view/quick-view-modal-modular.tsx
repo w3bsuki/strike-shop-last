@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useCartStore } from '@/lib/cart-store';
+import { useCartActions, useStore } from '@/lib/stores';
 import { useWishlistStore, type WishlistItem } from '@/lib/wishlist-store';
 import { createProductId, createVariantId, createQuantity } from '@/types/branded';
 import { useMobile } from '@/hooks/use-mobile';
@@ -66,7 +66,8 @@ export function QuickViewModalModular({
   const [isAdded, setIsAdded] = useState(false);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
-  const { addItem, openCart } = useCartStore();
+  const cartActions = useCartActions();
+  const setCartOpen = useStore((state) => state.actions.cart.setCartOpen);
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
 
   const isWishlisted = product ? isInWishlist(product.id) : false;
@@ -141,7 +142,7 @@ export function QuickViewModalModular({
     }
 
     try {
-      await addItem(createProductId(product.id), createVariantId(variantId), createQuantity(quantity));
+      await cartActions.addItem(createProductId(product.id), createVariantId(variantId), createQuantity(quantity));
 
       setIsAdded(true);
       
@@ -156,7 +157,7 @@ export function QuickViewModalModular({
         setIsAdded(false);
         onClose();
         setTimeout(() => {
-          openCart();
+          setCartOpen(true);
         }, 100);
       }, 1500);
     } catch (error) {

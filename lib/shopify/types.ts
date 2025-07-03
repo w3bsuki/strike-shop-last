@@ -1,6 +1,6 @@
 /**
  * Comprehensive TypeScript types for Shopify Storefront API
- * Based on Shopify Storefront API 2024-10
+ * Based on Shopify Storefront API 2025-04
  */
 
 // ============================================
@@ -346,10 +346,20 @@ export interface Cart {
   cost: {
     totalAmount: MoneyV2;
     subtotalAmount: MoneyV2;
-    totalTaxAmount?: MoneyV2 | null;
-    totalDutyAmount?: MoneyV2 | null;
+    // Note: totalTaxAmount and totalDutyAmount deprecated in 2025-01
   };
   discountAllocations: CartDiscountAllocation[];
+}
+
+// 2025-01 API: New CartDelivery interface with addresses field
+export interface CartDelivery {
+  addresses: DeliveryAddress[];
+}
+
+export interface DeliveryAddress {
+  id: ShopifyID;
+  address: MailingAddress;
+  isDefault: boolean;
 }
 
 export interface CartLineInput {
@@ -685,6 +695,12 @@ export interface CustomerAddressDeletePayload {
   customerUserErrors: CustomerUserError[];
   deletedCustomerAddressId?: string | null;
 }
+
+// ============================================
+// Re-export Customer Types
+// ============================================
+
+export * from './types/customer';
 
 // ============================================
 // Utility Types

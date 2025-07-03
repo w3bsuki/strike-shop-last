@@ -128,7 +128,7 @@ export function TestimonialCard({
       {/* Verified Badge */}
       {author.verified && (
         <div className="px-4 pb-3">
-          <span className="inline-flex items-center text-xs text-green-600 font-medium">
+          <span className="inline-flex items-center text-xs text-success font-medium">
             <svg
               className="w-3 h-3 mr-1"
               fill="currentColor"

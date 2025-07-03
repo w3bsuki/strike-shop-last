@@ -82,7 +82,7 @@ export function ProductImageGallery({
         {/* Badges */}
         <div className="absolute top-4 left-4 space-y-2">
           {badges?.discount && (
-            <span className="bg-red-600 text-white px-2 py-1 text-xs font-bold uppercase tracking-wider">
+            <span className="bg-destructive text-white px-2 py-1 text-xs font-bold uppercase tracking-wider">
               {badges.discount}
             </span>
           )}

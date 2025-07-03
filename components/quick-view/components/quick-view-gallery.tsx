@@ -112,7 +112,7 @@ export function QuickViewGallery({
           </div>
         )}
         {!badges?.soldOut && badges?.discount && (
-          <div className="bg-red-600 text-white px-2 py-1 text-xs font-bold">
+          <div className="bg-destructive text-white px-2 py-1 text-xs font-bold">
             {badges.discount}
           </div>
         )}

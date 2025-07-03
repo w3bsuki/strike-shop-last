@@ -1,5 +1,4 @@
-"use client";
-
+// Server Component - CVE-2025-29927 Compliant Performance Optimization
 import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -31,7 +30,8 @@ export function HeroSection({
     "24/7 SUPPORT",
   ],
 }: HeroSectionProps) {
-  const contentPosition = React.useMemo(() => {
+  // Server-side calculations (moved from useMemo for performance)
+  const contentPosition = (() => {
     switch (variant) {
       case "centered":
         return "center";
@@ -42,15 +42,15 @@ export function HeroSection({
       default:
         return "bottom-left";
     }
-  }, [variant]);
+  })();
 
-  const titleSize = React.useMemo(() => {
+  const titleSize = (() => {
     if (variant === "minimal") return "sm";
     if (variant === "centered" && size === "lg") return "massive";
     if (size === "lg") return "lg";
     if (size === "sm") return "sm";
     return "default";
-  }, [variant, size]);
+  })();
 
   return (
     <Hero size={size} className={className}>
@@ -71,7 +71,7 @@ export function HeroSection({
                 size="lg"
                 className={cn(
                   "uppercase tracking-wider",
-                  variant === "centered" && "bg-white text-black hover:bg-black hover:text-white"
+                  variant === "centered" && "bg-background text-foreground hover:bg-primary hover:text-primary-foreground"
                 )}
               >
                 <Link href={cta.href}>{cta.text}</Link>
@@ -86,7 +86,7 @@ export function HeroSection({
             <React.Fragment key={item}>
               <HeroMarqueeItem>{item}</HeroMarqueeItem>
               {index < marqueeItems.length - 1 && (
-                <span className="text-white/50" aria-hidden="true">•</span>
+                <span className="text-primary-foreground/50" aria-hidden="true">•</span>
               )}
             </React.Fragment>
           ))}

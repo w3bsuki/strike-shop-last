@@ -169,7 +169,7 @@ export function useFocusTrap(isActive: boolean = true) {
 
   useEffect(() => {
     if (isActive && containerRef.current) {
-      cleanupRef.current = trapFocus(containerRef);
+      cleanupRef.current = trapFocus(containerRef as React.RefObject<HTMLElement>);
     }
 
     return () => {
@@ -209,8 +209,8 @@ export function FocusIndicator({
   };
 
   const colorStyles = {
-    primary: 'focus-visible:outline-primary',
-    secondary: 'focus-visible:outline-secondary',
+    primary: 'focus-visible:outline-primary-950',
+    secondary: 'focus-visible:outline-primary-100',
     danger: 'focus-visible:outline-destructive',
   };
 
@@ -255,7 +255,7 @@ export function SkipNavigation({ links, className = '' }: SkipNavigationProps) {
           <li key={link.href}>
             <a
               href={link.href}
-              className="block px-3 py-2 text-sm font-medium text-foreground hover:bg-muted focus:bg-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="block px-3 py-2 text-sm font-medium text-primary hover:bg-secondary focus:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               tabIndex={index === 0 ? 0 : -1}
             >
               {link.label}

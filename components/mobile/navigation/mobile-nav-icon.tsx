@@ -27,17 +27,17 @@ export function MobileNavIcon({
       {hasBadge && (
         <>
           {badgeVariant === 'dot' && (
-            <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
+            <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full" />
           )}
           
           {badgeVariant === 'number' && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium text-[10px]">
+            <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium text-[10px]">
               {typeof badge === 'number' && badge > 9 ? '9+' : badge}
             </span>
           )}
           
           {badgeVariant === 'default' && badge && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full px-1 min-w-[16px] h-4 flex items-center justify-center font-medium">
+            <span className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground text-[10px] rounded-full px-1 min-w-[16px] h-4 flex items-center justify-center font-medium">
               {badge}
             </span>
           )}

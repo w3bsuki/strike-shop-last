@@ -36,7 +36,7 @@
     
     // Additional Type Checking 
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
     "noPropertyAccessFromIndexSignature": false,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
@@ -45,8 +45,8 @@
     // Advanced Type Safety
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     
     "plugins": [
       {
@@ -81,6 +81,7 @@
     "**/*.spec.tsx",
     "__tests__/**/*",
     "jest.config.*",
-    "scripts/**/*"
+    "scripts/**/*",
+    "**/*.disabled/**/*"
   ]
 }

@@ -13,6 +13,8 @@ import { ServiceWorkerProvider } from '@/components/service-worker-provider';
 import { PWAInstallPrompt } from '@/components/pwa-install-prompt';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { CartInitializer } from '@/components/cart-initializer';
+import { typewriterFont, professionalFont } from '@/lib/fonts';
+import { CookieConsent } from '@/components/cookie-consent';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://strike-shop.com';
 
@@ -125,7 +127,7 @@ export default function RootLayout({
   const websiteJsonLd = generateWebsiteJsonLd();
 
   return (
-    <html lang="en" className="font-typewriter">
+    <html lang="en" className={`${typewriterFont.variable} ${professionalFont.variable}`}>
       <head>
         {/* CRITICAL: Optimized viewport for perfect mobile performance - handled by Next.js viewport export */}
         
@@ -194,7 +196,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body className="font-typewriter">
+      <body className={`${typewriterFont.className} ${professionalFont.variable}`}>
         <SkipLink />
         <AppErrorBoundary>
           <ProvidersWrapper>
@@ -203,6 +205,7 @@ export default function RootLayout({
             <CartInitializer />
             <ServiceWorkerProvider />
             <PWAInstallPrompt />
+            <CookieConsent />
           </ProvidersWrapper>
         </AppErrorBoundary>
       </body>

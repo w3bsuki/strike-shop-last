@@ -113,7 +113,7 @@ const ProductActions = React.forwardRef<HTMLDivElement, ProductActionsProps>(
             variant="ghost"
             size={buttonSize}
             onClick={handleQuickView}
-            className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+            className="bg-background/90 backdrop-blur-sm hover:bg-background shadow-sm"
             aria-label={`Quick view ${product.name}`}
           >
             <Eye className={iconSize} />
@@ -126,8 +126,8 @@ const ProductActions = React.forwardRef<HTMLDivElement, ProductActionsProps>(
             size={buttonSize}
             onClick={handleWishlistToggle}
             className={cn(
-              "bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm",
-              isWishlisted && "text-red-500"
+              "bg-background/90 backdrop-blur-sm hover:bg-background shadow-sm",
+              isWishlisted && "text-destructive"
             )}
             aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
             aria-pressed={isWishlisted}
@@ -147,7 +147,7 @@ const ProductActions = React.forwardRef<HTMLDivElement, ProductActionsProps>(
             size={buttonSize}
             onClick={handleAddToCart}
             disabled={isAddingItem}
-            className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm disabled:opacity-50"
+            className="bg-background/90 backdrop-blur-sm hover:bg-background shadow-sm disabled:opacity-50"
             aria-label={`Add ${product.name} to cart`}
           >
             <ShoppingBag className={cn(iconSize, isAddingItem && "animate-pulse")} />

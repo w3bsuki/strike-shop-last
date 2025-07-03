@@ -2,9 +2,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function StudioSkeleton() {
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-muted">
       {/* Sidebar Skeleton */}
-      <div className="w-64 bg-white border-r p-4 space-y-4">
+      <div className="w-64 bg-background border-r p-4 space-y-4">
         <Skeleton className="h-8 w-full" />
         <div className="space-y-2">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -25,7 +25,7 @@ export function StudioSkeleton() {
           {/* Content Grid */}
           <div className="grid gap-6">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-lg p-6 shadow-sm">
+              <div key={i} className="bg-background rounded-lg p-6 shadow-sm">
                 <Skeleton className="h-6 w-48 mb-4" />
                 <div className="space-y-3">
                   <Skeleton className="h-4 w-full" />

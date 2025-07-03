@@ -1,5 +1,5 @@
-'use client';
-
+// Server Component - CVE-2025-29927 Compliant Performance Optimization
+// Phase 3: Hybrid Component Optimization - Server footer + Client newsletter
 import { FooterSection } from './footer-section';
 import { FooterNewsletter } from './footer-newsletter';
 import { FooterBottom } from './footer-bottom';
@@ -24,7 +24,7 @@ export function Footer({
   const showSections = variant !== 'compact' && config.sections.length > 0;
 
   return (
-    <footer className={cn('bg-white section-padding border-t border-subtle pb-safe-8 px-safe', className)}>
+    <footer className={cn('bg-background section-padding border-t border-border pb-safe-8 px-safe', className)}>
       <div className="strike-container">
         {variant === 'compact' ? (
           // Compact footer layout

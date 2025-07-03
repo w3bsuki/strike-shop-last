@@ -15,7 +15,7 @@ export function FooterLink({ href, children, className, external = false }: Foot
     <Link
       href={href}
       className={cn(
-        'text-xs hover:text-black text-[var(--subtle-text-color)] transition-colors',
+        'text-xs hover:text-foreground text-muted-foreground transition-colors',
         className
       )}
       {...linkProps}

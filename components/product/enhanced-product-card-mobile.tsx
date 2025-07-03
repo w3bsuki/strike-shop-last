@@ -234,7 +234,7 @@ const EnhancedMobileProductCardComponent = React.memo(({
       </div>
 
       {/* Image container with optimized aspect ratio */}
-      <div className="relative bg-gray-100 aspect-[3/4] overflow-hidden">
+      <div className="relative bg-muted aspect-[3/4] overflow-hidden">
         <ProductImage
           src={product.image || '/placeholder.svg'}
           alt={`${product.name}${product.soldOut ? ' - sold out' : ''}`}
@@ -246,7 +246,7 @@ const EnhancedMobileProductCardComponent = React.memo(({
         {/* Product badges */}
         {product.discount && (
           <div 
-            className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 z-10"
+            className="absolute top-2 left-2 bg-destructive text-white text-xs font-bold px-2 py-1 z-10"
             role="status" 
             aria-label={`${product.discount} discount`}
           >
@@ -264,7 +264,7 @@ const EnhancedMobileProductCardComponent = React.memo(({
         )}
         {product.soldOut && (
           <div 
-            className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 z-10"
+            className="absolute top-2 right-2 bg-destructive text-white text-xs font-bold px-2 py-1 z-10"
             role="status"
             aria-label="Product is sold out"
           >
@@ -393,7 +393,7 @@ const EnhancedMobileProductCardComponent = React.memo(({
             </span>
             {product.originalPrice && (
               <span 
-                className="font-typewriter text-xs text-gray-500 line-through"
+                className="font-typewriter text-xs text-muted-foreground line-through"
                 aria-label={`Original price ${product.originalPrice}`}
               >
                 {product.originalPrice}
@@ -401,7 +401,7 @@ const EnhancedMobileProductCardComponent = React.memo(({
             )}
           </div>
           {product.colors && (
-            <div className="text-xs text-gray-500 mt-1 font-typewriter">
+            <div className="text-xs text-muted-foreground mt-1 font-typewriter">
               <span aria-label={`Available in ${product.colors} different colors`}>
                 {product.colors} Colors
               </span>

@@ -9,10 +9,10 @@ const heroBadgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-white text-black",
-        outline: "border border-white text-white",
-        destructive: "bg-red-600 text-white",
-        secondary: "bg-white/20 text-white backdrop-blur-sm",
+        default: "bg-background text-foreground",
+        outline: "border border-primary-foreground text-primary-foreground",
+        destructive: "bg-destructive text-destructive-foreground",
+        secondary: "bg-background/20 text-primary-foreground backdrop-blur-sm",
       },
     },
     defaultVariants: {

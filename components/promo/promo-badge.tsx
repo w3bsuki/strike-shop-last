@@ -18,10 +18,10 @@ const promoBadgeVariants = cva(
       },
       color: {
         inherit: '',
-        white: 'text-white',
-        black: 'text-black',
+        white: 'text-primary-foreground',
+        black: 'text-foreground',
         primary: 'text-primary',
-        danger: 'text-red-600',
+        danger: 'text-destructive',
       },
     },
     defaultVariants: {

@@ -57,3 +57,51 @@ Thumbs.db
 *.tmp
 *.temp
 *.log
+.tmp/
+temp/
+
+# Medusa specific
+/uploads
+/dist
+/.cache
+medusa-db.sql
+medusa-config.local.js
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Keys and certificates  
+*.key
+*.cert
+*.crt
+*.pem
+private/
+secrets/
+
+# Backup files
+*.backup
+*.bak
+
+# Package files
+*.tgz
+
+# Shopify
+.shopify/
+
+# Strike Shop specific
+/public/uploads/
+/storage/
+*.local.json
+
+# Test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+coverage/
+.nyc_output/
+
+# Monitoring
+.grafana/
+.prometheus/

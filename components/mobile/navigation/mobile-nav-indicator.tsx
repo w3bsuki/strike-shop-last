@@ -30,7 +30,7 @@ export function MobileNavIndicator({
   const colorStyles = {
     primary: 'bg-primary',
     secondary: 'bg-secondary',
-    accent: 'bg-accent',
+    accent: 'bg-secondary',
     white: 'bg-white',
     black: 'bg-black',
   };

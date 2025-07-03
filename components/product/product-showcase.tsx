@@ -66,6 +66,8 @@ export function ProductShowcase({
   headerAlign = "left",
   priority = false,
 }: ProductShowcaseProps) {
+  console.log('[ProductShowcase] Rendering:', title, 'with', products.length, 'products');
+  console.log('[ProductShowcase] First product:', products[0]);
   const badge = showBadge && badgeText ? (
     <ProductBadge variant={badgeVariant} size="sm">
       {badgeText}

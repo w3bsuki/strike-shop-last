@@ -180,15 +180,15 @@ export function AdminDashboardOptimized() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'delivered':
-        return 'text-green-600 bg-green-50';
+        return 'text-success bg-green-50';
       case 'shipped':
-        return 'text-blue-600 bg-blue-50';
+        return 'text-info bg-blue-50';
       case 'processing':
         return 'text-yellow-600 bg-yellow-50';
       case 'pending':
         return 'text-purple-600 bg-purple-50';
       case 'cancelled':
-        return 'text-red-600 bg-red-50';
+        return 'text-destructive bg-red-50';
       default:
         return 'text-gray-600 bg-gray-50';
     }
@@ -236,7 +236,7 @@ export function AdminDashboardOptimized() {
           const Icon = stat.icon;
           const TrendIcon = stat.trend === 'up' ? TrendingUp : TrendingDown;
           const trendColor =
-            stat.trend === 'up' ? 'text-green-600' : 'text-red-600';
+            stat.trend === 'up' ? 'text-success' : 'text-destructive';
 
           return (
             <Card key={stat.title}>

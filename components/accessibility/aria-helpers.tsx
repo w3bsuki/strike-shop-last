@@ -121,7 +121,7 @@ interface LandmarkProps {
   label?: string;
   labelledBy?: string;
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: keyof React.JSX.IntrinsicElements;
 }
 
 export function Landmark({ 
@@ -241,7 +241,7 @@ export function AccessibleButton({
     primary: 'strike-button-primary',
     secondary: 'strike-button-secondary',
     outline: 'strike-button-outline',
-    ghost: 'bg-transparent hover:bg-muted'
+    ghost: 'bg-transparent hover:bg-secondary'
   };
 
   const sizeStyles = {
@@ -259,7 +259,7 @@ export function AccessibleButton({
           ${sizeStyles[size]}
           focus-visible:outline-2 
           focus-visible:outline-offset-2
-          focus-visible:outline-primary
+          focus-visible:outline-primary-950
           disabled:opacity-50 
           disabled:cursor-not-allowed
           transition-all duration-200
@@ -320,10 +320,10 @@ export function AriaAlert({
   const titleId = `title-${Math.random().toString(36).substr(2, 9)}`;
   
   const variantStyles = {
-    info: 'bg-muted border-border text-foreground',
-    success: 'bg-muted border-border text-foreground',
-    warning: 'bg-muted border-border text-foreground',
-    error: 'bg-destructive/10 border-destructive/20 text-destructive-foreground'
+    info: 'bg-secondary border-input text-primary',
+    success: 'bg-secondary border-input text-primary',
+    warning: 'bg-secondary border-input text-primary',
+    error: 'bg-destructive/10 border-destructive/20 text-destructive'
   };
 
   const iconMap = {
@@ -436,7 +436,7 @@ export function AccessibleField({
           ].filter(Boolean).join(' ') || undefined,
           'aria-invalid': error ? 'true' : undefined,
           'aria-required': required,
-        })}
+        } as any)}
       </div>
       
       {error && (

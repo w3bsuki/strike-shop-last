@@ -1,31 +1,38 @@
 export type NavItem = {
   title: string;
+  titleKey?: string; // Translation key for i18n
   href: string;
   description?: string;
   badge?: string;
+  badgeKey?: string; // Translation key for badge
   external?: boolean;
 };
 
 export type NavCategory = {
   title: string;
+  titleKey?: string; // Translation key for i18n
   items: NavItem[];
 };
 
 export const mainNavItems: NavItem[] = [
   {
     title: "Men",
+    titleKey: "nav.men",
     href: "/men",
   },
   {
-    title: "Women",
+    title: "Women", 
+    titleKey: "nav.women",
     href: "/women",
   },
   {
     title: "Kids",
+    titleKey: "nav.kids", 
     href: "/kids",
   },
   {
     title: "Sale",
+    titleKey: "nav.sale",
     href: "/sale",
     badge: "HOT",
   },

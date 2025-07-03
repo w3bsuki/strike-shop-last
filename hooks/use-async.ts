@@ -141,7 +141,7 @@ export function useDebouncedAsync<T = any>(
     retry: () => {},
   });
   
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const { execute: executeAsync } = useAsync(asyncFunction, options);
 
   const execute = useCallback(

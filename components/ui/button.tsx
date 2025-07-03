@@ -9,19 +9,19 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90 border-2 border-primary',
         destructive:
           'bg-destructive text-destructive-foreground hover:bg-destructive/90',
         outline:
-          'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+          'border border-input bg-background hover:bg-secondary hover:text-secondary-foreground',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost:
-          'hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground',
+          'hover:bg-secondary hover:text-secondary-foreground focus-visible:bg-secondary focus-visible:text-secondary-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
         // Strike-specific variants matching our custom CSS
         strike:
-          'bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-xs uppercase tracking-[0.1em] rounded-none border-none px-6 py-2.5 disabled:bg-muted disabled:cursor-not-allowed disabled:text-muted-foreground',
+          'bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-xs uppercase tracking-[0.1em] rounded-none border-none px-6 py-2.5 disabled:bg-secondary disabled:cursor-not-allowed disabled:text-muted-foreground',
         'strike-outline':
           'border-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-primary-foreground font-bold text-xs uppercase tracking-[0.1em] rounded-none px-6 py-2.5 transition-all',
         'strike-text':

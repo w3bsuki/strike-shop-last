@@ -2,12 +2,16 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { NewsletterBanner } from "./newsletter-banner";
 import { NavBar } from "./navbar";
 import { MobileNav } from "./mobile-nav";
 import { SearchBar } from "./search-bar";
 import { UserNav } from "./user-nav";
+import { CurrencySwitcherMinimal, CurrencySwitcherCompact } from "@/components/currency-switcher";
+import { LanguageSwitcherMinimal, LanguageSwitcherCompact } from "@/components/language-switcher";
+import type { Locale } from "@/lib/i18n/config";
 
 interface SiteHeaderProps {
   className?: string;
@@ -15,6 +19,8 @@ interface SiteHeaderProps {
 
 export function SiteHeader({ className }: SiteHeaderProps) {
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const params = useParams();
+  const currentLocale = (params.lang || 'en') as Locale;
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -54,6 +60,8 @@ export function SiteHeader({ className }: SiteHeaderProps) {
             {/* Actions */}
             <div className="flex items-center gap-2">
               <SearchBar variant="icon" />
+              <LanguageSwitcherMinimal currentLocale={currentLocale} />
+              <CurrencySwitcherMinimal />
               <UserNav />
             </div>
           </div>
@@ -73,8 +81,10 @@ export function SiteHeader({ className }: SiteHeaderProps) {
               STRIKE™
             </Link>
 
-            {/* Right: Cart only */}
-            <div className="justify-self-end">
+            {/* Right: Language + Currency + Cart */}
+            <div className="justify-self-end flex items-center gap-1">
+              <LanguageSwitcherCompact currentLocale={currentLocale} />
+              <CurrencySwitcherCompact />
               <UserNav showCart />
             </div>
           </div>

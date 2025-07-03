@@ -18,8 +18,8 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
   const { cart } = useCart();
   const { updateItemQuantity, removeItem } = useCartActions();
   
-  // Calculate totals from cart
-  const totalItems = cart?.items?.reduce((total, item) => total + (item.quantity as any), 0) || 0;
+  // Calculate totals from cart - ensure we get latest state
+  const totalItems = cart?.items?.reduce((total, item) => total + Number(item.quantity), 0) || 0;
   const totalPrice = cart?.items?.reduce((total, item) => {
     const price = item.pricing?.totalPrice as any as number || 0;
     return total + price;
@@ -45,7 +45,7 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
       <ShoppingBag className="h-6 w-6" />
       <span suppressHydrationWarning>
         {isClient && totalItems > 0 && (
-          <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-mono">
+          <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-mono">
             {totalItems > 99 ? '99+' : totalItems}
           </span>
         )}
@@ -79,11 +79,11 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
 
         {cart?.items?.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center p-6">
-            <ShoppingBag className="h-16 w-16 text-gray-300 mb-4" />
+            <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="font-mono text-sm font-bold uppercase tracking-wider mb-2">
               Your bag is empty
             </h3>
-            <p className="text-xs text-gray-500 text-center mb-6 font-mono">
+            <p className="text-xs text-muted-foreground text-center mb-6 font-mono">
               Start shopping to add items to your bag
             </p>
             <Button asChild className="w-full">
@@ -98,8 +98,8 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
             <div className="flex-1 overflow-y-auto">
               <div className="p-6 space-y-4">
                 {cart?.items?.map((item: any) => (
-                  <div key={item.id} className="flex gap-4 pb-4 border-b border-gray-100 last:border-0">
-                    <div className="relative w-20 h-24 bg-gray-100 flex-shrink-0">
+                  <div key={item.id} className="flex gap-4 pb-4 border-b border-border last:border-0">
+                    <div className="relative w-20 h-24 bg-muted flex-shrink-0">
                       <Image
                         src={item.image || '/placeholder.svg'}
                         alt={item.name}
@@ -114,7 +114,7 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
                         {item.name}
                       </h4>
                       {item.size && (
-                        <p className="text-xs text-gray-500 font-mono mt-1">
+                        <p className="text-xs text-muted-foreground font-mono mt-1">
                           Size: {item.size}
                         </p>
                       )}
@@ -126,7 +126,7 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
                       <div className="flex items-center justify-between mt-3">
                         <div className="flex items-center space-x-2">
                           <button
-                            className="border border-gray-300 hover:border-black min-h-touch min-w-touch flex items-center justify-center touch-manipulation transition-colors"
+                            className="border border-border hover:border-primary min-h-touch min-w-touch flex items-center justify-center touch-manipulation transition-colors"
                             onClick={() => updateItemQuantity(item.id as any, Math.max(1, (item.quantity as any) - 1))}
                             disabled={isUpdatingItem || (item.quantity as any) <= 1}
                           >
@@ -136,7 +136,7 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
                             {item.quantity}
                           </span>
                           <button
-                            className="border border-gray-300 hover:border-black min-h-touch min-w-touch flex items-center justify-center touch-manipulation transition-colors"
+                            className="border border-border hover:border-primary min-h-touch min-w-touch flex items-center justify-center touch-manipulation transition-colors"
                             onClick={() => updateItemQuantity(item.id as any, (item.quantity as any) + 1)}
                             disabled={isUpdatingItem}
                           >
@@ -145,7 +145,7 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
                         </div>
                         
                         <button
-                          className="text-gray-400 hover:text-red-500 p-1 touch-manipulation transition-colors"
+                          className="text-muted-foreground hover:text-destructive p-1 touch-manipulation transition-colors"
                           onClick={() => removeItem(item.id as any)}
                           disabled={isRemovingItem}
                           aria-label="Remove item"
@@ -170,7 +170,7 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
                 </span>
               </div>
               
-              <p className="text-xs text-gray-500 font-mono text-center">
+              <p className="text-xs text-muted-foreground font-mono text-center">
                 Shipping and taxes calculated at checkout
               </p>
               
@@ -189,7 +189,7 @@ export function MiniCart({ trigger, isOpen, onOpenChange }: MiniCartProps) {
               
               <div className="text-center">
                 <button
-                  className="text-xs text-gray-500 hover:text-gray-700 font-mono underline transition-colors"
+                  className="text-xs text-muted-foreground hover:text-foreground font-mono underline transition-colors"
                   onClick={() => setOpen(false)}
                 >
                   Continue Shopping

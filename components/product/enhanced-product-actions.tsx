@@ -203,9 +203,9 @@ export function EnhancedProductActions({ product, slug }: ProductActionsProps) {
       {/* Stock Status */}
       <div className="text-xs font-mono text-gray-500">
         {maxQuantity > 0 ? (
-          <span className="text-green-600">✓ IN STOCK</span>
+          <span className="text-success">✓ IN STOCK</span>
         ) : (
-          <span className="text-red-600">✗ OUT OF STOCK</span>
+          <span className="text-destructive">✗ OUT OF STOCK</span>
         )}
       </div>
     </div>
