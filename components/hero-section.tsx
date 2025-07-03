@@ -56,7 +56,7 @@ export function HeroSection() {
           <div 
             className="flex"
             style={{
-              animation: 'hero-marquee-scroll 100s linear infinite',
+              animation: 'hero-marquee-scroll 200s linear infinite',
             }}
           >
             <div className="flex whitespace-nowrap pr-12">
