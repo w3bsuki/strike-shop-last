@@ -319,6 +319,10 @@
   animation: marquee2 25s linear infinite;
 }
 
+.animate-marquee-slow {
+  animation: marquee 60s linear infinite;
+}
+
 /* Dark mode is not currently implemented - remove unused styles */
 
 /* ==========================================================================

@@ -52,9 +52,16 @@ export function HeroSection() {
         </Button>
       </div>
       <div className="absolute bottom-0 left-0 right-0 bg-black text-white py-3 overflow-hidden border-t-2 border-white">
-        <div className="flex animate-marquee whitespace-nowrap" style={{ willChange: 'transform' }}>
-          {/* First copy of content */}
-          <div className="flex">
+        <div className="relative flex">
+          <div className="animate-marquee-slow flex whitespace-nowrap">
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
+            <span className="mx-4 font-bold">•</span>
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">"{t('home.premiumQuality')}"</span>
+            <span className="mx-4 font-bold">•</span>
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.sustainableMaterials')}</span>
+            <span className="mx-4 font-bold">•</span>
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.support247')}</span>
+            <span className="mx-4 font-bold">•</span>
             <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
             <span className="mx-4 font-bold">•</span>
             <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">"{t('home.premiumQuality')}"</span>
@@ -64,8 +71,15 @@ export function HeroSection() {
             <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.support247')}</span>
             <span className="mx-4 font-bold">•</span>
           </div>
-          {/* Duplicate for seamless loop */}
-          <div className="flex" aria-hidden="true">
+          <div className="animate-marquee-slow flex whitespace-nowrap absolute top-0" aria-hidden="true">
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
+            <span className="mx-4 font-bold">•</span>
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">"{t('home.premiumQuality')}"</span>
+            <span className="mx-4 font-bold">•</span>
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.sustainableMaterials')}</span>
+            <span className="mx-4 font-bold">•</span>
+            <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.support247')}</span>
+            <span className="mx-4 font-bold">•</span>
             <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
             <span className="mx-4 font-bold">•</span>
             <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">"{t('home.premiumQuality')}"</span>
