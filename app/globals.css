@@ -312,7 +312,7 @@
 }
 
 .animate-marquee {
-  animation: marquee 25s linear infinite;
+  animation: marquee 40s linear infinite;
 }
 
 .animate-marquee2 {
@@ -1500,18 +1500,7 @@ button, [role="button"], a, input, select, textarea {
 }
 
 /* Marquee animation for hero */
-@keyframes marquee {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  animation: marquee 30s linear infinite;
-}
+/* Removed duplicate - using the one defined earlier */
 
 .modal-backdrop { animation: fadeIn 0.2s ease-out; }
 .modal-content { animation: slideInUp 0.3s ease-out; }

@@ -93,10 +93,10 @@ export const ProductCard = React.memo(({ product, className = '', priority = fal
           {/* Wishlist */}
           <button
             onClick={handleToggleWishlist}
-            className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity border border-gray-200"
             aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
           >
-            <Heart className={`h-4 w-4 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`} />
+            <Heart className={`h-3.5 w-3.5 ${isInWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
           </button>
           
           {/* Quick View on Hover (always visible on mobile) */}
@@ -134,10 +134,10 @@ export const ProductCard = React.memo(({ product, className = '', priority = fal
           <button
             onClick={handleAddToCart}
             disabled={product.soldOut}
-            className="flex-shrink-0 p-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="flex-shrink-0 p-1.5 bg-black text-white rounded hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             aria-label={product.soldOut ? 'Sold out' : 'Add to cart'}
           >
-            <ShoppingBag className="h-4 w-4" />
+            <ShoppingBag className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
