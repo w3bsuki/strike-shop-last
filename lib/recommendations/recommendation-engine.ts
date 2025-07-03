@@ -23,10 +23,16 @@ export class RecommendationEngine {
   private shopifyService: typeof ShopifyService;
 
   constructor() {
-    this.supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    // Make Supabase optional - use only if env vars are provided
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      this.supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+      );
+    } else {
+      // Create a dummy client that will throw if used
+      this.supabase = null as any;
+    }
     
     this.shopifyService = ShopifyService;
     
