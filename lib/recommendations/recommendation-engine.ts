@@ -205,7 +205,7 @@ export class RecommendationEngine {
 
     if (similarities && similarities.length > 0) {
       // Use pre-computed similarities
-      const productIds = similarities.map(s => s.product_b);
+      const productIds = similarities.map((s: { product_b: string; similarity_score: number }) => s.product_b);
       // Fetch all products and filter by IDs
       const allProducts = await this.shopifyService.getProducts(100);
       const products = allProducts.filter(p => productIds.includes(p.id));
