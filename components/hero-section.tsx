@@ -52,27 +52,37 @@ export function HeroSection() {
         </Button>
       </div>
       <div className="absolute bottom-0 left-0 right-0 bg-black text-white py-3 overflow-hidden border-t-2 border-white">
-        <div className="flex">
-          <div className="flex animate-scroll-left">
-            <div className="flex space-x-8 px-4">
-              <span className="font-typewriter font-bold tracking-wider text-sm uppercase whitespace-nowrap">{t('home.freeShipping')}</span>
-              <span className="font-bold">•</span>
-              <span className="font-typewriter font-bold tracking-wider text-sm uppercase whitespace-nowrap">"{t('home.premiumQuality')}"</span>
-              <span className="font-bold">•</span>
-              <span className="font-typewriter font-bold tracking-wider text-sm uppercase whitespace-nowrap">{t('home.sustainableMaterials')}</span>
-              <span className="font-bold">•</span>
-              <span className="font-typewriter font-bold tracking-wider text-sm uppercase whitespace-nowrap">{t('home.support247')}</span>
-              <span className="font-bold">•</span>
+        <div className="relative flex">
+          <style jsx>{`
+            @keyframes slow-scroll {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+            .marquee-content {
+              display: flex;
+              animation: slow-scroll 120s linear infinite;
+            }
+          `}</style>
+          <div className="marquee-content">
+            <div className="flex whitespace-nowrap pr-8">
+              <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
+              <span className="mx-4 font-bold">•</span>
+              <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">"{t('home.premiumQuality')}"</span>
+              <span className="mx-4 font-bold">•</span>
+              <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.sustainableMaterials')}</span>
+              <span className="mx-4 font-bold">•</span>
+              <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.support247')}</span>
+              <span className="mx-4 font-bold">•</span>
             </div>
-            <div className="flex space-x-8 px-4" aria-hidden="true">
-              <span className="font-typewriter font-bold tracking-wider text-sm uppercase whitespace-nowrap">{t('home.freeShipping')}</span>
-              <span className="font-bold">•</span>
-              <span className="font-typewriter font-bold tracking-wider text-sm uppercase whitespace-nowrap">"{t('home.premiumQuality')}"</span>
-              <span className="font-bold">•</span>
-              <span className="font-typewriter font-bold tracking-wider text-sm uppercase whitespace-nowrap">{t('home.sustainableMaterials')}</span>
-              <span className="font-bold">•</span>
-              <span className="font-typewriter font-bold tracking-wider text-sm uppercase whitespace-nowrap">{t('home.support247')}</span>
-              <span className="font-bold">•</span>
+            <div className="flex whitespace-nowrap pr-8" aria-hidden="true">
+              <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
+              <span className="mx-4 font-bold">•</span>
+              <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">"{t('home.premiumQuality')}"</span>
+              <span className="mx-4 font-bold">•</span>
+              <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.sustainableMaterials')}</span>
+              <span className="mx-4 font-bold">•</span>
+              <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.support247')}</span>
+              <span className="mx-4 font-bold">•</span>
             </div>
           </div>
         </div>
