@@ -345,6 +345,15 @@
   }
 }
 
+@keyframes slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 /* Dark mode is not currently implemented - remove unused styles */
 
 /* ==========================================================================

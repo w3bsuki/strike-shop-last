@@ -53,12 +53,7 @@ export function HeroSection() {
       </div>
       <div className="absolute bottom-0 left-0 right-0 bg-black text-white py-3 overflow-hidden border-t-2 border-white">
         <div className="relative flex">
-          <div 
-            className="flex"
-            style={{
-              animation: 'hero-marquee-scroll 200s linear infinite',
-            }}
-          >
+          <div className="flex animate-[slide_200s_linear_infinite]">
             <div className="flex whitespace-nowrap pr-12">
               <span className="mx-4 font-typewriter font-bold tracking-wider text-sm uppercase">{t('home.freeShipping')}</span>
               <span className="mx-4 font-bold">•</span>
