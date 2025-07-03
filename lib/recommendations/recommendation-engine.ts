@@ -296,7 +296,7 @@ export class RecommendationEngine {
     let products: IntegratedProduct[] = [];
     
     if (affinities && affinities.length > 0) {
-      const productIds = affinities.map(a => a.product_b);
+      const productIds = affinities.map((a: { product_b: string; affinity_score: number; confidence: number; lift: number }) => a.product_b);
       const allProducts = await this.shopifyService.getProducts(100);
       products = allProducts.filter(p => productIds.includes(p.id));
     } else {
@@ -351,7 +351,7 @@ export class RecommendationEngine {
     
     if (views && views.length > 0) {
       // Get unique product IDs (recently viewed)
-      const recentProductIds = [...new Set(views.map(v => v.product_id))];
+      const recentProductIds = [...new Set(views.map((v: { product_id: string; viewed_at: string; view_duration: number }) => v.product_id))];
       
       // Get products with view weighting
       const allProducts = await this.shopifyService.getProducts(100);
@@ -394,7 +394,7 @@ export class RecommendationEngine {
     // Count occurrences manually
     const productCounts = new Map<string, number>();
     if (recentViews) {
-      recentViews.forEach(view => {
+      recentViews.forEach((view: { product_id: string }) => {
         const count = productCounts.get(view.product_id) || 0;
         productCounts.set(view.product_id, count + 1);
       });
@@ -409,7 +409,7 @@ export class RecommendationEngine {
     let products: IntegratedProduct[] = [];
     
     if (trending && trending.length > 0) {
-      const productIds = trending.map(t => t.product_id);
+      const productIds = trending.map((t: { product_id: string }) => t.product_id);
       const allProducts = await this.shopifyService.getProducts(100);
       products = allProducts.filter(p => productIds.includes(p.id));
     } else {
@@ -506,10 +506,10 @@ export class RecommendationEngine {
 
     return {
       productViews: views.data || [],
-      cartAdditions: interactions.data?.filter(i => i.interaction_type === 'cart_add') || [],
+      cartAdditions: interactions.data?.filter((i: any) => i.interaction_type === 'cart_add') || [],
       purchases: purchases.data || [],
-      wishlistItems: interactions.data?.filter(i => i.interaction_type === 'wishlist_add') || [],
-      searches: interactions.data?.filter(i => i.interaction_type === 'search') || []
+      wishlistItems: interactions.data?.filter((i: any) => i.interaction_type === 'wishlist_add') || [],
+      searches: interactions.data?.filter((i: any) => i.interaction_type === 'search') || []
     };
   }
 
@@ -576,8 +576,8 @@ export class RecommendationEngine {
   private async findSimilarUsers(userId: string, userBehavior: UserBehavior): Promise<string[]> {
     // Find users with similar purchase/view patterns
     const userProductIds = new Set([
-      ...userBehavior.productViews.map(v => v.productId),
-      ...userBehavior.purchases.map(p => p.productId)
+      ...userBehavior.productViews.map((v: any) => v.productId),
+      ...userBehavior.purchases.map((p: any) => p.productId)
     ]);
 
     if (userProductIds.size === 0) return [];
@@ -705,7 +705,7 @@ export class RecommendationEngine {
   }
 
   private applyRecencyWeighting(products: IntegratedProduct[], views: any[]): IntegratedProduct[] {
-    const viewMap = new Map(views.map(v => [v.product_id, v]));
+    const viewMap = new Map(views.map((v: { product_id: string; viewed_at: string; view_duration?: number }) => [v.product_id, v]));
     
     return products
       .map(product => {
