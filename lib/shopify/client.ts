@@ -52,7 +52,7 @@ export class ShopifyClient {
     });
   }
 
-  async query<T>(query: string, variables: Record<string, any> = {}, context?: ShopifyRequestContext): Promise<T> {
+  async query<T>(query: string, variables: Record<string, unknown> = {}, context?: ShopifyRequestContext): Promise<T> {
     const apiVersion = this.config.apiVersion || '2025-01';
     const endpoint = `https://${this.config.domain}/api/${apiVersion}/graphql.json`;
     
@@ -100,7 +100,7 @@ export class ShopifyClient {
       if (error?.response?.errors) {
         const gqlErrors = error.response.errors;
         console.error('[ShopifyClient] GraphQL errors:', gqlErrors);
-        throw new Error(`Shopify GraphQL error: ${gqlErrors.map((e: any) => e.message).join(', ')}`);
+        throw new Error(`Shopify GraphQL error: ${gqlErrors.map((e: { message: string }) => e.message).join(', ')}`);
       }
       
       // Check if it's a network error

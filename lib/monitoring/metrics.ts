@@ -112,7 +112,7 @@ class MetricsCollector {
 export const metrics = new MetricsCollector();
 
 // Business metrics helpers
-export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
+export const trackEvent = (eventName: string, properties?: Record<string, string>) => {
   metrics.increment(`event_${eventName}`, properties);
 };
 

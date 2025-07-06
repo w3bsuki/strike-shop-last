@@ -16,7 +16,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
     
     // Send critical error to monitoring service
     if (process.env.NODE_ENV === 'production') {
-      fetch('/api/analytics/errors', {
+      fetch('/api/monitoring/errors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -184,7 +184,7 @@ export default function StripePaymentForm({
       try {
         // Create payment intent directly via API
 
-        const response = await fetch('/api/payments/create-intent', {
+        const response = await fetch('/api/payments/intent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

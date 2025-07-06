@@ -19,7 +19,7 @@ export interface GenericEvent {
   category: string;
   label?: string;
   value?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ProductData {
@@ -31,7 +31,7 @@ export interface ProductData {
   brand?: string;
   variant?: string;
   quantity?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PurchaseData {
@@ -39,7 +39,7 @@ export interface PurchaseData {
   items: ProductData[];
   total: number;
   currency: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // Helper function to log events in development

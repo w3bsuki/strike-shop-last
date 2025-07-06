@@ -40,7 +40,7 @@ export function CheckoutForm({ cartItems }: CheckoutFormProps) {
     setError('');
 
     try {
-      const response = await fetch('/api/payments/create-intent', {
+      const response = await fetch('/api/payments/intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

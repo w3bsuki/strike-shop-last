@@ -28,5 +28,5 @@ export interface ProductPageData {
   categories: ProductCategory[];
   tags: ProductTag[];
   material?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

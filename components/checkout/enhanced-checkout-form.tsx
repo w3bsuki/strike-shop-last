@@ -266,7 +266,7 @@ export function EnhancedCheckoutForm({ onPaymentSuccess, onPaymentError }: Enhan
 
     const createPaymentIntent = async () => {
       try {
-        const response = await fetch('/api/payments/create-payment-intent', {
+        const response = await fetch('/api/payments/intent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

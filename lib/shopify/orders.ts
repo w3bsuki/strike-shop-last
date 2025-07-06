@@ -1,5 +1,6 @@
 // Shopify Order Management Service
 import type { ShopifyOrderInput } from '@/lib/stripe/types';
+import type { MailingAddress, Customer, OrderLineItem } from '@/lib/shopify/types';
 
 export interface ShopifyOrder {
   id: string;
@@ -12,10 +13,10 @@ export interface ShopifyOrder {
   total_tax: string;
   financial_status: string;
   fulfillment_status: string;
-  line_items: any[];
-  shipping_address: any;
-  billing_address: any;
-  customer: any;
+  line_items: OrderLineItem[];
+  shipping_address: MailingAddress | null;
+  billing_address: MailingAddress | null;
+  customer: Customer | null;
 }
 
 /**
@@ -101,7 +102,7 @@ export async function updateOrderFulfillment(orderId: string, fulfillmentData: {
   tracking_company?: string;
   tracking_url?: string;
   line_items?: Array<{ id: string; quantity: number }>;
-}): Promise<any> {
+}): Promise<{ fulfillment: { id: string; status: string; tracking_number?: string; tracking_company?: string; tracking_url?: string } }> {
   const shopifyDomain = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN;
   const accessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
 

@@ -143,10 +143,10 @@ export class APISecurityMiddleware {
   private static validateQueryParams(params: Record<string, string>, schema: ValidationSchema['query']): {
     isValid: boolean
     errors: string[]
-    sanitizedData: Record<string, any>
+    sanitizedData: Record<string, string | number | boolean>
   } {
     const errors: string[] = []
-    const sanitizedData: Record<string, any> = {}
+    const sanitizedData: Record<string, string | number | boolean> = {}
 
     if (!schema) return { isValid: true, errors: [], sanitizedData: {} }
 

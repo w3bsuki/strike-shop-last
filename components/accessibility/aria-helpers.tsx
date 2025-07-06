@@ -527,10 +527,10 @@ export function useAccessibleId(prefix: string = 'accessible') {
 /**
  * Custom Hook for managing ARIA states
  */
-export function useAriaState(initialState: Record<string, any> = {}) {
+export function useAriaState(initialState: Record<string, string | boolean> = {}) {
   const [ariaState, setAriaState] = useState(initialState);
 
-  const updateAriaState = useCallback((updates: Record<string, any>) => {
+  const updateAriaState = useCallback((updates: Record<string, string | boolean>) => {
     setAriaState(prev => ({ ...prev, ...updates }));
   }, []);
 

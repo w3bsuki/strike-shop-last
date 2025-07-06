@@ -150,7 +150,7 @@ export function transformShopifyVariant(shopifyVariant: ProductVariant): Integra
     id: createVariantId(shopifyVariant.id),
     title: shopifyVariant.title,
     
-    options: shopifyVariant.selectedOptions.reduce((acc: Record<string, any>, option) => {
+    options: shopifyVariant.selectedOptions.reduce((acc: Record<string, string | { name: string }>, option) => {
       if (option.name.toLowerCase() === 'size') {
         acc.size = option.value;
       } else if (option.name.toLowerCase() === 'color') {

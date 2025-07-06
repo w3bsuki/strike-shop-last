@@ -26,7 +26,7 @@ export class ShopifyAdminClient {
     });
   }
 
-  async query<T>(query: string, variables: Record<string, any> = {}): Promise<T> {
+  async query<T>(query: string, variables: Record<string, unknown> = {}): Promise<T> {
     try {
       console.log('[ShopifyAdminClient] Making Admin API request');
       const result = await this.client.request<T>(query, variables);

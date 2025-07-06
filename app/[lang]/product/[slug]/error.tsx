@@ -17,7 +17,7 @@ export default function ProductError({ error, reset }: ErrorProps) {
     
     // Send error to monitoring service
     if (process.env.NODE_ENV === 'production') {
-      fetch('/api/analytics/errors', {
+      fetch('/api/monitoring/errors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

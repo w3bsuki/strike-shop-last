@@ -42,7 +42,7 @@ export function PaymentForm({
 
     try {
       // Update payment intent with form data
-      await fetch('/api/payments/create-intent', {
+      await fetch('/api/payments/intent', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

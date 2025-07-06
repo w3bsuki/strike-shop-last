@@ -86,7 +86,7 @@ export class RegionDetectionService {
       return cached.result;
     }
 
-    let result = await this.performDetection(request);
+    const result = await this.performDetection(request);
     
     // Cache the result
     detectionCache.set(cacheKey, {

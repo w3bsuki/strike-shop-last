@@ -1,4 +1,6 @@
 // Essential product type definitions
+import type { IntegratedProduct } from '../../types/integrated';
+import type { MoneyV2 } from '../../lib/shopify/types';
 
 export interface BaseProduct {
   id: string;
@@ -24,7 +26,7 @@ export interface ProductVariant {
   id: string;
   title: string;
   sku?: string;
-  prices?: any[];
+  prices?: MoneyV2[];
 }
 
 // Simple product type for compatibility
@@ -32,7 +34,7 @@ export type SimpleProduct = BaseProduct;
 
 export interface ProductCardProps {
   /** Product data - supports both simple and integrated formats */
-  product: any;
+  product: IntegratedProduct | BaseProduct;
   /** Optional CSS class names */
   className?: string;
   /** Whether to prioritize image loading */

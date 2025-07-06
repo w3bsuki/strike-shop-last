@@ -67,14 +67,16 @@ export function QuickAddButton({
 }
 
 // Example usage in product listings
-export function ProductCardWithQuickAdd({ product }: { product: any }) {
+import type { IntegratedProduct } from '@/types/integrated';
+
+export function ProductCardWithQuickAdd({ product }: { product: IntegratedProduct }) {
   return (
     <div className="group relative overflow-hidden rounded-lg border bg-background">
       {/* Product image */}
       <div className="aspect-square overflow-hidden">
         <img 
-          src={product.image} 
-          alt={product.title}
+          src={product.content.images[0]?.url || '/images/placeholder-product.jpg'} 
+          alt={product.content.images[0]?.alt || product.content.name}
           className="h-full w-full object-cover transition-transform group-hover:scale-105"
         />
         
@@ -83,7 +85,7 @@ export function ProductCardWithQuickAdd({ product }: { product: any }) {
           <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
             <QuickAddButton
               productId={product.id}
-              variantId={product.variants[0]?.id}
+              variantId={product.commerce.variants[0]?.id}
               size="sm"
               showText={false}
               className="shadow-lg"
@@ -94,14 +96,14 @@ export function ProductCardWithQuickAdd({ product }: { product: any }) {
       
       {/* Product details */}
       <div className="p-4">
-        <h3 className="font-medium line-clamp-2">{product.title}</h3>
-        <p className="text-sm text-muted-foreground mt-1">{product.price}</p>
+        <h3 className="font-medium line-clamp-2">{product.content.name}</h3>
+        <p className="text-sm text-muted-foreground mt-1">{product.pricing.displayPrice}</p>
         
         {/* Full quick add button for mobile */}
         <div className="mt-3 sm:hidden">
           <QuickAddButton
             productId={product.id}
-            variantId={product.variants[0]?.id}
+            variantId={product.commerce.variants[0]?.id}
             size="sm"
             variant="outline"
             className="w-full"
