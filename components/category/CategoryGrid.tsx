@@ -1,6 +1,7 @@
 // Server Component - CVE-2025-29927 Compliant Performance Optimization
 import React from 'react';
-import { CategoryCard, CategoryCardSkeleton } from './CategoryCard';
+import { CategoryCard } from './CategoryCard';
+import { Skeleton } from '@/components/ui/loading-skeleton';
 
 interface Category {
   id: string;
@@ -37,7 +38,7 @@ export function CategoryGrid({
 
   // Generate responsive grid classes - mobile-first optimized
   const gridClasses = `
-    grid gap-3 sm:gap-4 lg:gap-6
+    grid gap-grid
     grid-cols-${columns.mobile} 
     sm:grid-cols-${columns.tablet} 
     lg:grid-cols-${columns.desktop}
@@ -48,7 +49,7 @@ export function CategoryGrid({
     return (
       <div className={gridClasses}>
         {[...Array(8)].map((_, i) => (
-          <CategoryCardSkeleton key={i} variant={variant} />
+          <Skeleton key={i} className="aspect-[4/5] w-full rounded-lg" />
         ))}
       </div>
     );
@@ -66,7 +67,6 @@ export function CategoryGrid({
             category={category}
             variant={variant}
             priority={index < 4}
-            index={index}
           />
         </div>
       ))}
@@ -90,7 +90,7 @@ export function CategoryMasonry({
       <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 sm:gap-4 lg:gap-6">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="break-inside-avoid mb-3 sm:mb-4 lg:mb-6">
-            <CategoryCardSkeleton variant={i % 3 === 0 ? 'featured' : 'default'} />
+            <Skeleton className="aspect-[4/5] w-full rounded-lg" />
           </div>
         ))}
       </div>
@@ -109,7 +109,6 @@ export function CategoryMasonry({
             category={category}
             variant={index % 3 === 0 ? 'featured' : 'default'}
             priority={index < 4}
-            index={index}
           />
         </div>
       ))}

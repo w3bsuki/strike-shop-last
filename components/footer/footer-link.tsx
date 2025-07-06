@@ -16,6 +16,7 @@ export function FooterLink({ href, children, className, external = false }: Foot
       href={href}
       className={cn(
         'text-xs hover:text-foreground text-muted-foreground transition-colors',
+        'block py-2 min-h-[44px] flex items-center', // Proper touch target
         className
       )}
       {...linkProps}

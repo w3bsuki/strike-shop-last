@@ -4,14 +4,14 @@ import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { NewsletterBanner } from "./newsletter-banner";
+// Removed NewsletterBanner - using AnnouncementBanner in page.tsx instead
 import { NavBar } from "./navbar";
-import { MobileNav } from "./mobile-nav";
 import { SearchBar } from "./search-bar";
 import { UserNav } from "./user-nav";
 import { CurrencySwitcherMinimal, CurrencySwitcherCompact } from "@/components/currency-switcher";
 import { LanguageSwitcherMinimal, LanguageSwitcherCompact } from "@/components/language-switcher";
 import type { Locale } from "@/lib/i18n/config";
+import { layoutClasses } from "@/lib/layout/config";
 
 interface SiteHeaderProps {
   className?: string;
@@ -34,8 +34,8 @@ export function SiteHeader({ className }: SiteHeaderProps) {
 
   return (
     <>
-      <NewsletterBanner />
       <header
+        role="banner"
         className={cn(
           "sticky top-0 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50",
           isScrolled && "shadow-sm",
@@ -43,13 +43,14 @@ export function SiteHeader({ className }: SiteHeaderProps) {
         )}
         suppressHydrationWarning
       >
-        <div className="strike-container">
-          {/* DESKTOP */}
-          <div className="hidden lg:flex items-center justify-between h-20">
+        {/* DESKTOP */}
+        <div className={cn(layoutClasses.container, "hidden lg:block")}>
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link
               href="/"
-              className="text-2xl font-typewriter font-bold tracking-tight uppercase"
+              className="text-2xl typewriter-brand"
+              aria-label="Strike Shop - Home"
             >
               STRIKE™
             </Link>
@@ -65,26 +66,27 @@ export function SiteHeader({ className }: SiteHeaderProps) {
               <UserNav />
             </div>
           </div>
+        </div>
 
-          {/* MOBILE */}
-          <div className="grid lg:hidden grid-cols-3 items-center h-16">
-            {/* Left: Hamburger */}
-            <div className="justify-self-start">
-              <MobileNav currentLocale={currentLocale} />
-            </div>
+        {/* MOBILE - Clean header without hamburger menu */}
+        <div className={cn(layoutClasses.container, "flex lg:hidden items-center justify-between h-14 md:h-16 px-3 md:px-4")}>
+          {/* Left: Search - proper touch target */}
+          <div className="flex items-center min-w-0">
+            <SearchBar variant="icon" className="min-h-[44px] min-w-[44px]" />
+          </div>
 
-            {/* Center: Logo */}
-            <Link
-              href="/"
-              className="justify-self-center text-xl font-typewriter font-bold tracking-tight uppercase"
-            >
-              STRIKE™
-            </Link>
+          {/* Center: Logo */}
+          <Link
+            href="/"
+            className="flex-1 flex items-center justify-center text-lg md:text-xl typewriter-brand min-w-0 px-2"
+            aria-label="Strike Shop - Home"
+          >
+            STRIKE™
+          </Link>
 
-            {/* Right: Cart only */}
-            <div className="justify-self-end">
-              <UserNav showCart />
-            </div>
+          {/* Right: Cart only - proper touch target */}
+          <div className="flex items-center justify-end min-w-0">
+            <UserNav showCart className="min-h-[44px] min-w-[44px]" />
           </div>
         </div>
       </header>

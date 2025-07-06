@@ -9,10 +9,12 @@ const FROM_EMAIL = 'Strike Shop <orders@strike-shop.com>';
 const REPLY_TO = 'support@strike-shop.com';
 
 export interface OrderEmailData {
-  order: ShopifyOrder;
+  order: ShopifyOrder | any; // Allow partial order for failed orders
   customerEmail: string;
   customerName: string;
   paymentIntentId?: string;
+  subject?: string; // Custom subject for admin alerts
+  isAdminAlert?: boolean; // Flag for admin notifications
 }
 
 export interface EmailResult {
@@ -26,7 +28,7 @@ export interface EmailResult {
  */
 export async function sendOrderConfirmation(data: OrderEmailData): Promise<EmailResult> {
   try {
-    const { order, customerEmail, customerName } = data;
+    const { order, customerEmail, customerName, subject, isAdminAlert } = data;
 
     // For now, use a simple HTML template
     // TODO: Create React Email template
@@ -56,7 +58,7 @@ export async function sendOrderConfirmation(data: OrderEmailData): Promise<Email
             
             <h3>Items Ordered:</h3>
             <ul>
-              ${order.line_items.map(item => 
+              ${order.line_items.map((item: any) => 
                 `<li>${item.title} - Quantity: ${item.quantity} - $${item.price}</li>`
               ).join('')}
             </ul>
@@ -97,7 +99,7 @@ export async function sendOrderConfirmation(data: OrderEmailData): Promise<Email
       from: FROM_EMAIL,
       to: customerEmail,
       replyTo: REPLY_TO,
-      subject: `Order Confirmation - Order #${order.order_number}`,
+      subject: subject || `Order Confirmation - Order #${order.order_number}`,
       html: emailHtml,
     });
 
@@ -308,6 +310,102 @@ export async function sendPasswordResetEmail(
     };
   } catch (error) {
     console.error('Failed to send password reset email:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Send payment failure notification
+ */
+export async function sendPaymentFailureNotification(data: {
+  customerEmail: string;
+  customerName: string;
+  paymentIntentId: string;
+  failureReason: string;
+  amount: number;
+  currency: string;
+}): Promise<EmailResult> {
+  try {
+    const { customerEmail, customerName, paymentIntentId, failureReason, amount, currency } = data;
+    
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Payment Failed - Strike Shop</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h1 style="color: #ff0000; border-bottom: 2px solid #ff0000; padding-bottom: 10px;">
+              Payment Failed
+            </h1>
+            
+            <p>Hi ${customerName},</p>
+            
+            <p>We were unable to process your payment. Please see the details below:</p>
+            
+            <div style="background: #fff0f0; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffcccc;">
+              <h2 style="margin-top: 0; color: #cc0000;">Payment Details</h2>
+              <p><strong>Amount:</strong> ${currency} ${amount.toFixed(2)}</p>
+              <p><strong>Reason:</strong> ${failureReason}</p>
+              <p><strong>Reference:</strong> ${paymentIntentId}</p>
+            </div>
+            
+            <h3>What to do next?</h3>
+            <ul>
+              <li>Check that your card details are correct</li>
+              <li>Ensure you have sufficient funds</li>
+              <li>Contact your bank if the problem persists</li>
+              <li>Try a different payment method</li>
+            </ul>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://strike-shop.com/cart" 
+                 style="background: #000; color: #fff; padding: 12px 30px; 
+                        text-decoration: none; border-radius: 5px; display: inline-block;">
+                Return to Cart
+              </a>
+            </div>
+            
+            <p>If you continue to experience issues, please contact our support team with the reference number above.</p>
+            
+            <p>Best regards,<br>The Strike Shop Team</p>
+            
+            <hr style="margin-top: 40px; border: none; border-top: 1px solid #ddd;">
+            <p style="font-size: 12px; color: #666; text-align: center;">
+              This is an automated email regarding your recent payment attempt at Strike Shop.
+            </p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    if (!resend) {
+      console.log('Email service not configured - skipping payment failure notification');
+      return {
+        success: false,
+        error: 'Email service not configured',
+      };
+    }
+
+    const result = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      replyTo: REPLY_TO,
+      subject: 'Payment Failed - Strike Shop',
+      html: emailHtml,
+    });
+
+    return {
+      success: true,
+      messageId: result.data?.id,
+    };
+  } catch (error) {
+    console.error('Failed to send payment failure notification:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

@@ -4,8 +4,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/supabase/auth-provider'
-import { Button } from '@/components/ui/button-unified'
-import { Input, FormField } from '@/components/ui/input-unified'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { FormField } from '@/components/ui/form-field'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle } from 'lucide-react'
 import { PasswordStrengthMeter } from '@/components/auth/PasswordStrengthMeter'
@@ -165,14 +166,17 @@ export function SignUpForm() {
               </FormField>
             </div>
 
-            <FormField label="Email Address" required>
+            <FormField 
+              label="Email Address" 
+              required
+              error={error?.includes('email') ? error : undefined}
+            >
               <Input
                 type="email"
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
-                error={error?.includes('email') ? error : false}
               />
             </FormField>
             
@@ -183,7 +187,7 @@ export function SignUpForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                helperText="Minimum 8 characters"
+                placeholder="Minimum 8 characters"
               />
             </FormField>
 
@@ -191,14 +195,17 @@ export function SignUpForm() {
               <PasswordStrengthMeter password={password} />
             )}
             
-            <FormField label="Confirm Password" required>
+            <FormField 
+              label="Confirm Password" 
+              required
+              error={password !== confirmPassword && confirmPassword ? 'Passwords do not match' : undefined}
+            >
               <Input
                 type="password"
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
-                error={password !== confirmPassword && confirmPassword ? 'Passwords do not match' : false}
               />
             </FormField>
 
@@ -220,11 +227,10 @@ export function SignUpForm() {
           <div className="space-y-4">
             <Button
               type="submit"
-              fullWidth
-              loading={isLoading}
-              loadingText="Creating account..."
+              className="w-full"
+              disabled={isLoading}
             >
-              Create Account
+              {isLoading ? 'Creating account...' : 'Create Account'}
             </Button>
 
             <p className="text-center text-xs text-muted-foreground">

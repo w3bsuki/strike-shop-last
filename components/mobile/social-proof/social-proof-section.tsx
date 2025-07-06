@@ -6,6 +6,7 @@ import { InstagramFeed } from './instagram-feed';
 import { ReviewCarousel } from './review-carousel';
 import { TestimonialCard } from './testimonial-card';
 import { SectionHeader } from '@/components/ui/section-header';
+import { Section } from '@/components/layout/section';
 
 interface SocialProofSectionProps {
   variant?: 'instagram' | 'reviews' | 'testimonials' | 'mixed';
@@ -79,67 +80,60 @@ export function SocialProofSection({
 
   if (variant === 'instagram') {
     return (
-      <section className={cn('bg-background py-8 sm:py-12', className)}>
-        <div className="strike-container">
-          <SectionHeader
-            title={title}
-            showCta={showCta}
-            ctaText={ctaText}
-            ctaHref={ctaHref}
-            className="mb-6 sm:mb-8"
-          />
-          <InstagramFeed posts={instagramPosts} variant="carousel" />
-        </div>
-      </section>
+      <Section size="sm" className={cn('bg-background', className)}>
+        <SectionHeader
+          title={title}
+          showCta={showCta}
+          ctaText={ctaText}
+          ctaHref={ctaHref}
+          className="mb-6 sm:mb-8"
+        />
+        <InstagramFeed posts={instagramPosts} variant="carousel" />
+      </Section>
     );
   }
 
   if (variant === 'reviews') {
     return (
-      <section className={cn('bg-background py-8 sm:py-12', className)}>
-        <div className="strike-container">
-          <ReviewCarousel
-            reviews={reviews}
-            title={title}
-            subtitle={subtitle}
-          />
-        </div>
-      </section>
+      <Section size="sm" className={cn('bg-background', className)}>
+        <ReviewCarousel
+          reviews={reviews}
+          title={title}
+          subtitle={subtitle}
+        />
+      </Section>
     );
   }
 
   if (variant === 'testimonials') {
     return (
-      <section className={cn('bg-background py-8 sm:py-12', className)}>
-        <div className="strike-container">
-          <SectionHeader
-            title={title}
-            showCta={showCta}
-            ctaText={ctaText}
-            ctaHref={ctaHref}
-            className="mb-6 sm:mb-8"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {testimonials.map((testimonial) => (
-              <TestimonialCard
-                key={testimonial.id}
-                author={testimonial.author}
-                content={testimonial.content}
-                rating={testimonial.rating}
-                date={testimonial.date}
-                product={testimonial.product}
-              />
-            ))}
-          </div>
+      <Section size="sm" className={cn('bg-background', className)}>
+        <SectionHeader
+          title={title}
+          showCta={showCta}
+          ctaText={ctaText}
+          ctaHref={ctaHref}
+          className="mb-6 sm:mb-8"
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {testimonials.map((testimonial) => (
+            <TestimonialCard
+              key={testimonial.id}
+              author={testimonial.author}
+              content={testimonial.content}
+              rating={testimonial.rating}
+              date={testimonial.date}
+              product={testimonial.product}
+            />
+          ))}
         </div>
-      </section>
+      </Section>
     );
   }
 
   // Mixed variant with tabs - FIXED LAYOUT
   return (
-    <section className={cn('bg-background py-6 sm:py-8', className)}>
-      <div className="strike-container">
+    <Section size="sm" className={cn('bg-background', className)}>
         {/* Header with proper button alignment */}
         <div className="flex items-end justify-between mb-6">
           <div>
@@ -241,7 +235,6 @@ export function SocialProofSection({
             </a>
           </div>
         )}
-      </div>
-    </section>
+    </Section>
   );
 }

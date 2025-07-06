@@ -1,5 +1,3 @@
-'use client';
-
 import { CartItem } from '@/types/store';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';

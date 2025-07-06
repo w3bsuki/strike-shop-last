@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
@@ -51,20 +49,18 @@ const DividerMarquee = React.forwardRef<HTMLDivElement, DividerMarqueeProps>(
     children, 
     ...props 
   }, ref) => {
-    const content = React.useMemo(() => {
-      const items = [];
-      for (let i = 0; i < count; i++) {
-        items.push(
-          <React.Fragment key={i}>
-            {children || <DividerText text={text} />}
-            {i < count - 1 && separator && (
-              <span className="mx-4 opacity-50">{separator}</span>
-            )}
-          </React.Fragment>
-        );
-      }
-      return items;
-    }, [count, text, separator, children]);
+    // Generate content at render time (server-side)
+    const content = [];
+    for (let i = 0; i < count; i++) {
+      content.push(
+        <React.Fragment key={i}>
+          {children || <DividerText text={text} />}
+          {i < count - 1 && separator && (
+            <span className="mx-4 opacity-50">{separator}</span>
+          )}
+        </React.Fragment>
+      );
+    }
 
     return (
       <div

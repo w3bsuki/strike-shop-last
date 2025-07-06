@@ -1,29 +1,58 @@
 import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      'border bg-card text-card-foreground shadow-sm',
-      className
-    )}
-    {...props}
-  />
-));
+const cardVariants = cva(
+  'border bg-card text-card-foreground',
+  {
+    variants: {
+      variant: {
+        default: 'shadow-sm',
+        strike: 'border-2 border-foreground shadow-lg hover:shadow-xl transition-shadow',
+        featured: 'border-2 border-primary bg-primary/5 shadow-md',
+        compact: 'border border-border shadow-none',
+      },
+      padding: {
+        none: '',
+        sm: 'p-spacing-2',
+        default: 'p-card',
+        lg: 'p-spacing-8',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      padding: 'default',
+    },
+  }
+);
+
+export interface UICardProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof cardVariants> {}
+
+const Card = React.forwardRef<HTMLDivElement, UICardProps>(
+  ({ className, variant, padding, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(cardVariants({ variant, padding }), className)}
+      {...props}
+    />
+  )
+);
 Card.displayName = 'Card';
 
 const CardHeader = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement> & { noPadding?: boolean }
+>(({ className, noPadding = false, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex flex-col space-y-1.5 p-6', className)}
+    className={cn(
+      'flex flex-col gap-spacing-1',
+      !noPadding && 'p-card',
+      className
+    )}
     {...props}
   />
 ));
@@ -58,19 +87,30 @@ CardDescription.displayName = 'CardDescription';
 
 const CardContent = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+  React.HTMLAttributes<HTMLDivElement> & { noPadding?: boolean }
+>(({ className, noPadding = false, ...props }, ref) => (
+  <div 
+    ref={ref} 
+    className={cn(
+      !noPadding && 'p-card pt-spacing-0',
+      className
+    )} 
+    {...props} 
+  />
 ));
 CardContent.displayName = 'CardContent';
 
 const CardFooter = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement> & { noPadding?: boolean }
+>(({ className, noPadding = false, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex items-center p-6 pt-0', className)}
+    className={cn(
+      'flex items-center',
+      !noPadding && 'p-card pt-spacing-0',
+      className
+    )}
     {...props}
   />
 ));
@@ -83,4 +123,5 @@ export {
   CardTitle,
   CardDescription,
   CardContent,
+  cardVariants,
 };

@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Button } from '@/components/ui/button-unified';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card-unified';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input, FormField } from '@/components/ui/input-unified';
+import { Input } from '@/components/ui/input';
+import { FormField } from '@/components/ui/form-field';
 import { Skeleton } from '@/components/ui/loading-skeleton';
 import { 
   User, 

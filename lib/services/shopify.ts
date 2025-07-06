@@ -43,10 +43,91 @@ export const REGION_CONFIGS: Record<Locale, RegionConfig> = {
   },
 };
 
+// GraphQL response types
+interface GraphQLEdge<T> {
+  node: T;
+}
+
+interface GraphQLConnection<T> {
+  edges: GraphQLEdge<T>[];
+  pageInfo?: {
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor?: string;
+    endCursor?: string;
+  };
+}
+
+interface PageInfo {
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  startCursor?: string;
+  endCursor?: string;
+}
+
 // Enhanced Shopify interfaces with multi-currency support
 export interface ShopifyMoney {
   amount: string;
   currencyCode: string;
+}
+
+// Raw GraphQL response interfaces (before processing)
+interface RawShopifyProductVariant {
+  id: string;
+  sku?: string;
+  title: string;
+  availableForSale: boolean;
+  quantityAvailable?: number;
+  price: ShopifyMoney;
+  compareAtPrice?: ShopifyMoney;
+  image?: {
+    url: string;
+    altText?: string;
+  };
+  selectedOptions: Array<{
+    name: string;
+    value: string;
+  }>;
+}
+
+interface RawShopifyProduct {
+  id: string;
+  handle: string;
+  title: string;
+  description: string;
+  descriptionHtml: string;
+  featuredImage?: {
+    url: string;
+    altText?: string;
+  };
+  images: GraphQLConnection<{
+    url: string;
+    altText?: string;
+  }>;
+  variants: GraphQLConnection<RawShopifyProductVariant>;
+  options: Array<{
+    name: string;
+    values: string[];
+  }>;
+  tags: string[];
+  vendor: string;
+  productType: string;
+  createdAt: string;
+  updatedAt: string;
+  availableForSale: boolean;
+  totalInventory?: number;
+  priceRange: {
+    minVariantPrice: ShopifyMoney;
+    maxVariantPrice: ShopifyMoney;
+  };
+  compareAtPriceRange?: {
+    minVariantPrice: ShopifyMoney;
+    maxVariantPrice: ShopifyMoney;
+  };
+  seo: {
+    title?: string;
+    description?: string;
+  };
 }
 
 export interface ShopifyProductVariant {
@@ -220,7 +301,7 @@ class ShopifyClient {
     locale?: Locale,
     first = 20,
     after?: string
-  ): Promise<{ products: ShopifyProduct[]; pageInfo: any }> {
+  ): Promise<{ products: ShopifyProduct[]; pageInfo: PageInfo }> {
     const query = `
       query GetProducts($first: Int!, $after: String, $currency: CurrencyCode!) {
         products(first: $first, after: $after) {
@@ -324,10 +405,10 @@ class ShopifyClient {
     );
 
     return {
-      products: data.products.edges.map((edge: any) => ({
+      products: data.products.edges.map((edge: GraphQLEdge<RawShopifyProduct>): ShopifyProduct => ({
         ...edge.node,
-        images: edge.node.images.edges.map((img: any) => img.node),
-        variants: edge.node.variants.edges.map((variant: any) => variant.node),
+        images: edge.node.images.edges.map((img: GraphQLEdge<{url: string; altText?: string}>) => img.node),
+        variants: edge.node.variants.edges.map((variant: GraphQLEdge<RawShopifyProductVariant>): ShopifyProductVariant => variant.node),
       })),
       pageInfo: data.products.pageInfo,
     };
@@ -436,8 +517,8 @@ class ShopifyClient {
 
     return {
       ...data.product,
-      images: data.product.images.edges.map((edge: any) => edge.node),
-      variants: data.product.variants.edges.map((edge: any) => edge.node),
+      images: data.product.images.edges.map((edge: GraphQLEdge<ShopifyProduct['images'][0]>) => edge.node),
+      variants: data.product.variants.edges.map((edge: GraphQLEdge<ShopifyProductVariant>) => edge.node),
     };
   }
 
@@ -502,7 +583,13 @@ class ShopifyClient {
       }
     `;
 
-    const data = await this.storefrontRequest<any>(
+    interface CollectionQueryResponse {
+      collection: ShopifyCollection & {
+        products: GraphQLConnection<ShopifyProduct>;
+      };
+    }
+
+    const data = await this.storefrontRequest<CollectionQueryResponse>(
       query,
       { handle, currency, first },
       locale
@@ -514,7 +601,7 @@ class ShopifyClient {
 
     return {
       ...data.collection,
-      products: data.collection.products.edges.map((edge: any) => edge.node),
+      products: data.collection.products.edges.map((edge: GraphQLEdge<ShopifyProduct>) => edge.node),
     };
   }
 
@@ -620,7 +707,16 @@ class ShopifyClient {
       }
     `;
 
-    const cartInput: any = {
+    interface CartInput {
+      lines: never[];
+      buyerIdentity?: {
+        countryCode: string;
+        email?: string;
+        phone?: string;
+      };
+    }
+
+    const cartInput: CartInput = {
       lines: [],
     };
 
@@ -641,7 +737,7 @@ class ShopifyClient {
     const cart = data.cartCreate.cart;
     return {
       ...cart,
-      lines: cart.lines.edges.map((edge: any) => edge.node),
+      lines: cart.lines.edges.map((edge: GraphQLEdge<any>) => edge.node),
     };
   }
 

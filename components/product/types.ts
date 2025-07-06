@@ -1,17 +1,4 @@
-// Product component type definitions
-
-export interface SimpleProduct {
-  id: string;
-  name: string;
-  price: string;
-  originalPrice?: string;
-  discount?: string;
-  image: string;
-  slug: string;
-  isNew?: boolean;
-  soldOut?: boolean;
-  colors?: number;
-}
+// Essential product type definitions
 
 export interface BaseProduct {
   id: string;
@@ -29,6 +16,8 @@ export interface BaseProduct {
   sizes?: string[];
   sku?: string;
   variants?: ProductVariant[];
+  variantId?: string;
+  title?: string; // Alternative to name for compatibility
 }
 
 export interface ProductVariant {
@@ -38,53 +27,8 @@ export interface ProductVariant {
   prices?: any[];
 }
 
-export type ProductLayoutType = "scroll" | "grid" | "list";
-
-export type ProductBadgeVariant = "sale" | "new" | "soldOut" | "limited" | "exclusive";
-
-export type ProductSectionSpacing = "none" | "sm" | "default" | "lg";
-
-export type ProductSectionBackground = "none" | "subtle" | "contrast" | "gradient";
-
-export type ProductActionLayout = "horizontal" | "vertical" | "overlay";
-
-export type ProductGridCols = 2 | 3 | 4 | 5 | 6;
-
-export interface ProductShowcaseConfig {
-  title: string;
-  viewAllLink: string;
-  layout: ProductLayoutType;
-  showBadge?: boolean;
-  badgeText?: string;
-  badgeVariant?: ProductBadgeVariant;
-  description?: string;
-}
-
-export interface ProductDisplaySettings {
-  cardSizes: {
-    scroll: {
-      default: string;
-      sm: string;
-      lg: string;
-    };
-    grid: {
-      default: string;
-    };
-  };
-  priceDisplay: {
-    showCurrency: boolean;
-    currency: string;
-    showOriginalPrice: boolean;
-  };
-  quickView: {
-    enabled: boolean;
-    showOnHover: boolean;
-  };
-  wishlist: {
-    enabled: boolean;
-    showOnCard: boolean;
-  };
-}
+// Simple product type for compatibility
+export type SimpleProduct = BaseProduct;
 
 export interface ProductCardProps {
   /** Product data - supports both simple and integrated formats */

@@ -3,6 +3,39 @@ import { createClient } from '@/lib/supabase/client';
 // Temporary types until we regenerate Supabase types
 type OrderStatus = 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded' | 'payment_failed';
 
+interface OrderItem {
+  id: string;
+  product_id: string;
+  variant_id: string;
+  quantity: number;
+  price: number;
+  title: string;
+  variant_title?: string;
+  image_url?: string;
+  sku?: string;
+}
+
+interface Address {
+  first_name: string;
+  last_name: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  province: string;
+  country: string;
+  zip: string;
+  phone?: string;
+}
+
+interface OrderMetadata {
+  shopify_order_number?: number;
+  email?: string;
+  notes?: string;
+  tracking_number?: string;
+  tracking_company?: string;
+  [key: string]: unknown; // Allow additional metadata
+}
+
 interface Order {
   id: string;
   user_id: string | null;
@@ -12,10 +45,10 @@ interface Order {
   status: OrderStatus;
   total_amount: number;
   currency: string;
-  items: any;
-  shipping_address: any;
-  billing_address: any;
-  metadata: any;
+  items: OrderItem[];
+  shipping_address: Address;
+  billing_address: Address;
+  metadata: OrderMetadata;
   created_at: string;
   updated_at: string;
 }
@@ -28,10 +61,10 @@ interface OrderInput {
   status?: OrderStatus;
   total_amount: number;
   currency: string;
-  items: any;
-  shipping_address?: any;
-  billing_address?: any;
-  metadata?: any;
+  items: OrderItem[];
+  shipping_address?: Address;
+  billing_address?: Address;
+  metadata?: OrderMetadata;
 }
 
 export interface CreateOrderInput {
@@ -42,9 +75,9 @@ export interface CreateOrderInput {
   email: string;
   amount: number;
   currency: string;
-  items: any[];
-  shippingAddress: any;
-  billingAddress: any;
+  items: OrderItem[];
+  shippingAddress: Address;
+  billingAddress: Address;
 }
 
 /**
@@ -89,17 +122,17 @@ export async function createOrder(input: CreateOrderInput): Promise<Order | null
 export async function updateOrderStatus(
   orderId: string,
   status: OrderStatus,
-  metadata?: any
+  metadata?: Partial<OrderMetadata>
 ): Promise<Order | null> {
   const supabase = createClient();
 
-  const updateData: any = {
+  const updateData: Partial<Order> = {
     status,
     updated_at: new Date().toISOString(),
   };
 
   if (metadata) {
-    updateData.metadata = metadata;
+    updateData.metadata = metadata as OrderMetadata;
   }
 
   const { data, error } = await supabase
@@ -172,7 +205,7 @@ export async function getOrderByPaymentIntent(
   const { data, error } = await supabase
     .from('orders')
     .select('*')
-    .eq('payment_intent_id', paymentIntentId)
+    .eq('stripe_payment_intent_id', paymentIntentId)
     .single();
 
   if (error) {

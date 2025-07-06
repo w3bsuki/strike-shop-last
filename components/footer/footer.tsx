@@ -6,6 +6,7 @@ import { FooterBottom } from './footer-bottom';
 import { FooterLogo } from './footer-logo';
 import type { FooterConfig } from '@/config/footer';
 import { cn } from '@/lib/utils';
+import { Section } from '@/components/layout/section';
 
 interface FooterProps {
   config: FooterConfig;
@@ -24,8 +25,12 @@ export function Footer({
   const showSections = variant !== 'compact' && config.sections.length > 0;
 
   return (
-    <footer className={cn('bg-background section-padding border-t border-border pb-safe-8 px-safe', className)}>
-      <div className="strike-container">
+    <Section
+      as="section"
+      size="lg"
+      className={cn('bg-background border-t border-border', className)}
+    >
+      <footer>
         {variant === 'compact' ? (
           // Compact footer layout
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -85,7 +90,7 @@ export function Footer({
             />
           </>
         )}
-      </div>
-    </footer>
+      </footer>
+    </Section>
   );
 }

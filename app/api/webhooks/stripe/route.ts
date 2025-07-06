@@ -3,8 +3,9 @@ import { headers } from 'next/headers';
 import { verifyStripeWebhook } from '@/lib/stripe/client';
 import { createShopifyOrder } from '@/lib/shopify/orders';
 // import { generateOrderReference } from '@/lib/stripe/utils';
-import { sendOrderConfirmation } from '@/lib/email/resend';
-import { createOrder as createSupabaseOrder } from '@/lib/supabase/orders';
+import { sendOrderConfirmation, sendPaymentFailureNotification } from '@/lib/email/resend';
+import { createOrder as createSupabaseOrder, updateOrderStatus } from '@/lib/supabase/orders';
+import { createClient } from '@/lib/supabase/server';
 import type { StripeWebhookEvent, ShopifyOrderInput } from '@/lib/stripe/types';
 
 export async function POST(request: NextRequest) {
@@ -185,9 +186,58 @@ async function handlePaymentSuccess(event: StripeWebhookEvent) {
   } catch (error) {
     console.error(`Failed to create Shopify order for payment ${paymentIntent.id}:`, error);
     
-    // TODO: Implement retry mechanism
-    // TODO: Alert admin of failed order creation
-    // TODO: Store failed order data for manual processing
+    // Store failed order in Supabase for retry
+    try {
+      const supabase = await createClient();
+      
+      // Store failed order data in a retry queue
+      const { data: failedOrder } = await supabase
+        .from('order_retry_queue')
+        .insert({
+          stripe_payment_intent_id: paymentIntent.id,
+          order_data: {
+            metadata: paymentIntent.metadata,
+            amount: paymentIntent.amount,
+            currency: paymentIntent.currency,
+            receipt_email: paymentIntent.receipt_email,
+          },
+          error_message: error instanceof Error ? error.message : 'Unknown error',
+          retry_count: 0,
+          max_retries: 3,
+          next_retry_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // Retry in 5 minutes
+        })
+        .select()
+        .single();
+      
+      if (failedOrder) {
+        console.log(`Queued failed order for retry: ${failedOrder.id}`);
+      }
+      
+      // Alert admin via email
+      await sendOrderConfirmation({
+        order: {
+          id: `FAILED-${paymentIntent.id}`,
+          order_number: 0,
+          name: `#FAILED-${Date.now()}`,
+          total_price: (paymentIntent.amount / 100).toString(),
+          financial_status: 'paid',
+          fulfillment_status: 'unfulfilled',
+          created_at: new Date().toISOString(),
+          currency: paymentIntent.currency.toUpperCase(),
+          customer: {
+            email: paymentIntent.receipt_email || paymentIntent.metadata.customer_email || 'admin@strike.com',
+          },
+        },
+        customerEmail: 'admin@strike.com',
+        customerName: 'Admin',
+        paymentIntentId: paymentIntent.id,
+        subject: '⚠️ URGENT: Shopify Order Creation Failed',
+        isAdminAlert: true,
+      });
+      
+    } catch (retryError) {
+      console.error('Failed to queue order for retry:', retryError);
+    }
   }
 }
 
@@ -198,9 +248,57 @@ async function handlePaymentFailure(event: StripeWebhookEvent) {
   console.log(`Failure reason: ${paymentIntent.last_payment_error?.message || 'Unknown'}`);
 
   try {
-    // TODO: Send payment failure notification to customer
-    // TODO: Update cart status to allow retry
-    // TODO: Log payment failure for analytics
+    // Extract customer email
+    const customerEmail = paymentIntent.receipt_email || 
+                         paymentIntent.metadata?.customer_email || 
+                         paymentIntent.charges?.data[0]?.billing_details?.email;
+    
+    if (customerEmail) {
+      // Send payment failure notification to customer
+      const emailResult = await sendPaymentFailureNotification({
+        customerEmail,
+        customerName: paymentIntent.metadata?.customer_name || 'Customer',
+        paymentIntentId: paymentIntent.id,
+        failureReason: paymentIntent.last_payment_error?.message || 'Payment could not be processed',
+        amount: paymentIntent.amount / 100,
+        currency: paymentIntent.currency.toUpperCase(),
+      });
+      
+      if (!emailResult.success) {
+        console.error(`Failed to send payment failure email: ${emailResult.error}`);
+      } else {
+        console.log(`Payment failure notification sent to ${customerEmail}`);
+      }
+    }
+    
+    // Update order status if it exists in Supabase
+    const supabase = await createClient();
+    const { data: existingOrder } = await supabase
+      .from('orders')
+      .select('id')
+      .eq('stripe_payment_intent_id', paymentIntent.id)
+      .single();
+    
+    if (existingOrder) {
+      await updateOrderStatus(existingOrder.id, 'payment_failed', {
+        failure_reason: paymentIntent.last_payment_error?.message,
+        failed_at: new Date().toISOString(),
+      });
+      console.log(`Updated order ${existingOrder.id} status to payment_failed`);
+    }
+    
+    // Log payment failure for analytics
+    await supabase
+      .from('payment_failures')
+      .insert({
+        stripe_payment_intent_id: paymentIntent.id,
+        amount: paymentIntent.amount,
+        currency: paymentIntent.currency,
+        failure_reason: paymentIntent.last_payment_error?.message,
+        failure_code: paymentIntent.last_payment_error?.code,
+        customer_email: customerEmail,
+        metadata: paymentIntent.metadata,
+      });
 
   } catch (error) {
     console.error(`Failed to handle payment failure for ${paymentIntent.id}:`, error);

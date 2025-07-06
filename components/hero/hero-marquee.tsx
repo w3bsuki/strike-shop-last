@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +12,7 @@ const HeroMarquee = React.forwardRef<HTMLDivElement, HeroMarqueeProps>(
       <div
         ref={ref}
         className={cn(
-          "absolute bottom-0 left-0 right-0 overflow-hidden bg-black text-white py-3 md:py-4",
+          "absolute bottom-0 left-0 right-0 overflow-hidden bg-black border-t border-gray-200 text-white py-3 md:py-4",
           className
         )}
         {...props}
@@ -46,7 +44,7 @@ const HeroMarqueeItem = React.forwardRef<HTMLSpanElement, HeroMarqueeItemProps>(
       <>
         <span
           ref={ref}
-          className={cn("text-sm font-medium uppercase tracking-wider mx-4", className)}
+          className={cn("text-sm font-primary font-medium uppercase tracking-wider mx-4", className)}
           {...props}
         >
           {children}

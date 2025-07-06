@@ -1,19 +1,12 @@
-"use client";
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { Section } from "@/components/layout/section";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const productSectionVariants = cva(
-  "w-full",
+  "",
   {
     variants: {
-      spacing: {
-        none: "",
-        sm: "py-8 md:py-12",
-        default: "py-12 md:py-16 lg:py-20",
-        lg: "py-16 md:py-24 lg:py-32",
-      },
       background: {
         none: "",
         subtle: "bg-gray-50",
@@ -22,7 +15,6 @@ const productSectionVariants = cva(
       },
     },
     defaultVariants: {
-      spacing: "default",
       background: "none",
     },
   }
@@ -33,24 +25,22 @@ export interface ProductSectionProps
     VariantProps<typeof productSectionVariants> {
   as?: "section" | "div";
   container?: boolean;
+  size?: "sm" | "default" | "lg";
 }
 
 const ProductSection = React.forwardRef<HTMLElement, ProductSectionProps>(
-  ({ className, spacing, background, as: Comp = "section", container = true, children, ...props }, ref) => {
+  ({ className, size = "default", background, as = "section", container = true, children, ...props }, ref) => {
     return (
-      <Comp
+      <Section
         ref={ref as any}
-        className={cn(productSectionVariants({ spacing, background }), className)}
+        as={as}
+        size={size}
+        container={container}
+        className={cn(productSectionVariants({ background }), className)}
         {...props}
       >
-        {container ? (
-          <div className="strike-container">
-            {children}
-          </div>
-        ) : (
-          children
-        )}
-      </Comp>
+        {children}
+      </Section>
     );
   }
 );

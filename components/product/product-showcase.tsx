@@ -5,7 +5,7 @@ import { ProductScroll } from "./product-scroll";
 import { ProductGrid } from "./product-grid";
 import { ProductCard } from "./product-card";
 import { ProductBadge } from "./product-badge";
-import { SectionInfo } from "./section-info";
+import { SectionInfo } from "@/components/product/section-info";
 import { getPerfectProductCardClasses } from "@/lib/layout/config";
 
 type Product = {

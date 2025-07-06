@@ -1,13 +1,39 @@
 // Analytics Integration for Production
 // Supports Google Analytics, Google Tag Manager, Facebook Pixel, and PostHog
 
+// Type definitions for analytics libraries
+type GtagCommand = 'config' | 'event' | 'js' | 'set';
+
+interface GtagConfigParams {
+  page_path?: string;
+  page_title?: string;
+  page_location?: string;
+  [key: string]: unknown;
+}
+
+interface GtagEventParams {
+  event_category?: string;
+  event_label?: string;
+  value?: number;
+  [key: string]: unknown;
+}
+
+type FbqCommand = 'init' | 'track' | 'trackCustom' | 'trackSingle' | 'trackSingleCustom';
+
+interface PostHogInstance {
+  capture: (event: string, properties?: Record<string, unknown>) => void;
+  identify: (userId: string, properties?: Record<string, unknown>) => void;
+  reset: () => void;
+  [key: string]: unknown;
+}
+
 declare global {
   interface Window {
     gtag?: (...args: any[]) => void;
-    dataLayer?: any[];
+    dataLayer?: Array<Record<string, unknown>>;
     fbq?: (...args: any[]) => void;
     _fbq?: (...args: any[]) => void;
-    posthog?: any;
+    posthog?: PostHogInstance;
   }
 }
 
@@ -55,7 +81,7 @@ interface EventParams {
   category: string;
   label?: string;
   value?: number;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export const event = ({ action, category, label, value, ...otherParams }: EventParams) => {
@@ -239,7 +265,7 @@ export const trackSearch = (searchTerm: string, resultsCount?: number) => {
 };
 
 // User identification (for logged-in users)
-export const identifyUser = (userId: string, traits?: Record<string, any>) => {
+export const identifyUser = (userId: string, traits?: Record<string, unknown>) => {
   if (!isProduction) return;
   
   // Google Analytics User ID

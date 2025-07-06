@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -26,7 +24,7 @@ const HeroImage = React.forwardRef<HTMLDivElement, HeroImageProps>(
       <div 
         ref={ref} 
         className={cn(
-          "absolute inset-0 w-full h-full",
+          "absolute inset-0 w-full h-full bg-gray-900",
           className
         )} 
         {...props}
@@ -35,10 +33,10 @@ const HeroImage = React.forwardRef<HTMLDivElement, HeroImageProps>(
           src={src}
           alt={alt}
           fill
-          className="object-cover"
+          className="object-cover object-center mix-blend-multiply opacity-80"
           priority={priority}
-          sizes="100vw"
-          quality={85}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
+          quality={90}
           placeholder="blur"
           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkrHB0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
         />

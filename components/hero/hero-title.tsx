@@ -1,11 +1,9 @@
-"use client";
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const heroTitleVariants = cva(
-  "font-bold tracking-tight text-white leading-tight font-typewriter",
+  "font-bold tracking-tight text-white leading-tight font-primary",
   {
     variants: {
       size: {
@@ -29,13 +27,15 @@ export interface HeroTitleProps
 }
 
 const HeroTitle = React.forwardRef<HTMLHeadingElement, HeroTitleProps>(
-  ({ className, size, as: Comp = "h1", ...props }, ref) => {
+  ({ className, size, as: Comp = "h1", children, ...props }, ref) => {
     return (
       <Comp
         ref={ref}
         className={cn(heroTitleVariants({ size }), className)}
         {...props}
-      />
+      >
+        {children}
+      </Comp>
     );
   }
 );

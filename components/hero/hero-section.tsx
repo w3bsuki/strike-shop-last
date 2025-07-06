@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -26,7 +24,7 @@ export function HeroSection({
   showMarquee = false,
   marqueeItems = [
     "FREE SHIPPING ON ORDERS OVER $150",
-    "PREMIUM QUALITY",
+    "PREMIUM QUALITY", 
     "SUSTAINABLE MATERIALS",
     "24/7 SUPPORT",
   ],
@@ -86,10 +84,10 @@ export function HeroSection({
             <HeroActions align={variant === "centered" ? "center" : "start"}>
               <Button
                 asChild
-                variant="strike-outline"
+                variant="default"
                 size="lg"
                 className={cn(
-                  "bg-white/10 backdrop-blur-sm border-white text-white hover:bg-white hover:text-black",
+                  "bg-white text-black hover:bg-gray-100",
                   "font-bold tracking-wider transition-all duration-300",
                   "shadow-lg hover:shadow-xl"
                 )}

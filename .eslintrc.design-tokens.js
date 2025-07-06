@@ -70,7 +70,6 @@ module.exports = {
       cssFiles: [
         './app/globals.css',
         './styles/design-system.css',
-        './styles/tokens/design-tokens.css',
       ],
       removeDuplicates: true,
       skipClassAttribute: false,

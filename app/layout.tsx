@@ -13,7 +13,7 @@ import { ServiceWorkerProvider } from '@/components/service-worker-provider';
 import { PWAInstallPrompt } from '@/components/pwa-install-prompt';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { CartInitializer } from '@/components/cart-initializer';
-import { typewriterFont, professionalFont } from '@/lib/fonts';
+import { primaryFont, typewriterFont, monoFont } from '@/lib/fonts';
 import { CookieConsent } from '@/components/cookie-consent';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://strike-shop.com';
@@ -127,7 +127,7 @@ export default function RootLayout({
   const websiteJsonLd = generateWebsiteJsonLd();
 
   return (
-    <html lang="en" className={`${typewriterFont.variable} ${professionalFont.variable}`}>
+    <html lang="en" className={`${primaryFont.variable} ${typewriterFont.variable} ${monoFont.variable}`}>
       <head>
         {/* CRITICAL: Optimized viewport for perfect mobile performance - handled by Next.js viewport export */}
         
@@ -163,9 +163,7 @@ export default function RootLayout({
         <link rel="apple-touch-startup-image" href="/splash/apple-splash-750-1334.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
         <link rel="apple-touch-startup-image" href="/splash/apple-splash-640-1136.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
         
-        {/* PERFORMANCE: Preload critical assets */}
-        <link rel="preload" href="/fonts/CourierPrime-Regular.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/CourierPrime-Bold.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
+        {/* PERFORMANCE: Preload critical fonts - Google Fonts handles optimization */}
         
         {/* CRITICAL: DNS prefetch and preconnect for external domains */}
         <link rel="dns-prefetch" href="//cdn.sanity.io" />
@@ -196,7 +194,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body className={`${typewriterFont.className} ${professionalFont.variable}`}>
+      <body className={`${primaryFont.variable} ${typewriterFont.variable} ${monoFont.variable} font-primary`}>
         <SkipLink />
         <AppErrorBoundary>
           <ProvidersWrapper>

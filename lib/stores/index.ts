@@ -139,7 +139,6 @@ export const useCartTotalItems = () => {
   const result = useStore((state) => {
     const items = state.cart.items || [];
     const total = items.reduce((sum, item) => sum + Number(item.quantity), 0);
-    console.log('useCartTotalItems - items:', items.length, 'total:', total);
     return total;
   });
   return result;

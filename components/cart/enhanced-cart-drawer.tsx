@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStore } from '@/lib/stores';
-import { useEnhancedCartSummary, useCartRecommendations, useInventoryValidation, useMoveToWishlist, useCartSharing, useTaxEstimation } from '@/hooks/use-enhanced-cart';
+// Enhanced cart hooks temporarily disabled - using basic cart functionality
 import { formatPrice } from '@/lib/utils';
 import { CartItem } from './cart-item';
 import { CartRecommendations } from './cart-recommendations';
@@ -25,13 +25,13 @@ export function EnhancedCartDrawer() {
   const cartActions = useStore((state) => state.actions.cart);
   const isAuthenticated = useStore((state) => state.auth.isAuthenticated);
   
-  // Enhanced hooks
-  const cartSummaryData = useEnhancedCartSummary();
-  const { data: recommendations } = useCartRecommendations();
-  const { data: inventoryStatus } = useInventoryValidation();
-  const moveToWishlist = useMoveToWishlist();
-  const shareCart = useCartSharing();
-  const calculateTax = useTaxEstimation();
+  // Enhanced hooks temporarily disabled - using basic cart functionality
+  // const cartSummaryData = useEnhancedCartSummary();
+  // const { data: recommendations } = useCartRecommendations();
+  // const { data: inventoryStatus } = useInventoryValidation();
+  // const moveToWishlist = useMoveToWishlist();
+  // const shareCart = useCartSharing();
+  // const calculateTax = useTaxEstimation();
 
   const handleToggleSelect = (itemId: string) => {
     setSelectedItems(prev => 
@@ -51,22 +51,22 @@ export function EnhancedCartDrawer() {
 
   const handleBulkMoveToWishlist = async () => {
     for (const itemId of selectedItems) {
-      await moveToWishlist.mutateAsync(itemId);
+      console.log("Move to wishlist:", itemId); // moveToWishlist disabled
     }
     setSelectedItems([]);
   };
 
   const handleShareCart = async () => {
     try {
-      await shareCart.mutateAsync({ permissions: 'view', expiresInHours: 24 });
+      console.log("Share cart disabled"); // shareCart.mutateAsync({ permissions: 'view', expiresInHours: 24 });
     } catch (error) {
       console.error('Failed to share cart:', error);
     }
   };
 
   const hasSelectedItems = selectedItems.length > 0;
-  const hasUnavailableItems = cartSummaryData?.data.hasUnavailableItems || false;
-  const hasLowStockItems = cartSummaryData?.data.hasLowStockItems || false;
+  const hasUnavailableItems = false; // cartSummaryData?.data.hasUnavailableItems || false;
+  const hasLowStockItems = false; // cartSummaryData?.data.hasLowStockItems || false;
 
   return (
     <Sheet open={cart.isOpen} onOpenChange={cartActions.setCartOpen}>
@@ -88,7 +88,7 @@ export function EnhancedCartDrawer() {
                     variant="ghost"
                     size="sm"
                     onClick={handleShareCart}
-                    disabled={shareCart.isPending}
+                    disabled={false} // shareCart.isPending
                   >
                     <Share2 className="h-4 w-4" />
                   </Button>
@@ -183,9 +183,9 @@ export function EnhancedCartDrawer() {
                 <TabsTrigger value="cart" className="flex-1">
                   Cart ({cart.items.length})
                 </TabsTrigger>
-                {recommendations && recommendations.length > 0 && (
+                {false && false && (
                   <TabsTrigger value="recommendations">
-                    Recommendations ({recommendations.length})
+                    Recommendations (0)
                   </TabsTrigger>
                 )}
                 <TabsTrigger value="shipping">
@@ -199,9 +199,7 @@ export function EnhancedCartDrawer() {
                 <div className="flex-1 px-6 overflow-y-auto">
                   <div className="space-y-4 py-4">
                     {cart.items.map((item) => {
-                      const inventory = inventoryStatus?.find(status => 
-                        status.variantId === item.variantId
-                      );
+                      const inventory = null; // inventoryStatus?.find(status => status.variantId === item.variantId);
                       
                       return (
                         <CartItem
@@ -223,11 +221,11 @@ export function EnhancedCartDrawer() {
               </TabsContent>
 
               {/* Recommendations */}
-              {recommendations && recommendations.length > 0 && (
+              {false && false && (
                 <TabsContent value="recommendations" className="flex-1 mt-0">
                   <div className="flex-1 px-6 overflow-y-auto">
                     <CartRecommendations 
-                      recommendations={recommendations}
+                      recommendations={[]}
                       onAddToCart={(rec) => {
                         if (rec.variantId) {
                           cartActions.addItem(rec.productId, rec.variantId, 1);
@@ -242,8 +240,8 @@ export function EnhancedCartDrawer() {
               <TabsContent value="shipping" className="flex-1 mt-0">
                 <div className="p-6">
                   <TaxEstimator
-                    onCalculate={(address) => calculateTax.mutate(address)}
-                    isCalculating={calculateTax.isPending}
+                    onCalculate={(address) => console.log('Calculate tax:', address)} // calculateTax.mutate(address)
+                    isCalculating={false} // calculateTax.isPending
                     estimate={cart.taxEstimate}
                   />
                 </div>
@@ -252,11 +250,14 @@ export function EnhancedCartDrawer() {
 
             {/* Cart Summary Footer */}
             <div className="border-t bg-muted/50 p-6 space-y-4">
-              {cartSummaryData && cartSummaryData.data && (
+              {cart.items.length > 0 && (
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>Subtotal ({cartSummaryData.data.itemCount} items)</span>
-                    <span>{formatPrice(cartSummaryData.data.totals.subtotal)}</span>
+                    <span>Subtotal ({cart.items.length} items)</span>
+                    <span>{formatPrice(cart.items.reduce((total, item) => {
+                      const price = item.pricing?.totalPrice as any as number || 0;
+                      return total + price;
+                    }, 0))}</span>
                   </div>
                   
                   {cart.taxEstimate && (
@@ -277,7 +278,10 @@ export function EnhancedCartDrawer() {
                     <span>Total</span>
                     <span>
                       {formatPrice(
-                        cartSummaryData.data.totals.total + (cart.taxEstimate?.tax || 0)
+                        cart.items.reduce((total, item) => {
+                          const price = item.pricing?.totalPrice as any as number || 0;
+                          return total + price;
+                        }, 0) + (cart.taxEstimate?.tax || 0)
                       )}
                     </span>
                   </div>
@@ -290,7 +294,7 @@ export function EnhancedCartDrawer() {
                 <Button 
                   className="w-full" 
                   size="lg"
-                  disabled={cartSummaryData?.data.isEmpty || cart.isLoading}
+                  disabled={cart.items.length === 0 || cart.isLoading}
                   onClick={() => {
                     // Navigate to checkout
                     window.location.href = cart.checkoutUrl || '/checkout';

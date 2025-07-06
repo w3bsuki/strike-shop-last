@@ -1,5 +1,3 @@
-'use client';
-
 import { AlertCircle, WifiOff } from 'lucide-react';
 
 interface CartErrorProps {

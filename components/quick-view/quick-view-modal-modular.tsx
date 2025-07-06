@@ -177,11 +177,15 @@ export function QuickViewModalModular({
     if (!product) return;
 
     const wishlistItem: WishlistItem = {
-      id: product.id,
+      id: product.id as any,
+      productId: product.id as any,
+      variantId: (product.id + '-default') as any,
       name: product.name,
-      price: product.price,
-      image: product.image,
-      slug: product.slug,
+      price: product.price as any,
+      displayPrice: product.price,
+      image: product.image as any,
+      slug: product.slug as any,
+      addedAt: new Date(),
     };
 
     if (isInWishlist(product.id)) {

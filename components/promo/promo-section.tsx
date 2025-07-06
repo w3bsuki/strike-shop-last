@@ -1,16 +1,12 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
+import { Section } from '@/components/layout/section';
 
 const promoSectionVariants = cva(
   'relative overflow-hidden',
   {
     variants: {
-      size: {
-        sm: 'py-8 md:py-12',
-        default: 'py-12 md:py-16 lg:py-20',
-        lg: 'py-16 md:py-24 lg:py-32',
-      },
       theme: {
         default: 'bg-black text-white',
         inverted: 'bg-white text-black',
@@ -19,7 +15,6 @@ const promoSectionVariants = cva(
       },
     },
     defaultVariants: {
-      size: 'default',
       theme: 'default',
     },
   }
@@ -30,37 +25,33 @@ export interface PromoSectionProps
     VariantProps<typeof promoSectionVariants> {
   asChild?: boolean;
   href?: string;
+  size?: 'sm' | 'default' | 'lg';
+  container?: boolean;
 }
 
 const PromoSection = React.forwardRef<HTMLElement, PromoSectionProps>(
-  ({ className, size, theme, children, asChild = false, href, ...props }, ref) => {
-    const Comp = asChild ? React.Fragment : 'section';
+  ({ className, size = 'default', theme, children, asChild = false, href, container = true, ...props }, ref) => {
+    const content = (
+      <Section
+        ref={ref}
+        size={size}
+        container={container}
+        className={cn(promoSectionVariants({ theme }), className)}
+        {...props}
+      >
+        {children}
+      </Section>
+    );
     
     if (href) {
       return (
         <a href={href} className="block">
-          <section
-            ref={ref}
-            className={cn(promoSectionVariants({ size, theme, className }))}
-            {...props}
-          >
-            {children}
-          </section>
+          {content}
         </a>
       );
     }
 
-    return (
-      <Comp>
-        <section
-          ref={ref}
-          className={cn(promoSectionVariants({ size, theme, className }))}
-          {...props}
-        >
-          {children}
-        </section>
-      </Comp>
-    );
+    return content;
   }
 );
 

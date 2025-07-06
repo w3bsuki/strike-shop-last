@@ -1,11 +1,9 @@
-"use client";
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const heroDescriptionVariants = cva(
-  "text-white/90 font-typewriter tracking-wide leading-relaxed",
+  "text-white/90 font-primary tracking-normal leading-relaxed",
   {
     variants: {
       size: {

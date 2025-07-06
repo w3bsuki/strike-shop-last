@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand';
+import { createUserId } from '@/types/branded';
 import type {
   StoreState,
   AuthSlice,
@@ -16,10 +17,10 @@ const authService = {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     return {
-      id: 'user_123',
+      id: createUserId('user_123'),
       email,
-      first_name: 'John',
-      last_name: 'Doe',
+      firstName: 'John',
+      lastName: 'Doe',
       addresses: [],
       orders: [],
       createdAt: new Date(),
@@ -35,7 +36,7 @@ const authService = {
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     return {
-      id: userId,
+      id: createUserId(userId),
       email: updates.email || 'user@example.com',
       ...updates,
       addresses: updates.addresses || [],
@@ -102,7 +103,7 @@ export const createAuthSlice: StateCreator<
         const { auth } = get();
         if (!auth.user) return;
 
-        const updatedAddresses = auth.user.addresses.map((addr) =>
+        const updatedAddresses = auth.user.addresses.map((addr: Address) =>
           addr.id === addressId ? { ...addr, ...updates } : addr
         );
 
@@ -124,7 +125,7 @@ export const createAuthSlice: StateCreator<
         if (!auth.user) return;
 
         const updatedAddresses = auth.user.addresses.filter(
-          (addr) => addr.id !== addressId
+          (addr: Address) => addr.id !== addressId
         );
         set((state) => ({
           auth: {
@@ -143,7 +144,7 @@ export const createAuthSlice: StateCreator<
         const { auth } = get();
         if (!auth.user) return;
 
-        const updatedAddresses = auth.user.addresses.map((addr) => ({
+        const updatedAddresses = auth.user.addresses.map((addr: Address) => ({
           ...addr,
           isDefault:
             addr.id === addressId && addr.type === type
@@ -189,7 +190,7 @@ export const createAuthSlice: StateCreator<
         const { auth } = get();
         if (!auth.user) return;
 
-        const updatedOrders = auth.user.orders.map((order) =>
+        const updatedOrders = auth.user.orders.map((order: Order) =>
           order.id === orderId ? { ...order, status } : order
         );
 
@@ -251,10 +252,10 @@ export const createAuthSlice: StateCreator<
           // In production, this would call a real registration API
           await new Promise((resolve) => setTimeout(resolve, 1000));
           const user: User = {
-            id: 'user_' + Date.now(),
+            id: createUserId('user_' + Date.now()),
             email: data.email,
-            first_name: data.first_name,
-            last_name: data.last_name,
+            firstName: data.first_name,
+            lastName: data.last_name,
             ...(data.phone && { phone: data.phone }),
             addresses: [],
             orders: [],
@@ -292,10 +293,10 @@ export const createAuthSlice: StateCreator<
           // In production, this would initiate OAuth flow
           await new Promise((resolve) => setTimeout(resolve, 1500));
           const user: User = {
-            id: 'user_' + provider + '_' + Date.now(),
+            id: createUserId('user_' + provider + '_' + Date.now()),
             email: `user@${provider}.com`,
-            first_name: provider.charAt(0).toUpperCase() + provider.slice(1),
-            last_name: 'User',
+            firstName: provider.charAt(0).toUpperCase() + provider.slice(1),
+            lastName: 'User',
             addresses: [],
             orders: [],
             createdAt: new Date(),
@@ -369,7 +370,7 @@ export const createAuthSlice: StateCreator<
 
         return (
           auth.user.addresses.find(
-            (addr) => addr.type === type && addr.isDefault
+            (addr: Address) => addr.type === type && addr.isDefault
           ) || null
         );
       },
@@ -379,7 +380,7 @@ export const createAuthSlice: StateCreator<
         if (!auth.user) return [];
 
         return auth.user.orders
-          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+          .sort((a: Order, b: Order) => b.createdAt.getTime() - a.createdAt.getTime())
           .slice(0, limit);
       },
 
@@ -388,8 +389,8 @@ export const createAuthSlice: StateCreator<
         if (!auth.user) return false;
 
         return !!(
-          auth.user.first_name &&
-          auth.user.last_name &&
+          auth.user.firstName &&
+          auth.user.lastName &&
           auth.user.phone &&
           auth.user.addresses.length > 0
         );

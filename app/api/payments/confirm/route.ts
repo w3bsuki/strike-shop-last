@@ -40,14 +40,15 @@ export async function POST(request: Request) {
       .from('orders')
       .insert({
         user_id: user.id,
-        stripe_payment_id: paymentIntent.id,
-        amount: paymentIntent.amount / 100, // Convert from cents
+        stripe_payment_intent_id: paymentIntent.id,
+        total_amount: paymentIntent.amount / 100, // Convert from cents
         currency: paymentIntent.currency,
         status: 'confirmed',
         items: items,
         metadata: {
           payment_method: paymentIntent.payment_method_types[0],
           receipt_email: paymentIntent.receipt_email,
+          email: user.email,
         },
       })
       .select()

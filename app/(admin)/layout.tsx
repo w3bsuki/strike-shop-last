@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 
 // Dynamic import admin layout to keep it out of main bundle
 const AdminLayoutComponent = dynamic(
-  () => import('./admin-layout-component'),
+  () => import('@/app/(admin)/admin-layout-component'),
   {
     ssr: false,
     loading: () => (

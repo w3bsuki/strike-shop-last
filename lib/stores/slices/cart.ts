@@ -130,10 +130,72 @@ export const createCartSlice: StateCreator<
 
       // Add item to cart with Shopify integration
       addItem: async (productId: string, variantId: string, quantity: number = 1, productData?: any) => {
+        // Optimistic update - add item to cart immediately
+        const optimisticItem = {
+          id: createProductId(productId) || createProductId('fallback'),
+          lineItemId: createLineItemId(`temp_${Date.now()}`),
+          variantId: createVariantId(variantId),
+          name: productData?.name || 'Product',
+          slug: createSlug(productData?.slug || 'product'),
+          size: productData?.size || 'One Size',
+          quantity: createQuantity(quantity),
+          image: createImageURL(productData?.image || ''),
+          pricing: {
+            unitPrice: createPrice(Math.round((productData?.price || 0) * 100)),
+            totalPrice: createPrice(Math.round((productData?.price || 0) * 100 * quantity)),
+            displayUnitPrice: formatPrice(productData?.price || 0),
+            displayTotalPrice: formatPrice((productData?.price || 0) * quantity),
+          },
+        };
+        
+        // Update UI immediately (optimistic)
+        const currentItems = get().cart.items || [];
+        const existingItemIndex = currentItems.findIndex(item => item.variantId === createVariantId(variantId));
+        
+        let newItems;
+        if (existingItemIndex >= 0) {
+          // Update existing item quantity
+          newItems = [...currentItems];
+          const existingItem = newItems[existingItemIndex];
+          if (!existingItem) return; // Safety check
+          newItems[existingItemIndex] = {
+            ...existingItem,
+            id: existingItem.id || createProductId(productId),
+            lineItemId: existingItem.lineItemId || createLineItemId(`temp_${Date.now()}`),
+            variantId: existingItem.variantId || createVariantId(variantId),
+            name: existingItem.name || productData?.name || 'Product',
+            slug: existingItem.slug || createSlug(productData?.slug || 'product'),
+            size: existingItem.size || productData?.size || 'One Size',
+            image: existingItem.image ?? createImageURL(productData?.image || ''),
+            quantity: createQuantity(Number(existingItem.quantity) + quantity),
+            pricing: {
+              ...existingItem.pricing,
+              totalPrice: createPrice(Number(existingItem.pricing.unitPrice) * (Number(existingItem.quantity) + quantity)),
+              displayTotalPrice: formatPrice(Number(existingItem.pricing.unitPrice) * (Number(existingItem.quantity) + quantity) / 100),
+            },
+          };
+        } else {
+          // Add new item
+          newItems = [...currentItems, optimisticItem];
+        }
+        
         set((state) => ({ 
           ...state, 
-          cart: { ...state.cart, isLoading: true, error: null } 
+          cart: { ...state.cart, items: newItems, error: null } 
         }));
+        
+        // Show immediate feedback
+        cartEventEmitter.emit('item-added', {
+          item: optimisticItem,
+          timestamp: new Date(),
+          source: 'user'
+        });
+        
+        toast({
+          title: "Added to cart",
+          description: `${quantity} item${quantity > 1 ? 's' : ''} added to your cart`,
+        });
+        
         try {
           const state = get();
           let cartId = state.cart.cartId;
@@ -190,8 +252,6 @@ export const createCartSlice: StateCreator<
             },
           }));
           
-          console.log('Updating cart state with items:', items);
-          console.log('First item quantity type and value:', typeof items[0]?.quantity, items[0]?.quantity);
           set((state) => ({ 
             ...state, 
             cart: { 
@@ -202,28 +262,11 @@ export const createCartSlice: StateCreator<
               checkoutUrl: shopifyCart.checkoutUrl
             } 
           }));
-          console.log('Cart state updated successfully');
           
           // Save to localStorage
           if (typeof window !== 'undefined') {
             localStorage.setItem('strike-cart', JSON.stringify({ cartId, items }));
           }
-          
-          // Find the item that was just added/updated
-          const addedItem = items.find(item => item.variantId === createVariantId(variantId));
-          if (addedItem) {
-            cartEventEmitter.emit('item-added', {
-              item: addedItem,
-              timestamp: new Date(),
-              source: 'user'
-            });
-          }
-          
-          // Show toast
-          toast({
-            title: "Added to cart",
-            description: `${quantity} item${quantity > 1 ? 's' : ''} added to your cart`,
-          });
         } catch (error) {
           handleError(error);
           
@@ -234,10 +277,25 @@ export const createCartSlice: StateCreator<
             ? 'No connection. Item will be added when online.'
             : 'Failed to add item to cart. Please try again.';
           
-          set((state) => ({ 
-            ...state, 
-            cart: { ...state.cart, isLoading: false, error: errorMessage } 
-          }));
+          // Revert optimistic update on error (except for network errors)
+          if (!isNetworkError) {
+            set((state) => ({ 
+              ...state, 
+              cart: { ...state.cart, items: currentItems, error: errorMessage } 
+            }));
+            
+            toast({
+              title: "Failed to add item",
+              description: errorMessage,
+              variant: "destructive",
+            });
+          } else {
+            // Keep optimistic update for network errors
+            set((state) => ({ 
+              ...state, 
+              cart: { ...state.cart, error: errorMessage } 
+            }));
+          }
           
           // If network error, queue the action for later
           if (isNetworkError && typeof window !== 'undefined') {
@@ -349,7 +407,6 @@ export const createCartSlice: StateCreator<
             }
           }
         } catch (error) {
-          console.error('Failed to update item:', error);
           set((state) => ({ 
             ...state, 
             cart: { ...state.cart, error: 'Failed to update item', isLoading: false } 
@@ -419,7 +476,6 @@ export const createCartSlice: StateCreator<
             description: "All items have been removed from your cart",
           });
         } catch (error) {
-          console.error('Failed to clear cart:', error);
           // Clear local state anyway
           set((state) => ({ 
             ...state, 

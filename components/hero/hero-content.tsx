@@ -1,11 +1,10 @@
-"use client";
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
+import { layoutClasses } from "@/lib/layout/config";
 
 const heroContentVariants = cva(
-  "relative z-10 flex flex-col gap-4 md:gap-6 px-4 sm:px-6 md:px-8 lg:px-12",
+  "relative z-10 flex flex-col gap-4 px-4 sm:px-4 lg:px-6",
   {
     variants: {
       position: {

@@ -1,5 +1,7 @@
 import dynamic from 'next/dynamic';
 import { ComponentType } from 'react';
+// Type imports removed since we're using dynamic imports without generic types
+// This prevents TypeScript conflicts with Next.js dynamic() function
 
 // Loading component for dynamic imports
 const DefaultLoading = () => null;
@@ -33,58 +35,57 @@ export const ResponsiveContainer = dynamic(
 export const XAxis = dynamic(
   () => import('recharts').then(mod => ({ default: mod.XAxis as any })),
   { ssr: false, loading: DefaultLoading }
-) as any;
+);
 
 export const YAxis = dynamic(
   () => import('recharts').then(mod => ({ default: mod.YAxis as any })),
   { ssr: false, loading: DefaultLoading }
-) as any;
+);
 
 export const CartesianGrid = dynamic(
   () => import('recharts').then(mod => ({ default: mod.CartesianGrid as any })),
   { ssr: false, loading: DefaultLoading }
-) as any;
+);
 
 export const Tooltip = dynamic(
   () => import('recharts').then(mod => ({ default: mod.Tooltip as any })),
   { ssr: false, loading: DefaultLoading }
-) as any;
+);
 
 export const Legend = dynamic(
   () => import('recharts').then(mod => ({ default: mod.Legend as any })),
   { ssr: false, loading: DefaultLoading }
-) as any;
+);
 
 export const Line = dynamic(
   () => import('recharts').then(mod => ({ default: mod.Line as any })),
   { ssr: false, loading: DefaultLoading }
-) as any;
+);
 
 export const Bar = dynamic(
   () => import('recharts').then(mod => ({ default: mod.Bar as any })),
   { ssr: false, loading: DefaultLoading }
-) as any;
+);
 
 export const Area = dynamic(
   () => import('recharts').then(mod => ({ default: mod.Area as any })),
   { ssr: false, loading: DefaultLoading }
-) as any;
+);
 
 export const Pie = dynamic(
   () => import('recharts').then(mod => ({ default: mod.Pie as any })),
   { ssr: false, loading: DefaultLoading }
-) as any;
+);
 
 export const Cell = dynamic(
   () => import('recharts').then(mod => ({ default: mod.Cell as any })),
   { ssr: false, loading: DefaultLoading }
-) as any;
+);
 
 // Framer Motion components (~150KB)
-export const motion = dynamic(
-  () => import('framer-motion').then(mod => ({ default: mod.motion as any })),
-  { ssr: false }
-);
+// Note: motion is not a component but a factory, so we can't use dynamic() on it directly
+// Export it as a promise instead
+export const motion = import('framer-motion').then(mod => mod.motion);
 
 export const AnimatePresence = dynamic(
   () => import('framer-motion').then(mod => ({ default: mod.AnimatePresence })),
@@ -194,14 +195,14 @@ export const Map = dynamic(
 );
 
 // Helper to create dynamic imports with custom loading
-export function createDynamicImport<T extends ComponentType<any>>(
-  importFn: () => Promise<{ default: T }>,
+export function createDynamicImport<P = {}>(
+  importFn: () => Promise<{ default: ComponentType<P> }>,
   options?: {
     ssr?: boolean;
     loading?: () => React.ReactElement | null;
   }
 ) {
-  return dynamic(importFn, {
+  return dynamic<P>(importFn, {
     ssr: options?.ssr ?? false,
     loading: options?.loading ?? DefaultLoading,
   });

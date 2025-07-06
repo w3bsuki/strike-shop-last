@@ -119,7 +119,7 @@ function QuickViewContent({
 
   const cartActions = useCartActions();
   const setCartOpen = useStore((state) => state.actions.cart.setCartOpen);
-  const { addToWishlist, removeFromWishlist, isInWishlist, wishlist } =
+  const { addToWishlist, removeFromWishlist, isInWishlist, items: wishlist } =
     useWishlistStore();
 
   const [isProductWishlisted, setIsProductWishlisted] = useState(false);
@@ -190,11 +190,15 @@ function QuickViewContent({
       return;
 
     const wishlistItem: WishlistItem = {
-      id: product.id,
+      id: product.id as any,
+      productId: product.id as any,
+      variantId: (product.id + '-default') as any,
       name: product.name,
-      price: product.price,
-      image: product.image,
-      slug: product.slug,
+      price: product.price as any,
+      displayPrice: product.price,
+      image: product.image as any,
+      slug: product.slug as any,
+      addedAt: new Date(),
     };
 
     if (isInWishlist(product.id)) {
@@ -375,11 +379,15 @@ function MobileQuickViewContent({
     if (!product) return;
 
     const wishlistItem: WishlistItem = {
-      id: product.id,
+      id: product.id as any,
+      productId: product.id as any,
+      variantId: (product.id + '-default') as any,
       name: product.name,
-      price: product.price,
-      image: product.image,
-      slug: product.slug,
+      price: product.price as any,
+      displayPrice: product.price,
+      image: product.image as any,
+      slug: product.slug as any,
+      addedAt: new Date(),
     };
 
     if (isWishlisted) {

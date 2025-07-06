@@ -7,3 +7,7 @@ export { FooterNewsletter } from './footer-newsletter';
 export { FooterSocial } from './footer-social';
 export { FooterBottom } from './footer-bottom';
 export { FooterLogo } from './footer-logo';
+export { FooterWithConfig } from './footer-with-config';
+
+// Default export with config included for convenience
+export { FooterWithConfig as default } from './footer-with-config';

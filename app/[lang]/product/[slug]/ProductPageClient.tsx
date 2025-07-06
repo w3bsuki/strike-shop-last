@@ -110,10 +110,14 @@ export default function ProductPageClient({ product }: ProductPageProps) {
     } else {
       addToWishlist({
         id: product.id,
+        productId: product.id,
+        variantId: product.variants?.[0]?.id || product.id,
         name: product.title,
         price: product.variants?.[0]?.prices?.[0]?.amount?.toString() || '0',
+        displayPrice: product.variants?.[0]?.prices?.[0]?.amount?.toString() || '0',
         image: product.thumbnail || '',
         slug: product.handle || '',
+        addedAt: new Date(),
       });
     }
   };

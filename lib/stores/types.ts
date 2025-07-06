@@ -1,11 +1,11 @@
 // Import types from unified types for use in this file
-import type { CartItem } from '../../types/store';
+import type { CartItem, User, Address, Order, OrderStatus } from '../../types/store';
 import type { WishlistItem } from '../wishlist-store';
-import type { User, Address, Order, OrderStatus } from '../auth-store';
 import type { 
   BulkCartItem, 
   BulkOperation, 
-  SavedCart, 
+  SavedCart,
+  SavedCartItem,
   CartRecommendation, 
   InventoryStatus, 
   TaxEstimate,
@@ -33,13 +33,13 @@ export interface CartSlice {
   taxEstimate: TaxEstimate | null;
   shareToken: string | null;
   shareExpiry: number | null;
-  savedForLater: any[];
+  savedForLater: SavedCartItem[];
   abandonmentTracking: {
     startTime: number | null;
     events: Array<{
       event: string;
       timestamp: number;
-      data?: any;
+      data?: Record<string, unknown>;
     }>;
   };
 }

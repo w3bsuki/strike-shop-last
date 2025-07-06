@@ -115,7 +115,6 @@ export function CategoriesPage({
                   category={category}
                   variant="featured"
                   priority={true}
-                  index={index}
                 />
               ))}
             </div>

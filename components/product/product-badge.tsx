@@ -1,62 +1,46 @@
-"use client";
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const productBadgeVariants = cva(
-  "inline-flex items-center justify-center text-xs font-bold uppercase tracking-wider",
+  "absolute top-3 left-3 z-10 font-bold text-xs uppercase tracking-wider px-3 py-1.5 border-0 pointer-events-none",
   {
     variants: {
       variant: {
-        sale: "bg-destructive text-destructive-foreground",
-        new: "bg-primary text-primary-foreground",
-        soldOut: "bg-muted-foreground text-background",
-        limited: "bg-warning text-warning-foreground",
-        exclusive: "bg-info text-info-foreground",
+        sale: "bg-red-500 text-white",
+        new: "bg-black text-white",
+        soldOut: "bg-gray-500 text-white",
+        limited: "bg-yellow-400 text-black",
+        exclusive: "bg-purple-600 text-white",
       },
       size: {
-        sm: "px-1.5 py-0.5 text-[10px]",
-        default: "px-2 py-1 text-xs",
-        lg: "px-3 py-1.5 text-sm",
-      },
-      position: {
-        none: "",
-        topLeft: "absolute top-2 left-2",
-        topRight: "absolute top-2 right-2",
-        bottomLeft: "absolute bottom-2 left-2",
-        bottomRight: "absolute bottom-2 right-2",
+        sm: "text-xs px-2 py-1",
+        md: "text-xs px-3 py-1.5", 
+        lg: "text-sm px-4 py-2",
       },
     },
     defaultVariants: {
-      variant: "sale",
-      size: "default",
-      position: "none",
+      variant: "new",
+      size: "md",
     },
   }
 );
 
 export interface ProductBadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof productBadgeVariants> {
-  label?: string;
-}
+    VariantProps<typeof productBadgeVariants> {}
 
 const ProductBadge = React.forwardRef<HTMLDivElement, ProductBadgeProps>(
-  ({ className, variant, size, position, label, children, ...props }, ref) => {
-    const content = label || children;
+  ({ className, variant, size, children, ...props }, ref) => {
+    if (!children) return null;
     
-    if (!content) return null;
-
     return (
       <div
         ref={ref}
-        className={cn(productBadgeVariants({ variant, size, position }), className)}
-        role="status"
-        aria-label={`${content} badge`}
+        className={cn(productBadgeVariants({ variant, size }), className)}
         {...props}
       >
-        {content}
+        {children}
       </div>
     );
   }

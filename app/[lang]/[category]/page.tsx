@@ -5,7 +5,7 @@ import { QuickViewProvider } from '@/contexts/QuickViewContext';
 import { ShopifyService } from '@/lib/shopify/services';
 
 // Dynamic imports for heavy components
-const CategoryPageClient = dynamic(() => import('@/components/category-page-client'), {
+const CategoryPageClient = dynamic(() => import('@/components/category/CategoryPageClient'), {
   loading: () => (
     <div className="min-h-screen bg-white animate-pulse">
       <div className="container mx-auto px-4 py-8">

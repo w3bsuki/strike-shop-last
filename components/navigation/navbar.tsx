@@ -14,7 +14,11 @@ export function NavBar({ className }: NavBarProps) {
   const t = useTranslations();
 
   return (
-    <nav className={cn("hidden lg:flex items-center", className)}>
+    <nav 
+      className={cn("hidden lg:flex items-center", className)}
+      role="navigation"
+      aria-label="Main navigation"
+    >
       <ul className="flex items-center gap-2">
         {mainNavItems.map((item) => (
           <li key={item.href}>
@@ -24,7 +28,10 @@ export function NavBar({ className }: NavBarProps) {
             >
               {item.titleKey ? t(item.titleKey) : item.title}
               {item.badge && (
-                <span className="absolute -top-1 -right-1 text-xs font-typewriter font-semibold text-white bg-destructive px-1.5 py-0.5 rounded">
+                <span 
+                  className="absolute -top-1 -right-1 text-xs font-typewriter font-semibold text-white bg-destructive px-1.5 py-0.5 rounded"
+                  aria-label={`${item.badgeKey ? t(item.badgeKey) : item.badge} badge`}
+                >
                   {item.badgeKey ? t(item.badgeKey) : item.badge}
                 </span>
               )}

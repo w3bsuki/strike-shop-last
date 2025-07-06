@@ -58,14 +58,7 @@ export const DynamicPieChart = dynamic(
 // Heavy UI Components
 // ========================================
 
-// Dynamic import for carousel (if using embla-carousel)
-export const DynamicCarousel = dynamic(
-  () => import('@/components/ui/carousel').then(mod => ({ default: mod.Carousel })),
-  {
-    
-    loading: () => <div className="h-[400px] animate-pulse bg-muted rounded" />,
-  }
-);
+// Dynamic import for carousel - removed as component was unused
 
 // Dynamic import for date picker - commented out as date-picker component doesn't exist
 // export const DynamicDatePicker = dynamic(

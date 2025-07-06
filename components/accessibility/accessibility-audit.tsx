@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
-import { Button } from '@/components/ui/button-unified';
+import { Button } from '@/components/ui/button';
 
 interface AccessibilityIssue {
   id: string;
@@ -230,7 +230,7 @@ export function AccessibilityAudit() {
             <h2 className="font-semibold">Accessibility Audit</h2>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={() => setIsOpen(false)}
               aria-label="Close audit panel"
             >

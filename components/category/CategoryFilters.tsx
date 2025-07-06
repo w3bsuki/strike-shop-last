@@ -12,16 +12,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 
 const AVAILABLE_COLORS = [
-  { name: 'Black', value: '#000000' },
-  { name: 'White', value: '#FFFFFF' },
-  { name: 'Gray', value: '#808080' },
-  { name: 'Navy', value: '#000080' },
-  { name: 'Brown', value: '#8B4513' },
-  { name: 'Beige', value: '#F5F5DC' },
-  { name: 'Red', value: '#FF0000' },
-  { name: 'Blue', value: '#0000FF' },
-  { name: 'Green', value: '#008000' },
-  { name: 'Pink', value: '#FFC0CB' },
+  { name: 'Black', value: 'hsl(var(--foreground))' },
+  { name: 'White', value: 'hsl(var(--background))' },
+  { name: 'Gray', value: 'hsl(var(--muted))' },
+  { name: 'Navy', value: 'hsl(220, 100%, 25%)' },
+  { name: 'Brown', value: 'hsl(25, 55%, 35%)' },
+  { name: 'Beige', value: 'hsl(60, 56%, 91%)' },
+  { name: 'Red', value: 'hsl(var(--destructive))' },
+  { name: 'Blue', value: 'hsl(var(--primary))' },
+  { name: 'Green', value: 'hsl(142, 76%, 36%)' },
+  { name: 'Pink', value: 'hsl(350, 100%, 88%)' },
 ];
 
 const AVAILABLE_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
@@ -46,6 +46,8 @@ function FilterSection({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-between w-full py-2 text-left font-typewriter text-sm font-semibold hover:text-muted-foreground transition-colors"
+        aria-expanded={isOpen}
+        aria-label={`${isOpen ? 'Collapse' : 'Expand'} ${title} filter section`}
       >
         {title}
         {isOpen ? (
@@ -120,7 +122,8 @@ export function CategoryFilters() {
                 {color}
                 <button
                   onClick={() => toggleColor(color)}
-                  className="ml-1 hover:text-red-500"
+                  className="ml-1 hover:text-red-500 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label={`Remove ${color} color filter`}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -131,7 +134,8 @@ export function CategoryFilters() {
                 Size {size}
                 <button
                   onClick={() => toggleSize(size)}
-                  className="ml-1 hover:text-red-500"
+                  className="ml-1 hover:text-red-500 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label={`Remove size ${size} filter`}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -166,7 +170,7 @@ export function CategoryFilters() {
               onClick={() => toggleColor(color.name)}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className={`relative w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center touch-manipulation ${
+              className={`relative min-w-[44px] min-h-[44px] w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center touch-manipulation ${
                 selectedColors.includes(color.name)
                   ? 'border-primary shadow-lg'
                   : 'border-border hover:border-muted-foreground'
@@ -184,9 +188,7 @@ export function CategoryFilters() {
                   >
                     <Check 
                       className={`h-4 w-4 ${
-                        color.value.toUpperCase() === '#FFFFFF' ||
-                        color.value.toUpperCase() === '#F5F5DC' ||
-                        color.value.toUpperCase() === '#FFC0CB'
+                        color.name === 'White' || color.name === 'Beige' || color.name === 'Pink'
                           ? 'text-foreground'
                           : 'text-primary-foreground'
                       }`} 

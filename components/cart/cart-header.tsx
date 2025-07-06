@@ -1,5 +1,3 @@
-'use client';
-
 import { X, ShoppingBag } from 'lucide-react';
 
 interface CartHeaderProps {

@@ -31,11 +31,15 @@ export function useAddToWishlist() {
       // For now, we just update local state
       // Convert branded types to simple types for wishlist store compatibility
       const wishlistStoreItem = {
-        id: item.id as string,
+        id: item.id as any,
+        productId: item.id as any,
+        variantId: (item.id + '-default') as any,
         name: item.name,
-        price: item.displayPrice, // Use displayPrice instead of branded Price
-        image: item.image as string || '',
-        slug: item.slug as string,
+        price: item.displayPrice as any,
+        displayPrice: item.displayPrice,
+        image: item.image as any || '',
+        slug: item.slug as any,
+        addedAt: new Date(),
       };
       wishlistActions.addToWishlist(wishlistStoreItem);
       
@@ -52,11 +56,15 @@ export function useAddToWishlist() {
       // Optimistically update
       // Convert branded types to simple types for store compatibility
       const storeItem = {
-        id: newItem.id as string,
+        id: newItem.id as any,
+        productId: newItem.id as any,
+        variantId: (newItem.id + '-default') as any,
         name: newItem.name,
-        price: newItem.displayPrice,
-        image: newItem.image as string || '',
-        slug: newItem.slug as string,
+        price: newItem.displayPrice as any,
+        displayPrice: newItem.displayPrice,
+        image: newItem.image as any || '',
+        slug: newItem.slug as any,
+        addedAt: new Date(),
       };
       
       useStore.setState((state) => ({

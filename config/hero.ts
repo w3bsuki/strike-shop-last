@@ -54,15 +54,15 @@ export const heroPresets = {
 } as const;
 
 export const heroSizeClasses = {
-  sm: "h-[35vh] md:h-[45vh]",
-  default: "h-[50vh] md:h-[60vh]",
-  lg: "h-[65vh] md:h-[70vh]",
-  full: "h-screen",
+  sm: "h-[60vh] md:h-[70vh] lg:h-[80vh] min-h-[400px] md:min-h-[500px] lg:min-h-[600px]",
+  default: "h-[70vh] md:h-[80vh] lg:h-[85vh] min-h-[500px] md:min-h-[600px] lg:min-h-[700px]",
+  lg: "h-[80vh] md:h-[85vh] lg:h-[90vh] min-h-[600px] md:min-h-[700px] lg:min-h-[800px]",
+  full: "h-screen min-h-[600px]",
 } as const;
 
 export const heroOverlayClasses = {
   none: "",
-  gradient: "bg-gradient-to-t from-black/80 via-black/40 to-transparent",
-  stark: "bg-black/20",
-  subtle: "bg-black/10",
+  gradient: "bg-gradient-to-t from-gray-900/90 via-gray-800/50 to-gray-700/20",
+  stark: "bg-gray-800/60",
+  subtle: "bg-gray-900/30",
 } as const;

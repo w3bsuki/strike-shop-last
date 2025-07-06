@@ -1,8 +1,6 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import { Star, CheckCircle } from 'lucide-react';
 import { SectionHeader } from '@/components/ui/section-header';
+import { WriteReviewButton } from './write-review-button';
 
 type Review = {
   id: string;
@@ -24,25 +22,18 @@ interface ProductReviewsProps {
   productId: string;
 }
 
-export default function ProductReviews({ productId }: ProductReviewsProps) {
-  const [reviewData, setReviewData] = useState<ReviewData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+// Server component that fetches reviews data
+export default async function ProductReviews({ productId }: ProductReviewsProps) {
+  let reviewData: ReviewData | null = null;
 
-  useEffect(() => {
-    const fetchReviews = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch(`/api/reviews/${productId}`);
-        const data = await res.json();
-        setReviewData(data);
-      } catch (error) {
-
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchReviews();
-  }, [productId]);
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/reviews/${productId}`, {
+      cache: 'no-store' // Fresh data for reviews
+    });
+    reviewData = await res.json();
+  } catch (error) {
+    console.error('Failed to fetch reviews:', error);
+  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -51,34 +42,6 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
       day: 'numeric',
     });
   };
-
-  if (isLoading) {
-    return (
-      <div className="section-padding">
-        <div className="strike-container">
-          <SectionHeader title="CUSTOMER REVIEWS" showCta={false} />
-          <div className="space-y-6">
-            {[...Array(2)].map((_, i) => (
-              <div
-                key={i}
-                className="animate-pulse border-b border-subtle pb-6"
-              >
-                <div className="flex items-center mb-2">
-                  <div className="h-4 w-24 bg-gray-200 rounded"></div>
-                  <div className="ml-auto h-4 w-16 bg-gray-200 rounded"></div>
-                </div>
-                <div className="h-5 w-48 bg-gray-200 rounded mb-3"></div>
-                <div className="space-y-2">
-                  <div className="h-4 w-full bg-gray-200 rounded"></div>
-                  <div className="h-4 w-3/4 bg-gray-200 rounded"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (!reviewData || reviewData.totalReviews === 0) {
     return (
@@ -116,9 +79,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
               </p>
             </div>
           </div>
-          <button className="button-secondary mt-4 md:mt-0">
-            Write a Review
-          </button>
+          <WriteReviewButton productId={productId} />
         </div>
 
         <div className="space-y-8">

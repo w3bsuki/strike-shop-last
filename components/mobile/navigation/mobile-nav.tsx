@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Home, Heart, ShoppingBag, User, Grid3X3 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useIsAuthenticated, useWishlistCount, useCartTotalItems } from '@/lib/stores';
-import AuthModal from '@/components/auth-modal';
+import AuthModal from '@/components/auth/auth-modal';
 import { MobileNavContainer } from './mobile-nav-container';
 import { MobileNavItem } from './mobile-nav-item';
 import { MobileNavIcon } from './mobile-nav-icon';
