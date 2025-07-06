@@ -1,39 +1,27 @@
 'use client';
 
-import type React from 'react';
+import dynamic from 'next/dynamic';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/lib/auth-store';
-import AdminSidebar from '@/components/admin/AdminSidebar';
-import AdminHeader from '@/components/admin/AdminHeader';
+// Dynamic import admin layout to keep it out of main bundle
+const AdminLayoutComponent = dynamic(
+  () => import('./admin-layout-component'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading admin panel...</p>
+        </div>
+      </div>
+    ),
+  }
+);
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, user } = useAuthStore();
-  const router = useRouter();
-
-  // Check if user is authenticated and is an admin
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/admin/login');
-    }
-  }, [isAuthenticated, user, router]);
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <AdminSidebar />
-      <div className="flex-1 flex flex-col">
-        <AdminHeader />
-        <main className="flex-1 p-6 overflow-auto">{children}</main>
-      </div>
-    </div>
-  );
+  return <AdminLayoutComponent>{children}</AdminLayoutComponent>;
 }

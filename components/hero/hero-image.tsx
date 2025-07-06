@@ -26,7 +26,7 @@ const HeroImage = React.forwardRef<HTMLDivElement, HeroImageProps>(
       <div 
         ref={ref} 
         className={cn(
-          "relative w-full h-full overflow-hidden",
+          "absolute inset-0 w-full h-full",
           className
         )} 
         {...props}
@@ -38,7 +38,9 @@ const HeroImage = React.forwardRef<HTMLDivElement, HeroImageProps>(
           className="object-cover"
           priority={priority}
           sizes="100vw"
-          quality={90}
+          quality={85}
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkrHB0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
         />
         {overlay !== "none" && (
           <div
@@ -49,7 +51,7 @@ const HeroImage = React.forwardRef<HTMLDivElement, HeroImageProps>(
             aria-hidden="true"
           />
         )}
-        <div className="relative z-10">
+        <div className="relative z-10 h-full">
           {children}
         </div>
       </div>

@@ -1,4 +1,5 @@
-// Server Component - CVE-2025-29927 Compliant Performance Optimization
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,7 @@ export function HeroSection({
     "24/7 SUPPORT",
   ],
 }: HeroSectionProps) {
-  // Server-side calculations (moved from useMemo for performance)
+  // Client-side calculations
   const contentPosition = (() => {
     switch (variant) {
       case "centered":
@@ -61,17 +62,36 @@ export function HeroSection({
               {badge}
             </HeroBadge>
           )}
-          <HeroTitle size={titleSize}>{title}</HeroTitle>
-          {subtitle && <HeroDescription>{subtitle}</HeroDescription>}
+          <HeroTitle 
+            size={titleSize}
+            className={cn(
+              "drop-shadow-lg",
+              variant === "centered" && "text-center",
+              "font-bold tracking-tight"
+            )}
+          >
+            {title}
+          </HeroTitle>
+          {subtitle && (
+            <HeroDescription 
+              className={cn(
+                "drop-shadow-md max-w-2xl",
+                variant === "centered" && "text-center mx-auto"
+              )}
+            >
+              {subtitle}
+            </HeroDescription>
+          )}
           {cta && (
             <HeroActions align={variant === "centered" ? "center" : "start"}>
               <Button
                 asChild
-                variant={cta.variant || "default"}
+                variant="strike-outline"
                 size="lg"
                 className={cn(
-                  "uppercase tracking-wider",
-                  variant === "centered" && "bg-background text-foreground hover:bg-primary hover:text-primary-foreground"
+                  "bg-white/10 backdrop-blur-sm border-white text-white hover:bg-white hover:text-black",
+                  "font-bold tracking-wider transition-all duration-300",
+                  "shadow-lg hover:shadow-xl"
                 )}
               >
                 <Link href={cta.href}>{cta.text}</Link>

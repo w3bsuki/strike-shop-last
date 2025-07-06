@@ -35,7 +35,7 @@ interface CommunityReview {
 }
 
 interface CommunityShowcaseProps {
-  title: string;
+  title?: string;
   description?: string;
   viewAllLink?: string;
   viewAllText?: string;
@@ -44,6 +44,7 @@ interface CommunityShowcaseProps {
   instagramPosts?: CommunityPost[];
   reviews?: CommunityReview[];
   className?: string;
+  noSection?: boolean;
 }
 
 export function CommunityShowcase({
@@ -56,6 +57,7 @@ export function CommunityShowcase({
   instagramPosts = [],
   reviews = [],
   className,
+  noSection = false,
 }: CommunityShowcaseProps) {
   const [currentTab, setCurrentTab] = React.useState(activeTab);
 
@@ -64,16 +66,16 @@ export function CommunityShowcase({
     onTabChange?.(tab);
   };
 
-  // Tab buttons component
+  // Tab buttons component - mobile optimized
   const tabButtons = (
-    <div className="flex gap-1 p-1 bg-muted rounded-md">
+    <div className="flex gap-1 p-1 bg-gray-100 rounded-md">
       <button
         onClick={() => handleTabChange('instagram')}
         className={cn(
-          'px-3 py-1.5 text-xs font-typewriter font-medium transition-all duration-200 rounded-sm',
+          'px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-typewriter font-bold transition-all duration-200 rounded',
           currentTab === 'instagram'
-            ? 'bg-background text-foreground shadow-sm'
-            : 'text-muted-foreground hover:text-foreground'
+            ? 'bg-black text-white'
+            : 'text-black/60 hover:text-black'
         )}
       >
         FEED
@@ -81,10 +83,10 @@ export function CommunityShowcase({
       <button
         onClick={() => handleTabChange('reviews')}
         className={cn(
-          'px-3 py-1.5 text-xs font-typewriter font-medium transition-all duration-200 rounded-sm',
+          'px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-typewriter font-bold transition-all duration-200 rounded',
           currentTab === 'reviews'
-            ? 'bg-background text-foreground shadow-sm'
-            : 'text-muted-foreground hover:text-foreground'
+            ? 'bg-black text-white'
+            : 'text-black/60 hover:text-black'
         )}
       >
         REVIEWS
@@ -92,23 +94,19 @@ export function CommunityShowcase({
     </div>
   );
 
-  return (
-    <ProductSection spacing="default" background="none" className={className}>
-      <ProductHeader
-        title={title}
-        {...(description && { description })}
-        viewAllText={viewAllText}
-        {...(viewAllLink && { viewAllHref: viewAllLink })}
-        align="left"
-        badge={tabButtons}
-      />
+  const content = (
+    <>
+      {/* Tab buttons - centered */}
+      <div className="flex justify-center mb-6">
+        {tabButtons}
+      </div>
       
       <ProductScroll showControls controlsPosition="outside">
         {currentTab === 'instagram' ? (
           instagramPosts.map((post) => (
             <div
               key={post.id}
-              className="flex-shrink-0 w-44 sm:w-48 md:w-52 lg:w-60 snap-start touch-manipulation"
+              className="flex-shrink-0 w-[45vw] max-w-[200px] sm:w-48 md:w-56 lg:w-64 snap-start"
             >
               <div className="bg-background border border-border rounded-md overflow-hidden h-full">
                 {/* Image */}
@@ -147,7 +145,7 @@ export function CommunityShowcase({
           reviews.map((review) => (
             <div
               key={review.id}
-              className="flex-shrink-0 w-44 sm:w-48 md:w-52 lg:w-60 snap-start touch-manipulation"
+              className="flex-shrink-0 w-[45vw] max-w-[200px] sm:w-48 md:w-56 lg:w-64 snap-start"
             >
               <div className="bg-background border border-border rounded-md p-3 h-full">
                 <div className="flex items-center gap-2 mb-2">
@@ -178,6 +176,25 @@ export function CommunityShowcase({
           ))
         )}
       </ProductScroll>
+    </>
+  );
+
+  if (noSection) {
+    return <div className={className}>{content}</div>;
+  }
+
+  return (
+    <ProductSection size="default" background="none" className={className}>
+      <ProductHeader
+        title={title}
+        {...(description && { description })}
+        viewAllText={viewAllText}
+        {...(viewAllLink && { viewAllHref: viewAllLink })}
+        align="center"
+        badge={tabButtons}
+      />
+      
+      {content}
     </ProductSection>
   );
 }

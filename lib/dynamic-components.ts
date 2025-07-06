@@ -129,7 +129,7 @@ export const SheetTrigger = dynamic(
 
 // Admin components
 export const AdminDashboard = dynamic(
-  () => import('@/components/admin/AdminDashboard').then(mod => ({ default: mod.AdminDashboard })),
+  () => import('@/components/admin/AdminDashboard'),
   { ssr: false, loading: () => null }
 );
 

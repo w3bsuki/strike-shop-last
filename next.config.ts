@@ -74,16 +74,16 @@ const nextConfig: NextConfig = {
     ],
   },
   // Modularize imports for perfect tree-shaking
-  // modularizeImports: {
-  //   'lucide-react': {
-  //     transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
-  //     preventFullImport: true,
-  //   },
-  //   'recharts': {
-  //     transform: 'recharts/lib/{{member}}',
-  //     preventFullImport: true,
-  //   },
-  // },
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
+      preventFullImport: true,
+    },
+    'recharts': {
+      transform: 'recharts/lib/{{member}}',
+      preventFullImport: true,
+    },
+  },
   // Production optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',

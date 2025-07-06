@@ -1,4 +1,5 @@
-// Server Component - CVE-2025-29927 Compliant Performance Optimization
+"use client";
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -6,12 +7,6 @@ interface HeroMarqueeProps extends React.HTMLAttributes<HTMLDivElement> {
   speed?: "slow" | "normal" | "fast";
   pauseOnHover?: boolean;
 }
-
-const speedClasses = {
-  slow: "animate-marquee-slow",
-  normal: "animate-marquee",
-  fast: "animate-marquee-fast",
-};
 
 const HeroMarquee = React.forwardRef<HTMLDivElement, HeroMarqueeProps>(
   ({ className, children, speed = "normal", pauseOnHover = false, ...props }, ref) => {
@@ -24,17 +19,16 @@ const HeroMarquee = React.forwardRef<HTMLDivElement, HeroMarqueeProps>(
         )}
         {...props}
       >
-        <div
-          className={cn(
-            "flex whitespace-nowrap",
-            speedClasses[speed],
-            pauseOnHover && "hover:[animation-play-state:paused]"
-          )}
-        >
-          <div className="flex items-center space-x-8 px-4">
+        <div className={cn(
+          "flex animate-marquee",
+          speed === "slow" && "animate-marquee-slow",
+          speed === "fast" && "animate-marquee-fast",
+          pauseOnHover && "hover:[animation-play-state:paused]"
+        )}>
+          <div className="flex shrink-0 items-center justify-around min-w-full">
             {children}
           </div>
-          <div className="flex items-center space-x-8 px-4" aria-hidden="true">
+          <div className="flex shrink-0 items-center justify-around min-w-full" aria-hidden="true">
             {children}
           </div>
         </div>
@@ -47,13 +41,17 @@ HeroMarquee.displayName = "HeroMarquee";
 interface HeroMarqueeItemProps extends React.HTMLAttributes<HTMLSpanElement> {}
 
 const HeroMarqueeItem = React.forwardRef<HTMLSpanElement, HeroMarqueeItemProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, children, ...props }, ref) => {
     return (
-      <span
-        ref={ref}
-        className={cn("text-sm font-medium uppercase tracking-wider", className)}
-        {...props}
-      />
+      <>
+        <span
+          ref={ref}
+          className={cn("text-sm font-medium uppercase tracking-wider mx-4", className)}
+          {...props}
+        >
+          {children}
+        </span>
+      </>
     );
   }
 );

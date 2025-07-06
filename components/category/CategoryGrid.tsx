@@ -28,19 +28,20 @@ export function CategoryGrid({
   loading = false,
   columns = {
     mobile: 2,
-    tablet: 3,
+    tablet: 3, 
     desktop: 4
   }
 }: CategoryGridProps) {
   // CSS-based animation classes (replacing Framer Motion for performance)
   const animationClasses = 'animate-fade-in-up';
 
-  // Generate responsive grid classes
+  // Generate responsive grid classes - mobile-first optimized
   const gridClasses = `
     grid gap-3 sm:gap-4 lg:gap-6
     grid-cols-${columns.mobile} 
     sm:grid-cols-${columns.tablet} 
     lg:grid-cols-${columns.desktop}
+    auto-rows-fr
   `;
 
   if (loading) {
@@ -58,7 +59,7 @@ export function CategoryGrid({
       {categories.map((category, index) => (
         <div 
           key={category.id}
-          className="animate-fade-in-stagger"
+          className="animate-fade-in-stagger w-full"
           style={{ animationDelay: `${index * 0.1}s` }}
         >
           <CategoryCard
@@ -101,7 +102,7 @@ export function CategoryMasonry({
       {categories.map((category, index) => (
         <div 
           key={category.id} 
-          className="break-inside-avoid mb-3 sm:mb-4 lg:mb-6 animate-fade-in-stagger"
+          className="break-inside-avoid mb-3 sm:mb-4 lg:mb-6 animate-fade-in-stagger w-full"
           style={{ animationDelay: `${index * 0.1}s` }}
         >
           <CategoryCard

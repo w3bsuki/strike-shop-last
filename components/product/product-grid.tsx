@@ -1,65 +1,31 @@
-"use client";
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { cva, type VariantProps } from "class-variance-authority";
+import { SPACING } from "@/lib/layout/config";
 
-const productGridVariants = cva(
-  "grid gap-4 md:gap-6 select-none",
-  {
-    variants: {
-      cols: {
-        2: "grid-cols-2",
-        3: "grid-cols-2 md:grid-cols-3",
-        4: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
-        5: "grid-cols-2 md:grid-cols-3 lg:grid-cols-5",
-        6: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6",
-      },
-      gap: {
-        none: "gap-0",
-        sm: "gap-2 md:gap-3",
-        default: "gap-4 md:gap-6",
-        lg: "gap-6 md:gap-8",
-      },
-    },
-    defaultVariants: {
-      cols: 4,
-      gap: "default",
-    },
-  }
-);
+interface ProductGridProps extends React.HTMLAttributes<HTMLDivElement> {
+  cols?: 2 | 3 | 4 | 5 | 6;
+  children: React.ReactNode;
+}
 
-export interface ProductGridProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof productGridVariants> {}
-
-/**
- * ProductGrid Component
- * 
- * A responsive grid layout component for displaying product cards.
- * Automatically adjusts columns based on screen size with customizable gaps.
- * 
- * @component
- * @example
- * <ProductGrid cols={4} gap="default">
- *   <ProductCard product={product1} />
- *   <ProductCard product={product2} />
- *   <ProductCard product={product3} />
- *   <ProductCard product={product4} />
- * </ProductGrid>
- */
 const ProductGrid = React.forwardRef<HTMLDivElement, ProductGridProps>(
-  ({ className, cols, gap, children, ...props }, ref) => {
+  ({ className, cols = 4, children, ...props }, ref) => {
+    const gridClasses = {
+      2: "grid-cols-2",
+      3: "grid-cols-2 sm:grid-cols-3",
+      4: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
+      5: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5",
+      6: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6",
+    };
+
     return (
       <div
         ref={ref}
-        className={cn(productGridVariants({ cols, gap }), className)}
-        style={{
-          touchAction: 'pan-y', // Allow vertical scrolling
-          WebkitTouchCallout: 'none',
-          WebkitUserSelect: 'none',
-          userSelect: 'none'
-        }}
+        className={cn(
+          "grid",
+          SPACING.productGap,
+          gridClasses[cols],
+          className
+        )}
         {...props}
       >
         {children}
@@ -69,4 +35,4 @@ const ProductGrid = React.forwardRef<HTMLDivElement, ProductGridProps>(
 );
 ProductGrid.displayName = "ProductGrid";
 
-export { ProductGrid, productGridVariants };
+export { ProductGrid };

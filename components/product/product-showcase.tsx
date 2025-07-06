@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { ProductSection } from "./product-section";
 import { ProductHeader } from "./product-header";
@@ -7,6 +5,8 @@ import { ProductScroll } from "./product-scroll";
 import { ProductGrid } from "./product-grid";
 import { ProductCard } from "./product-card";
 import { ProductBadge } from "./product-badge";
+import { SectionInfo } from "./section-info";
+import { getPerfectProductCardClasses } from "@/lib/layout/config";
 
 type Product = {
   id: string;
@@ -32,7 +32,7 @@ type Product = {
 };
 
 interface ProductShowcaseProps {
-  title: string;
+  title?: string;
   description?: string;
   products: Product[];
   viewAllLink?: string;
@@ -42,11 +42,14 @@ interface ProductShowcaseProps {
   showBadge?: boolean;
   badgeText?: string;
   badgeVariant?: "sale" | "new" | "soldOut" | "limited" | "exclusive";
-  sectionSpacing?: "none" | "sm" | "default" | "lg";
+  sectionSpacing?: "sm" | "default" | "lg";
   sectionBackground?: "none" | "subtle" | "contrast" | "gradient";
   className?: string;
   headerAlign?: "left" | "center" | "right";
   priority?: boolean;
+  carouselMode?: boolean; // New prop for carousel-based sections
+  integratedHeader?: React.ReactNode; // New prop for integrated header content
+  noSection?: boolean; // New prop to skip ProductSection wrapper when used inside unified sections
 }
 
 export function ProductShowcase({
@@ -65,25 +68,37 @@ export function ProductShowcase({
   className,
   headerAlign = "left",
   priority = false,
+  carouselMode = false,
+  integratedHeader,
+  noSection = false,
 }: ProductShowcaseProps) {
-  console.log('[ProductShowcase] Rendering:', title, 'with', products.length, 'products');
-  console.log('[ProductShowcase] First product:', products[0]);
-  const badge = showBadge && badgeText ? (
-    <ProductBadge variant={badgeVariant} size="sm">
-      {badgeText}
-    </ProductBadge>
-  ) : null;
-
-  return (
-    <ProductSection spacing={sectionSpacing} background={sectionBackground} className={className}>
-      <ProductHeader
-        title={title}
-        {...(description && { description })}
-        viewAllText={viewAllText}
-        {...(viewAllLink && { viewAllHref: viewAllLink })}
-        align={headerAlign}
-        {...(badge && { badge })}
-      />
+  
+  const content = (
+    <>
+      {/* If integratedHeader is provided, use it instead of the default headers */}
+      {integratedHeader ? (
+        <>
+          {integratedHeader}
+          <div className="mb-6 md:mb-8" /> {/* Consistent spacing between header and products */}
+        </>
+      ) : carouselMode ? (
+        // Carousel mode: only show compact section info
+        <SectionInfo
+          description={description}
+          viewAllText={viewAllText}
+          {...(viewAllLink && { viewAllHref: viewAllLink })}
+        />
+      ) : (
+        // Traditional mode: show full header
+        <ProductHeader
+          title={title}
+          {...(description && { description })}
+          viewAllText={viewAllText}
+          {...(viewAllLink && { viewAllHref: viewAllLink })}
+          align={headerAlign}
+          {...(showBadge && badgeText && { badgeText, badgeVariant })}
+        />
+      )}
       
       {layout === "scroll" ? (
         <ProductScroll showControls controlsPosition="outside">
@@ -91,22 +106,54 @@ export function ProductShowcase({
             <ProductCard
               key={`${product.id}-${index}`}
               product={product}
-              className="flex-shrink-0 w-44 sm:w-48 md:w-52 lg:w-60 snap-start touch-manipulation"
+              className={getPerfectProductCardClasses('carousel')}
               priority={priority && index < 4}
             />
           ))}
         </ProductScroll>
       ) : (
-        <ProductGrid cols={gridCols}>
-          {products.map((product, index) => (
-            <ProductCard
-              key={`${product.id}-${index}`}
-              product={product}
-              priority={priority && index < gridCols}
-            />
-          ))}
-        </ProductGrid>
+        <>
+          {/* Mobile: Horizontal scroll */}
+          <div className="block lg:hidden">
+            <ProductScroll showControls={false} controlsPosition="outside">
+              {products.map((product, index) => (
+                <ProductCard
+                  key={`${product.id}-${index}`}
+                  product={product}
+                  className={getPerfectProductCardClasses('carousel')}
+                  priority={priority && index < 4}
+                />
+              ))}
+            </ProductScroll>
+          </div>
+          
+          {/* Desktop: Grid layout */}
+          <div className="hidden lg:block px-4 sm:px-4 lg:px-6 max-w-[1440px] mx-auto">
+            <ProductGrid cols={gridCols}>
+              {products.map((product, index) => (
+                <ProductCard
+                  key={`${product.id}-${index}`}
+                  product={product}
+                  className={getPerfectProductCardClasses('grid')}
+                  priority={priority && index < gridCols}
+                />
+              ))}
+            </ProductGrid>
+          </div>
+        </>
       )}
+    </>
+  );
+
+  // If noSection is true, return content without ProductSection wrapper
+  if (noSection) {
+    return <div className={className}>{content}</div>;
+  }
+
+  // Default behavior with ProductSection wrapper
+  return (
+    <ProductSection size={sectionSpacing} background={sectionBackground} className={className}>
+      {content}
     </ProductSection>
   );
 }

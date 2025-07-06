@@ -16,20 +16,6 @@ import { CurrencyProvider } from '@/lib/currency/currency-context';
 import { QuickViewProvider } from '@/contexts/QuickViewContext';
 import { RegionProvider } from '@/lib/region/region-context';
 
-// Lazy load dev tools
-let ReactQueryDevtools: any = () => null;
-
-if (process.env.NODE_ENV === 'development') {
-  ReactQueryDevtools = dynamic(
-    () => import('@tanstack/react-query-devtools').then(mod => ({ 
-      default: mod.ReactQueryDevtools
-    })),
-    { 
-      
-      loading: () => null 
-    }
-  );
-}
 
 // Minimal client providers - only what's absolutely necessary
 export function ClientProviders({ children }: { children: React.ReactNode }) {
@@ -65,7 +51,6 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
             </CartProvider>
           </CurrencyProvider>
         </RegionProvider>
-        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </SupabaseAuthProvider>
   );

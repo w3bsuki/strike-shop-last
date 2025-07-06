@@ -4,33 +4,18 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { cva, type VariantProps } from "class-variance-authority";
+import { layoutClasses, SPACING } from "@/lib/layout/config";
 
-const productScrollVariants = cva(
-  "flex overflow-x-auto overflow-y-visible gap-3 md:gap-4 pb-1 horizontal-scroll-optimized scrollbar-hide",
-  {
-    variants: {
-      gap: {
-        sm: "gap-2 md:gap-3",
-        default: "gap-3 md:gap-4",
-        lg: "gap-4 md:gap-6",
-      },
-    },
-    defaultVariants: {
-      gap: "default",
-    },
-  }
-);
+// PERFECT PRODUCT SCROLL - No variations, always consistent
+const productScrollClasses = `flex overflow-x-auto ${SPACING.productGap} pb-1 horizontal-scroll-optimized scrollbar-hide snap-x snap-mandatory`;
 
-export interface ProductScrollProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof productScrollVariants> {
+export interface ProductScrollProps extends React.HTMLAttributes<HTMLDivElement> {
   showControls?: boolean;
   controlsPosition?: "inside" | "outside";
 }
 
 const ProductScroll = React.forwardRef<HTMLDivElement, ProductScrollProps>(
-  ({ className, gap, showControls = true, controlsPosition = "outside", children, ...props }, ref) => {
+  ({ className, showControls = true, controlsPosition = "outside", children, ...props }, ref) => {
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
     const [canScrollLeft, setCanScrollLeft] = React.useState(false);
     const [canScrollRight, setCanScrollRight] = React.useState(false);
@@ -61,7 +46,7 @@ const ProductScroll = React.forwardRef<HTMLDivElement, ProductScrollProps>(
     }, [checkScrollability]);
 
     return (
-      <div className="relative group">
+      <div className="relative group/scroll -mx-4 md:-mx-6 lg:-mx-8">
         <div
           ref={(node) => {
             scrollRef.current = node;
@@ -71,12 +56,9 @@ const ProductScroll = React.forwardRef<HTMLDivElement, ProductScrollProps>(
               ref.current = node;
             }
           }}
-          className={cn(productScrollVariants({ gap }), className)}
+          className={cn(productScrollClasses, SPACING.containerPadding, className)}
           style={{ 
             maxWidth: "100%",
-            touchAction: "pan-x", // Only allow horizontal scroll on touch
-            overscrollBehaviorX: "contain",
-            overscrollBehaviorY: "none",
             WebkitOverflowScrolling: "touch" // iOS momentum scrolling
           }}
           onScroll={checkScrollability}
@@ -94,8 +76,8 @@ const ProductScroll = React.forwardRef<HTMLDivElement, ProductScrollProps>(
                 size="icon"
                 onClick={() => scroll("left")}
                 className={cn(
-                  "absolute top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity min-h-[44px] min-w-[44px] touch-manipulation",
-                  controlsPosition === "inside" ? "left-2" : "-left-4"
+                  "absolute top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm opacity-0 group-hover/scroll:opacity-100 transition-opacity min-h-[44px] min-w-[44px] touch-manipulation",
+                  controlsPosition === "inside" ? "left-6 md:left-8 lg:left-10" : "left-2 md:left-4 lg:left-6"
                 )}
                 aria-label="Scroll left"
                 onTouchStart={(e) => e.stopPropagation()}
@@ -109,8 +91,8 @@ const ProductScroll = React.forwardRef<HTMLDivElement, ProductScrollProps>(
                 size="icon"
                 onClick={() => scroll("right")}
                 className={cn(
-                  "absolute top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity min-h-[44px] min-w-[44px] touch-manipulation",
-                  controlsPosition === "inside" ? "right-2" : "-right-4"
+                  "absolute top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-none bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm opacity-0 group-hover/scroll:opacity-100 transition-opacity min-h-[44px] min-w-[44px] touch-manipulation",
+                  controlsPosition === "inside" ? "right-6 md:right-8 lg:right-10" : "right-2 md:right-4 lg:right-6"
                 )}
                 aria-label="Scroll right"
                 onTouchStart={(e) => e.stopPropagation()}
@@ -126,4 +108,4 @@ const ProductScroll = React.forwardRef<HTMLDivElement, ProductScrollProps>(
 );
 ProductScroll.displayName = "ProductScroll";
 
-export { ProductScroll, productScrollVariants };
+export { ProductScroll };

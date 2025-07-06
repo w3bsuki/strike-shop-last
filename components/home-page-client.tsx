@@ -1,5 +1,12 @@
 'use client';
 
+// Mobile-First Home Page Client Component
+// Rebuilt for perfect mobile responsiveness with TailwindCSS v4
+// - Uses consistent layout system from lib/layout/config
+// - Mobile-first approach with progressive enhancement
+// - Proper touch targets and accessibility
+// - Optimized spacing and typography
+
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -7,15 +14,17 @@ import {
   ProductScrollSkeleton, 
   CategoryScrollSkeleton
 } from '@/components/ui/loading-states';
-import { CategorySection, CategoryScroll, CategoryCard } from '@/components/category';
+import { CategoryCarousel } from '@/components/category/CategoryCarousel';
 import { ProductHeader } from '@/components/product/product-header';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useTranslations } from '@/lib/i18n/i18n-provider';
+import { Section, SectionTitle } from '@/components/layout/section';
+import { ShowcaseSection, SectionHeader, StrikePattern } from '@/components/layout/unified-section';
 
 // Import directly for immediate rendering (no dynamic loading for critical path)
 import { ProductShowcase } from '@/components/product/product-showcase';
-
+import { SeasonalCollectionCarousel } from '@/components/seasonal-collection-carousel';
 
 // Community section using same pattern as products
 const CommunityShowcase = dynamic(() => 
@@ -29,7 +38,6 @@ const QuickViewModal = dynamic(() =>
   
   loading: () => null
 });
-
 
 // Divider components
 const DividerSection = dynamic(() => 
@@ -69,238 +77,340 @@ export default function HomePageClient({
     kidsItems: kidsItems.length,
   });
   
-  // Log first product to debug
-  if (saleItems.length > 0) {
-    console.log('[HomePageClient] First sale item:', saleItems[0]);
-  }
-  
   return (
     <>
-
-      <ErrorBoundary>
-        <Suspense fallback={<div style={{ minHeight: '320px' }}><CategoryScrollSkeleton /></div>}>
-          <CategorySection spacing="default">
-            <ProductHeader 
-              title={t('home.shopByCategory')} 
-              viewAllText={t('home.viewAllCategories')}
-              viewAllHref="/categories"
-            />
-            <CategoryScroll showControls={false}>
-              {categories.map((category, index) => (
-                <div key={category.id} className="flex-none w-[200px] sm:w-[240px] md:w-[280px] lg:w-[320px]">
-                  <CategoryCard
-                    category={category}
-                    priority={index < 3}
-                  />
-                </div>
-              ))}
-            </CategoryScroll>
-          </CategorySection>
-        </Suspense>
-      </ErrorBoundary>
-
-      {/* Winter Sale Banner - Black background + White text */}
-      <section className="bg-black text-white">
-        <div className="strike-container py-4 sm:py-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-baseline gap-3 sm:gap-4">
-              <h2 className="text-lg sm:text-xl md:text-2xl font-typewriter font-bold uppercase tracking-wider text-white">
-                {t('home.winterSale')}
-              </h2>
-            </div>
-            <Button
-              asChild
-              size="sm"
-              variant="strike-outline"
-              className="font-typewriter font-bold uppercase tracking-wider flex-shrink-0 bg-white text-black border-2 border-white hover:bg-black hover:text-white hover:border-white transition-all duration-200"
-            >
-              <Link href="/sale">{t('home.shopWinterSale')}</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {saleItems.length > 0 && (
+      {/* Mobile-First Content Sections with Proper Spacing */}
+      {/* 1. NEW ARRIVALS - First product section after hero */}
+      {newArrivals.length > 0 && (
         <ErrorBoundary>
-          <ProductShowcase
-            title={t('home.saleItems')}
-            products={saleItems}
-            viewAllLink="/sale"
-            layout="scroll"
-            showBadge={true}
-            badgeText={t('products.sale')}
-            badgeVariant="sale"
-            description={t('home.winterSaleDescription')}
-          />
+          <ShowcaseSection
+            color="light"
+            pattern={<StrikePattern theme="light" />}
+            header={
+              <SectionHeader
+                title="NEW DROPS"
+                description="Fresh arrivals weekly. Latest streetwear drops and exclusive designs."
+                theme="light"
+                action={
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="strike-outline"
+                    className="font-typewriter font-bold uppercase tracking-wider bg-black text-white border-2 border-black hover:bg-white hover:text-black hover:border-black transition-all duration-200 rounded-md text-xs px-3"
+                  >
+                    <Link href="/new">VIEW ALL</Link>
+                  </Button>
+                }
+              />
+            }
+          >
+            <ProductShowcase
+              products={newArrivals.slice(0, 8)}
+              layout="grid"
+              gridCols={4}
+              noSection={true}
+            />
+          </ShowcaseSection>
         </ErrorBoundary>
       )}
 
-      {/* Divider Section using modular components */}
-      <DividerSection theme="default" size="lg" className="border-y-2 border-black">
-          <div className="flex items-center justify-center gap-4">
-            <DividerLine variant="solid" color="white" className="flex-1" />
-            <DividerText text='"LUXURY STREETWEAR"' size="default" color="white" spacing="default" />
-            <DividerLine variant="solid" color="white" className="flex-1" />
-          </div>
-        </DividerSection>
 
-        {newArrivals.length > 0 && (
-          <ErrorBoundary>
-            <ProductShowcase
-              title={t('home.newArrivals')}
-              products={newArrivals}
-              viewAllLink="/new"
-              layout="scroll"
-              showBadge={true}
-              badgeText={t('products.new')}
-              badgeVariant="new"
-              description={t('home.newsletterDescription')}
-            />
-          </ErrorBoundary>
-        )}
-
-      <DividerSection theme="default" size="lg" className="border-y-2 border-black">
-          <div className="flex items-center justify-center gap-4">
-            <DividerLine variant="solid" color="white" className="flex-1" />
-            <DividerText text='"PREMIUM QUALITY"' size="default" color="white" spacing="default" />
-            <DividerLine variant="solid" color="white" className="flex-1" />
-          </div>
-        </DividerSection>
-
-        {sneakers.length > 0 && (
-          <ErrorBoundary>
-            <ProductShowcase
-              title={t('home.sneakerCollection')}
-              products={sneakers}
-              viewAllLink="/footwear"
-              layout="scroll"
-              description={t('home.newsletterDescription')}
-            />
-          </ErrorBoundary>
-        )}
-
-      <DividerSection theme="default" size="lg" className="border-y-2 border-black">
-          <div className="flex items-center justify-center gap-4">
-            <DividerLine variant="solid" color="white" className="flex-1" />
-            <DividerText text='"NEXT GENERATION"' size="default" color="white" spacing="default" />
-            <DividerLine variant="solid" color="white" className="flex-1" />
-          </div>
-        </DividerSection>
-
-        {kidsItems.length > 0 && (
-          <ErrorBoundary>
-            <ProductShowcase
-              title={t('home.kidsCollection')}
-              products={kidsItems}
-              viewAllLink="/kids"
-              layout="scroll"
-              description={t('home.newsletterDescription')}
-            />
-          </ErrorBoundary>
-        )}
-
-      <DividerSection theme="default" size="sm">
-          <div className="flex items-center justify-center gap-4">
-            <DividerLine variant="solid" color="default" className="flex-1" />
-            <DividerText text="COMMUNITY" size="sm" spacing="default" />
-            <DividerLine variant="solid" color="default" className="flex-1" />
-          </div>
-        </DividerSection>
-
+      {/* 3. PREMIUM COLLECTION - Seasonal Campaign - Desktop Only */}
+      <div className="hidden lg:block">
+        <Section size="sm" className="bg-gray-300 text-black relative overflow-hidden mt-8">
+            {/* Strike Brand Background Pattern - Silver/Black */}
+            <div className="absolute inset-0 opacity-[0.08] pointer-events-none">
+              <div 
+                className="w-full h-full" 
+                style={{
+                  backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, black 35px, black 70px)`,
+                }} 
+              />
+            </div>
+            
+            <div className="relative flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-typewriter font-bold uppercase tracking-wider text-black">
+                  PREMIUM COLLECTION
+                </h2>
+                <p className="text-xs sm:text-sm text-black/70 mt-1">
+                  Exclusive seasonal drops. Limited quantities available.
+                </p>
+              </div>
+              <Button
+                  asChild
+                  size="sm"
+                  variant="strike-outline"
+                  className="font-typewriter font-bold uppercase tracking-wider bg-black text-white border-2 border-black hover:bg-white hover:text-black hover:border-black transition-all duration-200 rounded-md text-xs sm:text-sm px-3 sm:px-6"
+                >
+                  <Link href="/collections/premium">VIEW ALL</Link>
+                </Button>
+            </div>
+        </Section>
+      </div>
+      
+      <div className="hidden lg:block">
         <ErrorBoundary>
-          <Suspense fallback={<div style={{ minHeight: '380px' }}><ProductScrollSkeleton /></div>}>
-            <CommunityShowcase
+          <SeasonalCollectionCarousel
+            slides={[
+              {
+                id: "seasonal-1",
+                season: "SPRING/SUMMER 2025",
+                title: "CONCRETE JUNGLE",
+                description: "Where nature meets urban decay. A collection inspired by resilience.",
+                story: "In the cracks of concrete, wildflowers bloom. This collection celebrates the unstoppable force of nature reclaiming urban spaces, translated into wearable art that speaks to the streets.",
+                mainImage: "/images/seasonal/ss25-main.webp",
+                mobileImage: "/images/seasonal/ss25-main-mobile.webp",
+                lookImage: "/images/seasonal/ss25-look.webp",
+                products: [
+                  {
+                    id: "ss25-1",
+                    name: "BLOOM GRAPHIC TEE",
+                    price: "$79",
+                    image: "/images/products/bloom-tee.webp",
+                    slug: "bloom-graphic-tee"
+                  },
+                  {
+                    id: "ss25-2",
+                    name: "CONCRETE WASH DENIM",
+                    price: "$169",
+                    image: "/images/products/concrete-denim.webp",
+                    slug: "concrete-wash-denim"
+                  },
+                  {
+                    id: "ss25-3",
+                    name: "URBAN FLORA JACKET",
+                    price: "$249",
+                    image: "/images/products/flora-jacket.webp",
+                    slug: "urban-flora-jacket"
+                  }
+                ],
+                cta: {
+                  text: "SHOP THE COLLECTION",
+                  href: "/collections/ss25"
+                },
+                theme: "light"
+              }
+            ]}
+            autoPlayInterval={10000}
+          />
+        </ErrorBoundary>
+      </div>
+
+      {/* 4. SALE SECTION - Single instance only */}
+      {saleItems.length > 0 && (
+        <ErrorBoundary>
+          <ShowcaseSection
+            color="black"
+            pattern={<StrikePattern theme="dark" />}
+            header={
+              <SectionHeader
+                title="WINTER SALE"
+                description="Up to 50% off selected items. Limited time only."
+                theme="dark"
+                action={
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="strike-outline"
+                    className="font-typewriter font-bold uppercase tracking-wider bg-white text-black border-2 border-white hover:bg-black hover:text-white hover:border-white transition-all duration-200 rounded-md text-xs px-3"
+                  >
+                    <Link href="/sale">SHOP SALE</Link>
+                  </Button>
+                }
+              />
+            }
+          >
+            <ProductShowcase
+              products={saleItems.slice(0, 8)}
+              layout="grid"
+              gridCols={4}
+              noSection={true}
+            />
+          </ShowcaseSection>
+        </ErrorBoundary>
+      )}
+
+      {/* 5. TRENDING NOW - Fixed with unified layout */}
+      {newArrivals.length > 0 && (
+        <ErrorBoundary>
+          <ShowcaseSection
+            color="light"
+            pattern={<StrikePattern theme="light" />}
+            header={
+              <SectionHeader
+                title="TRENDING NOW"
+                description="Oversized silhouettes and tech wear dominating the streets."
+                theme="light"
+                action={
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="strike-outline"
+                    className="font-typewriter font-bold uppercase tracking-wider bg-black text-white border-2 border-black hover:bg-white hover:text-black hover:border-black transition-all duration-200 rounded-md text-xs px-3"
+                  >
+                    <Link href="/trending">VIEW ALL</Link>
+                  </Button>
+                }
+              />
+            }
+          >
+            <ProductShowcase
+              products={newArrivals.slice(0, 8)}
+              layout="grid"
+              gridCols={4}
+              noSection={true}
+            />
+          </ShowcaseSection>
+        </ErrorBoundary>
+      )}
+
+      {/* 6. FOOTWEAR FOCUS */}
+      {sneakers.length > 0 && (
+        <ErrorBoundary>
+          <ShowcaseSection
+            color="black"
+            pattern={<StrikePattern theme="dark" />}
+            header={
+              <SectionHeader
+                title="FOOTWEAR"
+                description="Premium sneakers and streetwear footwear. Comfort meets style."
+                theme="dark"
+                action={
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="strike-outline"
+                    className="font-typewriter font-bold uppercase tracking-wider bg-white text-black border-2 border-white hover:bg-black hover:text-white hover:border-white transition-all duration-200 rounded-md text-xs px-3"
+                  >
+                    <Link href="/footwear">VIEW ALL</Link>
+                  </Button>
+                }
+              />
+            }
+          >
+            <ProductShowcase
+              products={sneakers}
+              layout="grid"
+              gridCols={4}
+              noSection={true}
+            />
+          </ShowcaseSection>
+        </ErrorBoundary>
+      )}
+
+      {/* 7. COMMUNITY - Social proof near the end */}
+      <ErrorBoundary>
+        <ShowcaseSection
+          color="light"
+          pattern={<StrikePattern theme="light" />}
+          header={
+            <SectionHeader
               title="COMMUNITY STYLE"
               description="Real customers, real style. Tag us @strike for a chance to be featured"
-              viewAllLink="/community"
-              viewAllText="VIEW ALL"
-              instagramPosts={[
-                {
-                  id: '1',
-                  username: '@streetstyle_maven',
-                  userAvatar: '/placeholder.svg?height=40&width=40',
-                  images: ['/placeholder.svg?height=400&width=400'],
-                  caption: 'Living for this oversized fit! Perfect for those cozy street vibes ✨ #StrikeStyle',
-                  likes: 1247,
-                  comments: 89,
-                },
-                {
-                  id: '2',
-                  username: '@minimal_mode',
-                  userAvatar: '/placeholder.svg?height=40&width=40',
-                  images: ['/placeholder.svg?height=400&width=400'],
-                  caption: 'Monochrome perfection. These cargos are everything! 🖤 #MinimalVibes',
-                  likes: 892,
-                  comments: 45,
-                },
-                {
-                  id: '3',
-                  username: '@urban_explorer',
-                  userAvatar: '/placeholder.svg?height=40&width=40',
-                  images: ['/placeholder.svg?height=400&width=400'],
-                  caption: 'STRIKE never misses. Quality and style in every piece 💯',
-                  likes: 634,
-                  comments: 23,
-                },
-                {
-                  id: '4',
-                  username: '@style_maven',
-                  userAvatar: '/placeholder.svg?height=40&width=40',
-                  images: ['/placeholder.svg?height=400&width=400'],
-                  caption: 'New drop hits different. Already planning my next order 🔥',
-                  likes: 1156,
-                  comments: 67,
-                },
-              ]}
-              reviews={[
-                {
-                  id: '1',
-                  author: {
-                    name: 'Sarah Johnson',
-                    username: '@sarahj',
-                    avatar: '/placeholder.svg?height=40&width=40',
-                    verified: true,
-                  },
-                  content: 'The quality is absolutely incredible. The oversized hoodie fits perfectly and the material feels premium.',
-                  rating: 5,
-                  date: '2 days ago',
-                  product: {
-                    name: 'STRIKE™ OVERSIZED HOODIE',
-                    href: '/products/oversized-hoodie',
-                  },
-                },
-                {
-                  id: '2',
-                  author: {
-                    name: 'Mike Chen',
-                    username: '@mikechen',
-                    avatar: '/placeholder.svg?height=40&width=40',
-                    verified: true,
-                  },
-                  content: 'Best streetwear brand I\'ve found. The attention to detail is amazing and the fit is perfect.',
-                  rating: 5,
-                  date: '1 week ago',
-                  product: {
-                    name: 'STRIKE™ CARGO PANTS',
-                    href: '/products/cargo-pants',
-                  },
-                },
-                {
-                  id: '3',
-                  author: {
-                    name: 'Alex Rivera',
-                    username: '@alexr',
-                    avatar: '/placeholder.svg?height=40&width=40',
-                    verified: false,
-                  },
-                  content: 'Fast shipping, great customer service, and the clothes are exactly as described. Will definitely order again!',
-                  rating: 5,
-                  date: '3 days ago',
-                },
-              ]}
+              theme="light"
+              action={
+                <Button
+                  asChild
+                  size="sm"
+                  variant="strike-outline"
+                  className="font-typewriter font-bold uppercase tracking-wider bg-black text-white border-2 border-black hover:bg-white hover:text-black hover:border-black transition-all duration-200 rounded-md text-xs px-3"
+                >
+                  <Link href="/community">VIEW ALL</Link>
+                </Button>
+              }
             />
-          </Suspense>
-        </ErrorBoundary>
+          }
+        >
+          <CommunityShowcase
+            noSection={true}
+            instagramPosts={[
+              {
+                id: '1',
+                username: '@streetstyle_maven',
+                userAvatar: '/placeholder.svg?height=40&width=40',
+                images: ['/placeholder.svg?height=400&width=400'],
+                caption: 'Living for this oversized fit! Perfect for those cozy street vibes ✨ #StrikeStyle',
+                likes: 1247,
+                comments: 89,
+              },
+              {
+                id: '2',
+                username: '@minimal_mode',
+                userAvatar: '/placeholder.svg?height=40&width=40',
+                images: ['/placeholder.svg?height=400&width=400'],
+                caption: 'Monochrome perfection. These cargos are everything! 🖤 #MinimalVibes',
+                likes: 892,
+                comments: 45,
+              },
+              {
+                id: '3',
+                username: '@urban_explorer',
+                userAvatar: '/placeholder.svg?height=40&width=40',
+                images: ['/placeholder.svg?height=400&width=400'],
+                caption: 'STRIKE never misses. Quality and style in every piece 💯',
+                likes: 634,
+                comments: 23,
+              },
+              {
+                id: '4',
+                username: '@style_maven',
+                userAvatar: '/placeholder.svg?height=40&width=40',
+                images: ['/placeholder.svg?height=400&width=400'],
+                caption: 'New drop hits different. Already planning my next order 🔥',
+                likes: 1156,
+                comments: 67,
+              },
+            ]}
+            reviews={[
+              {
+                id: '1',
+                author: {
+                  name: 'Sarah Johnson',
+                  username: '@sarahj',
+                  avatar: '/placeholder.svg?height=40&width=40',
+                  verified: true,
+                },
+                content: 'The quality is absolutely incredible. The oversized hoodie fits perfectly and the material feels premium.',
+                rating: 5,
+                date: '2 days ago',
+                product: {
+                  name: 'STRIKE™ OVERSIZED HOODIE',
+                  href: '/products/oversized-hoodie',
+                },
+              },
+              {
+                id: '2',
+                author: {
+                  name: 'Mike Chen',
+                  username: '@mikechen',
+                  avatar: '/placeholder.svg?height=40&width=40',
+                  verified: true,
+                },
+                content: 'Best streetwear brand I\'ve found. The attention to detail is amazing and the fit is perfect.',
+                rating: 5,
+                date: '1 week ago',
+                product: {
+                  name: 'STRIKE™ CARGO PANTS',
+                  href: '/products/cargo-pants',
+                },
+              },
+              {
+                id: '3',
+                author: {
+                  name: 'Alex Rivera',
+                  username: '@alexr',
+                  avatar: '/placeholder.svg?height=40&width=40',
+                  verified: false,
+                },
+                content: 'Fast shipping, great customer service, and the clothes are exactly as described. Will definitely order again!',
+                rating: 5,
+                date: '3 days ago',
+              },
+            ]}
+          />
+        </ShowcaseSection>
+      </ErrorBoundary>
 
       {/* Quick View Modal */}
       <QuickViewModal />

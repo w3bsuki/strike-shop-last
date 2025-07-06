@@ -1,4 +1,4 @@
-import { OrdersTable } from '@/components/admin/OrdersTableNew';
+import { OrdersTable } from '@/components/admin/OrdersTable';
 import { getAllOrders } from '@/lib/supabase/orders';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';

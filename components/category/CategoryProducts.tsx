@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product/product-card';
-import { motion, AnimatePresence } from '@/lib/dynamic-imports/framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Package } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 
@@ -75,7 +75,7 @@ export function CategoryProducts({
       y: 0,
       transition: {
         duration: 0.4,
-        ease: [0.22, 1, 0.36, 1],
+        ease: "easeOut",
       },
     },
   };
@@ -119,10 +119,8 @@ export function CategoryProducts({
       >
         <AnimatePresence mode="popLayout">
           {products.map((product, index) => (
-            <motion.div
+            <div
               key={product.id}
-              variants={itemVariants}
-              layout
               className="w-full"
             >
               <ProductCard 
@@ -130,7 +128,7 @@ export function CategoryProducts({
                 priority={index < 10}
                 className="w-full touch-manipulation select-none" 
               />
-            </motion.div>
+            </div>
           ))}
         </AnimatePresence>
       </motion.div>

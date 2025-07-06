@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import {
   TrendingUp,
   TrendingDown,
@@ -18,18 +19,47 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-// BUNDLE OPTIMIZATION: Lazy load Recharts components (~1MB)
-import {
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  ChartContainer,
-  ChartTooltip,
-} from '@/components/ui/chart-dynamic';
 
-export function AdminDashboard() {
+// Dynamic import for chart components - saves ~200KB from initial bundle
+const ChartContainer = dynamic(
+  () => import('@/components/ui/chart').then(mod => ({ default: mod.ChartContainer })),
+  { 
+    
+    loading: () => <div className="h-[300px] bg-gray-100 animate-pulse rounded" />
+  }
+) as any;
+
+const ResponsiveContainer = dynamic(
+  () => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })) as any,
+  { ssr: false }
+) as any;
+
+const LineChart = dynamic(
+  () => import('recharts').then(mod => ({ default: mod.LineChart })) as any,
+  { ssr: false }
+) as any;
+
+const Line = dynamic(
+  () => import('recharts').then(mod => ({ default: mod.Line })) as any,
+  { ssr: false }
+) as any;
+
+const XAxis = dynamic(
+  () => import('recharts').then(mod => ({ default: mod.XAxis })) as any,
+  { ssr: false }
+) as any;
+
+const YAxis = dynamic(
+  () => import('recharts').then(mod => ({ default: mod.YAxis })) as any,
+  { ssr: false }
+) as any;
+
+const Tooltip = dynamic(
+  () => import('recharts').then(mod => ({ default: mod.Tooltip })) as any,
+  { ssr: false }
+) as any;
+
+export function AdminDashboardOptimized() {
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month' | 'year'>(
     'week'
   );
@@ -150,17 +180,17 @@ export function AdminDashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'delivered':
-        return 'text-success bg-success/10';
+        return 'text-success bg-green-50';
       case 'shipped':
-        return 'text-info-foreground bg-info/10';
+        return 'text-info bg-blue-50';
       case 'processing':
-        return 'text-warning bg-warning/10';
+        return 'text-yellow-600 bg-yellow-50';
       case 'pending':
-        return 'text-info-foreground bg-info/10';
+        return 'text-purple-600 bg-purple-50';
       case 'cancelled':
-        return 'text-destructive bg-destructive/10';
+        return 'text-destructive bg-red-50';
       default:
-        return 'text-muted-foreground bg-muted';
+        return 'text-gray-600 bg-gray-50';
     }
   };
 
@@ -214,7 +244,7 @@ export function AdminDashboard() {
                 <CardTitle className="text-sm font-medium">
                   {stat.title}
                 </CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <Icon className="h-4 w-4 text-gray-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
@@ -223,7 +253,7 @@ export function AdminDashboard() {
                     {stat.change}
                   </span>
                   <TrendIcon className={`h-3 w-3 ml-1 ${trendColor}`} />
-                  <span className="text-xs text-muted-foreground ml-2">
+                  <span className="text-xs text-gray-500 ml-2">
                     from last period
                   </span>
                 </div>
@@ -253,7 +283,7 @@ export function AdminDashboard() {
                 <LineChart data={revenueData}>
                   <XAxis dataKey="date" />
                   <YAxis />
-                  <ChartTooltip />
+                  <Tooltip />
                   <Line
                     type="monotone"
                     dataKey="revenue"
@@ -290,7 +320,7 @@ export function AdminDashboard() {
                 >
                   <div className="space-y-1">
                     <p className="text-sm font-medium">{order.customer}</p>
-                    <div className="flex items-center text-xs text-muted-foreground">
+                    <div className="flex items-center text-xs text-gray-500">
                       <span>{order.id}</span>
                       <span className="mx-1">•</span>
                       <span>{new Date(order.date).toLocaleDateString()}</span>
@@ -332,7 +362,7 @@ export function AdminDashboard() {
                 >
                   <div className="space-y-1">
                     <p className="text-sm font-medium">{product.name}</p>
-                    <div className="flex items-center text-xs text-muted-foreground">
+                    <div className="flex items-center text-xs text-gray-500">
                       <span>{product.sales} sold</span>
                       <span className="mx-1">•</span>
                       <span>{product.stock} in stock</span>
@@ -349,4 +379,4 @@ export function AdminDashboard() {
   );
 }
 
-export default AdminDashboard;
+export default AdminDashboardOptimized;

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { motion } from '@/lib/dynamic-imports/framer-motion';
+import { motion } from 'framer-motion';
 import {
   DropdownMenu,
   DropdownMenuContent,
