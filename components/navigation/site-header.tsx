@@ -2,14 +2,17 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-// Removed NewsletterBanner - using AnnouncementBanner in page.tsx instead
+import { Menu, X, Search, ShoppingBag } from "lucide-react";
 import { NavBar } from "./navbar";
 import { SearchBar } from "./search-bar";
 import { UserNav } from "./user-nav";
-import { CurrencySwitcherMinimal, CurrencySwitcherCompact } from "@/components/currency-switcher";
-import { LanguageSwitcherMinimal, LanguageSwitcherCompact } from "@/components/language-switcher";
+import { MarketSelector } from "@/components/market-selector";
+import { mainNavItems } from "@/config/navigation";
+import { useTranslations, useLocale } from "@/lib/i18n/i18n-provider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { Locale } from "@/lib/i18n/config";
 import { layoutClasses } from "@/lib/layout/config";
 
@@ -19,8 +22,34 @@ interface SiteHeaderProps {
 
 export function SiteHeader({ className }: SiteHeaderProps) {
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const params = useParams();
+  const router = useRouter();
   const currentLocale = (params.lang || 'en') as Locale;
+  const t = useTranslations();
+  const locale = useLocale();
+
+  // Memoized handlers for better performance
+  const toggleMobileMenu = React.useCallback(() => {
+    setIsMobileMenuOpen(prev => {
+      const newState = !prev;
+      console.log('[SiteHeader] Mobile menu toggled:', newState);
+      return newState;
+    });
+  }, []);
+
+  const closeMobileMenu = React.useCallback(() => {
+    setIsMobileMenuOpen(false);
+  }, []);
+
+  const toggleSearch = React.useCallback(() => {
+    setIsSearchOpen(prev => !prev);
+  }, []);
+
+  const closeSearch = React.useCallback(() => {
+    setIsSearchOpen(false);
+  }, []);
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -31,6 +60,39 @@ export function SiteHeader({ className }: SiteHeaderProps) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Close mobile menu on escape key
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeMobileMenu();
+        closeSearch();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [closeMobileMenu, closeSearch]);
+
+  // Prevent body scroll when mobile menu is open
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('[SiteHeader] Render - isMobileMenuOpen:', isMobileMenuOpen);
+  }, [isMobileMenuOpen]);
 
   return (
     <>
@@ -61,35 +123,204 @@ export function SiteHeader({ className }: SiteHeaderProps) {
             {/* Actions */}
             <div className="flex items-center gap-2">
               <SearchBar variant="icon" />
-              <LanguageSwitcherMinimal currentLocale={currentLocale} />
-              <CurrencySwitcherMinimal />
+              <MarketSelector />
               <UserNav />
             </div>
           </div>
         </div>
 
-        {/* MOBILE - Clean header without hamburger menu */}
-        <div className={cn(layoutClasses.container, "flex lg:hidden items-center justify-between h-14 md:h-16 px-3 md:px-4")}>
-          {/* Left: Search - proper touch target */}
-          <div className="flex items-center min-w-0">
-            <SearchBar variant="icon" className="min-h-[44px] min-w-[44px]" />
-          </div>
+        {/* MOBILE - Header with hamburger menu */}
+        <div className={cn(layoutClasses.container, "flex lg:hidden items-center justify-between h-16 px-3")}>
+          {/* Left: Hamburger Menu */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleMobileMenu}
+            className="min-h-[44px] min-w-[44px] hover:bg-muted"
+            aria-label="Open menu"
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
 
           {/* Center: Logo */}
           <Link
-            href="/"
+            href={`/${locale}`}
             className="flex-1 flex items-center justify-center text-lg md:text-xl typewriter-brand min-w-0 px-2"
             aria-label="Strike Shop - Home"
           >
             STRIKE™
           </Link>
 
-          {/* Right: Cart only - proper touch target */}
-          <div className="flex items-center justify-end min-w-0">
+          {/* Right: Search & Cart */}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSearch}
+              className="min-h-[44px] min-w-[44px] hover:bg-muted"
+              aria-label="Search"
+            >
+              <Search className="h-5 w-5" />
+            </Button>
             <UserNav showCart className="min-h-[44px] min-w-[44px]" />
           </div>
         </div>
       </header>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[70] lg:hidden">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            onClick={closeMobileMenu}
+          />
+          
+          {/* Menu Panel - Slide from left */}
+          <div className="absolute inset-y-0 left-0 w-[85vw] max-w-sm bg-white shadow-2xl pb-[env(safe-area-inset-bottom)] animate-in slide-in-from-left duration-300">
+            {/* Menu Header - Minimalist design */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+              <h2 className="text-2xl font-bold tracking-tight">
+                STRIKE™
+              </h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={closeMobileMenu}
+                className="min-h-[44px] min-w-[44px] hover:bg-gray-100 rounded-full transition-all"
+                aria-label="Close menu"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Menu Content - Better spacing and typography */}
+            <div className="flex flex-col h-[calc(100%-76px)] overflow-y-auto">
+              {/* Main Navigation - Premium feel */}
+              <nav role="navigation" aria-label="Mobile navigation" className="px-6 py-6">
+                <ul className="space-y-1">
+                  {mainNavItems.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={`/${locale}${item.href}`}
+                        onClick={closeMobileMenu}
+                        className="group flex items-center justify-between w-full px-4 py-4 text-lg font-medium tracking-tight hover:bg-black hover:text-white rounded-lg transition-all duration-200 min-h-[56px]"
+                      >
+                        <span className="font-semibold">{item.titleKey ? t(item.titleKey) : item.title}</span>
+                        {item.badge && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-white bg-red-600 px-2 py-1 rounded-full">
+                            {item.badgeKey ? t(item.badgeKey) : item.badge}
+                          </span>
+                        )}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              {/* Divider - Subtle */}
+              <div className="mx-6 border-t border-gray-100" />
+
+              {/* Secondary Actions - Clean design */}
+              <div className="px-6 py-6 space-y-1">
+                <Link
+                  href={`/${locale}/account`}
+                  onClick={closeMobileMenu}
+                  className="flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 min-h-[48px]"
+                >
+                  My Account
+                </Link>
+                <Link
+                  href={`/${locale}/wishlist`}
+                  onClick={closeMobileMenu}
+                  className="flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 min-h-[48px]"
+                >
+                  Wishlist
+                </Link>
+              </div>
+
+              {/* Market Selector - Bottom positioned */}
+              <div className="mt-auto px-6 pb-6">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Region & Currency</p>
+                  <MarketSelector />
+                </div>
+              </div>
+
+              {/* Footer Info - Minimal */}
+              <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+                <p className="text-xs text-gray-500 text-center">© 2025 Strike Shop. All rights reserved.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Search Overlay */}
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-[70] lg:hidden">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            onClick={closeSearch}
+          />
+          
+          {/* Search Panel - Slide from top */}
+          <div className="absolute top-0 left-0 right-0 bg-white shadow-2xl animate-in slide-in-from-top duration-300">
+            <div className="flex items-center px-6 py-4 gap-4">
+              <div className="flex-1">
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    const query = formData.get('search') as string;
+                    if (query.trim()) {
+                      router.push(`/${locale}/search?q=${encodeURIComponent(query)}`);
+                      closeSearch();
+                    }
+                  }}
+                  className="w-full"
+                >
+                  <Input
+                    name="search"
+                    placeholder="What are you looking for?"
+                    autoFocus
+                    className="w-full h-14 text-lg border-2 border-gray-200 focus:border-black rounded-full px-6 transition-all"
+                  />
+                </form>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={closeSearch}
+                className="min-h-[48px] min-w-[48px] hover:bg-gray-100 rounded-full transition-all"
+                aria-label="Close search"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            
+            {/* Quick Search Suggestions */}
+            <div className="px-6 pb-6">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Popular Searches</p>
+              <div className="flex flex-wrap gap-2">
+                {['Sneakers', 'New Arrivals', 'Sale', 'Accessories'].map((term) => (
+                  <button
+                    key={term}
+                    onClick={() => {
+                      router.push(`/${locale}/search?q=${encodeURIComponent(term.toLowerCase())}`);
+                      closeSearch();
+                    }}
+                    className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-black hover:text-white rounded-full transition-all"
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

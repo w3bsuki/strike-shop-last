@@ -67,6 +67,9 @@ export function AnnouncementBanner({
 
   return (
     <div
+      role="banner"
+      aria-live="polite"
+      aria-label="Announcements"
       className={cn(
         "relative w-full bg-black text-white overflow-hidden",
         "transition-all duration-300 ease-in-out",
@@ -92,9 +95,10 @@ export function AnnouncementBanner({
             <Link
               href={currentMessage.cta.href}
               className="hidden sm:flex items-center gap-1 text-xs font-bold uppercase tracking-wider hover:underline transition-all"
+              aria-label={`${currentMessage.cta.text} - Learn more about this announcement`}
             >
               {currentMessage.cta.text}
-              <ChevronRight className="h-3 w-3" />
+              <ChevronRight className="h-3 w-3" aria-hidden="true" />
             </Link>
           )}
 
@@ -111,20 +115,6 @@ export function AnnouncementBanner({
         </div>
       </div>
 
-      {/* Progress Indicators */}
-      {messages.length > 1 && (
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-1 pb-1">
-          {messages.map((_, index) => (
-            <div
-              key={index}
-              className={cn(
-                "h-0.5 transition-all duration-300",
-                index === currentIndex ? "w-4 bg-white" : "w-1 bg-white/40"
-              )}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
