@@ -1,0 +1,1 @@
+export { MobileTouchTarget } from './mobile-touch-target';

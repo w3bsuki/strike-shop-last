@@ -1,0 +1,107 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (block all except templates/examples)
+.env
+.env.local
+.env.production
+.env.development
+.env.staging
+.env.test
+.env.*
+!.env.example
+!.env.*.example
+!.env.template
+!.env.*.template
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+# clerk configuration (can include secrets)
+/.clerk/
+
+# Windows WSL artifacts
+*:Zone.Identifier
+*.Zone.Identifier
+
+# Test files in root
+/test-*.js
+
+# Editor directories
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+.tmp/
+temp/
+
+# Medusa specific
+/uploads
+/dist
+/.cache
+medusa-db.sql
+medusa-config.local.js
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Keys and certificates  
+*.key
+*.cert
+*.crt
+*.pem
+private/
+secrets/
+
+# Backup files
+*.backup
+*.bak
+
+# Package files
+*.tgz
+
+# Shopify
+.shopify/
+
+# Strike Shop specific
+/public/uploads/
+/storage/
+*.local.json
+
+# Test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+coverage/
+.nyc_output/
+
+# Monitoring
+.grafana/
+.prometheus/

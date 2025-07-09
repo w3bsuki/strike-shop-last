@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000">
+  <title>Offline - Strike Shop</title>
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f9fafb;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --accent: #000000;
+      --border: #e5e7eb;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #111827;
+        --bg-secondary: #1f2937;
+        --text-primary: #f9fafb;
+        --text-secondary: #d1d5db;
+        --accent: #ffffff;
+        --border: #374151;
+      }
+    }
+    
+    body {
+      font-family: 'Courier Prime', monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    header {
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+    
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    
+    .offline-container {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .offline-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 2rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+    
+    .status-message {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      margin-bottom: 3rem;
+      line-height: 1.6;
+    }
+    
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      margin: 3rem 0;
+      text-align: left;
+    }
+    
+    .feature {
+      padding: 1.5rem;
+      background-color: var(--bg-secondary);
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+    }
+    
+    .feature-icon {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 0.75rem;
+      color: var(--accent);
+    }
+    
+    .feature h3 {
+      font-size: 1.125rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+    
+    .feature p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    
+    .actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+    
+    button {
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    
+    .primary-btn {
+      background-color: var(--accent);
+      color: var(--bg-primary);
+    }
+    
+    .primary-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    
+    .secondary-btn {
+      background-color: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    
+    .secondary-btn:hover {
+      background-color: var(--bg-secondary);
+    }
+    
+    .connection-status {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 0.75rem 1.5rem;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+    }
+    
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #ef4444;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+    
+    .status-indicator.online {
+      background-color: #10b981;
+      animation: none;
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    
+    .cached-pages {
+      margin-top: 3rem;
+      padding: 2rem;
+      background-color: var(--bg-secondary);
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+    }
+    
+    .cached-pages h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    
+    .cached-list {
+      list-style: none;
+      display: grid;
+      gap: 0.5rem;
+    }
+    
+    .cached-list a {
+      color: var(--accent);
+      text-decoration: none;
+      padding: 0.5rem;
+      display: block;
+      border-radius: 0.25rem;
+      transition: background-color 0.15s ease;
+    }
+    
+    .cached-list a:hover {
+      background-color: var(--bg-primary);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="logo">STRIKE SHOP</a>
+  </header>
+  
+  <main>
+    <div class="offline-container">
+      <svg class="offline-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+      </svg>
+      
+      <h1>You're Offline</h1>
+      <p class="status-message">
+        Don't worry! You can still browse cached content and your cart data is saved locally.
+      </p>
+      
+      <div class="features">
+        <div class="feature">
+          <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          <h3>Cart Saved</h3>
+          <p>Your shopping cart is saved and will sync when you're back online.</p>
+        </div>
+        
+        <div class="feature">
+          <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
+          <h3>Cached Content</h3>
+          <p>Previously viewed products and pages are available offline.</p>
+        </div>
+        
+        <div class="feature">
+          <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <h3>Auto Sync</h3>
+          <p>Everything will automatically sync once your connection is restored.</p>
+        </div>
+      </div>
+      
+      <div class="actions">
+        <button class="primary-btn" onclick="retryConnection()">
+          Retry Connection
+        </button>
+        <button class="secondary-btn" onclick="window.history.back()">
+          Go Back
+        </button>
+      </div>
+      
+      <div class="cached-pages" id="cachedPages" style="display: none;">
+        <h2>Available Offline</h2>
+        <ul class="cached-list" id="cachedList"></ul>
+      </div>
+    </div>
+  </main>
+  
+  <div class="connection-status" id="connectionStatus">
+    <span class="status-indicator" id="statusIndicator"></span>
+    <span id="statusText">Offline</span>
+  </div>
+  
+  <script>
+    // Connection monitoring
+    let isOnline = navigator.onLine;
+    let retryCount = 0;
+    let retryInterval;
+    
+    function updateConnectionStatus() {
+      const statusIndicator = document.getElementById('statusIndicator');
+      const statusText = document.getElementById('statusText');
+      
+      if (navigator.onLine) {
+        statusIndicator.classList.add('online');
+        statusText.textContent = 'Connection restored!';
+        
+        // Reload after a short delay to allow user to see the message
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        statusIndicator.classList.remove('online');
+        statusText.textContent = `Offline (Retry ${retryCount})`;
+      }
+    }
+    
+    function retryConnection() {
+      retryCount++;
+      updateConnectionStatus();
+      
+      // Try to fetch a small resource to check connectivity
+      fetch('/manifest.json', { method: 'HEAD' })
+        .then(() => {
+          // Connection successful
+          window.location.reload();
+        })
+        .catch(() => {
+          // Still offline
+          updateConnectionStatus();
+        });
+    }
+    
+    // Check connection every 5 seconds
+    retryInterval = setInterval(() => {
+      if (navigator.onLine !== isOnline) {
+        isOnline = navigator.onLine;
+        updateConnectionStatus();
+      }
+    }, 5000);
+    
+    // Listen for online/offline events
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    
+    // Load cached pages if available
+    if ('caches' in window) {
+      caches.keys().then(cacheNames => {
+        const strikeCaches = cacheNames.filter(name => name.includes('strike-shop'));
+        
+        if (strikeCaches.length > 0) {
+          Promise.all(
+            strikeCaches.map(cacheName => 
+              caches.open(cacheName).then(cache => cache.keys())
+            )
+          ).then(requests => {
+            const urls = requests.flat()
+              .map(req => req.url)
+              .filter(url => {
+                const u = new URL(url);
+                return u.pathname !== '/' && 
+                       !u.pathname.includes('_next') && 
+                       !u.pathname.includes('.js') &&
+                       !u.pathname.includes('.css') &&
+                       !u.pathname.includes('/api/');
+              })
+              .filter((url, index, self) => self.indexOf(url) === index);
+            
+            if (urls.length > 0) {
+              const cachedPages = document.getElementById('cachedPages');
+              const cachedList = document.getElementById('cachedList');
+              
+              cachedPages.style.display = 'block';
+              
+              urls.forEach(url => {
+                const u = new URL(url);
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = u.pathname;
+                a.textContent = u.pathname;
+                li.appendChild(a);
+                cachedList.appendChild(li);
+              });
+            }
+          });
+        }
+      });
+    }
+    
+    // Initial status update
+    updateConnectionStatus();
+  </script>
+</body>
+</html>

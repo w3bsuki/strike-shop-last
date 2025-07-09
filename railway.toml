@@ -1,0 +1,13 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "pnpm install --frozen-lockfile && pnpm run build"
+
+[build.nixpacksPlan.phases.setup]
+nixPkgs = ["nodejs", "pnpm", "python3"]
+
+[deploy]
+startCommand = "pnpm run start"
+healthcheckPath = "/health"
+healthcheckTimeout = 180
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
