@@ -5,9 +5,21 @@
 
 // Export modern infrastructure
 export { logger, log } from '../logging';
-// DISABLED: Causing build warnings - export { metrics } from '../telemetry';
 import { handleError } from '../errors/api-errors';
 import { log } from '../logging';
+
+// Simple metrics stub to fix build errors
+export const metrics = {
+  increment: (name: string, tags?: Record<string, string>) => {
+    log.debug(`Metric: ${name}`, tags);
+  },
+  gauge: (name: string, value: number, tags?: Record<string, string>) => {
+    log.debug(`Metric: ${name} = ${value}`, tags);
+  },
+  histogram: (name: string, value: number, tags?: Record<string, string>) => {
+    log.debug(`Metric: ${name} = ${value}`, tags);
+  }
+};
 
 // Backward compatibility
 export const captureShopifyError = (error: unknown, context?: Record<string, string>) => {
